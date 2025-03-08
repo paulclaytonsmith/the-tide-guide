@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LocationSearch } from "@/components/LocationSearch"
-import { TideTable } from "@/components/TideTable"
+import { TideChart } from "@/components/TideChart"
 import { getTidePredictions } from "@/lib/noaa"
 import { useState } from "react"
 
@@ -36,10 +36,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="flex gap-6 items-start">
-        <div className="flex flex-col gap-4">
-          <Card className="w-[320px]">
+    <div className="min-h-screen bg-background">
+      <div className="p-6">
+        <div className="flex flex-col gap-4 w-[320px]">
+          <Card>
             <CardHeader className="space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">The Tide Near</CardTitle>
             </CardHeader>
@@ -56,9 +56,7 @@ function App() {
               </p>
             </div>
           )}
-        </div>
 
-        <div className="flex-1">
           {isLoading && (
             <div className="text-sm text-muted-foreground">
               Loading tide data...
@@ -69,9 +67,10 @@ function App() {
               {error}
             </div>
           )}
-          {tideData && <TideTable data={tideData} />}
         </div>
       </div>
+
+      {tideData && <TideChart data={tideData} />}
     </div>
   )
 }
