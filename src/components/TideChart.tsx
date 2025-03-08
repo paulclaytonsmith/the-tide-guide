@@ -45,39 +45,27 @@ export function TideChart({ data }: TideChartProps) {
     })
   }
 
-  // Generate ticks for every hour
+  // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
     const startTime = new Date(chartData[0].time)
     const endTime = new Date(chartData[chartData.length - 1].time)
     
-    // Round to the next hour for start
-    const firstHour = new Date(startTime)
-    firstHour.setMinutes(0, 0, 0)
-    if (firstHour < startTime) {
-      firstHour.setHours(firstHour.getHours() + 1)
-    }
-
-    // Round to the previous hour for end
-    const lastHour = new Date(endTime)
-    lastHour.setMinutes(0, 0, 0)
+    // Round to the next 6-hour mark
+    const firstTick = new Date(startTime)
+    firstTick.setMinutes(0, 0, 0)
+    const currentHour = firstTick.getHours()
+    const hoursToNext = (6 - (currentHour % 6)) % 6
+    firstTick.setHours(currentHour + hoursToNext)
 
     const ticks = []
-    const currentHour = new Date(firstHour)
+    const currentTime = new Date(firstTick)
     
-    while (currentHour <= lastHour) {
-      ticks.push(currentHour.getTime())
-      currentHour.setHours(currentHour.getHours() + 1)
+    while (currentTime <= endTime) {
+      ticks.push(currentTime.getTime())
+      currentTime.setHours(currentTime.getHours() + 6)
     }
     
     return ticks
-  }
-
-  // Update the time format to only show hour
-  const formatAxisTime = (time: Date) => {
-    const weekday = time.toLocaleDateString('en-US', { weekday: 'short' })
-    const date = time.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })
-    const timeStr = time.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-    return [`${weekday} ${date}`, timeStr]
   }
 
   return (
@@ -106,7 +94,12 @@ export function TideChart({ data }: TideChartProps) {
               tick={(props) => {
                 const { x, y, payload } = props
                 const date = new Date(payload.value)
-                const [dateStr, timeStr] = formatAxisTime(date)
+                const isMidnight = date.getHours() === 0
+                const dateStr = isMidnight
+                  ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`
+                  : '\u00A0'  // Non-breaking space to maintain height
+                const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+
                 return (
                   <g transform={`translate(${x},${y + 10})`}>
                     <text
@@ -125,9 +118,10 @@ export function TideChart({ data }: TideChartProps) {
                       dy={20}
                       textAnchor="start"
                       fill="white"
+                      fillOpacity={0.5}
                       fontSize={12}
                     >
-                      {timeStr}
+                      {time}
                     </text>
                   </g>
                 )
