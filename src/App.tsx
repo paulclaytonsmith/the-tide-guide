@@ -37,7 +37,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-6">
+      <div className="fixed top-0 left-0 p-6 z-10">
         <div className="flex flex-col gap-4 w-[320px]">
           <Card>
             <CardHeader className="space-y-0 pb-2">
@@ -47,15 +47,6 @@ function App() {
               <LocationSearch onLocationSelect={handleLocationSelect} />
             </CardContent>
           </Card>
-
-          {selectedLocation && (
-            <div className="text-sm px-4">
-              <p className="font-medium">{selectedLocation.name}</p>
-              <p className="text-muted-foreground">
-                {selectedLocation.lat.toFixed(6)}, {selectedLocation.lng.toFixed(6)}
-              </p>
-            </div>
-          )}
 
           {isLoading && (
             <div className="text-sm text-muted-foreground">
@@ -70,7 +61,9 @@ function App() {
         </div>
       </div>
 
-      {tideData && <TideChart data={tideData} />}
+      <div className="absolute inset-0 overflow-x-auto">
+        {tideData && <TideChart data={tideData} />}
+      </div>
     </div>
   )
 }

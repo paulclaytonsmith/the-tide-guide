@@ -110,7 +110,7 @@ function toRad(degrees: number): number {
 async function fetchTidePredictions(stationId: string): Promise<TidePrediction[] | null> {
   const today = new Date()
   const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  tomorrow.setDate(tomorrow.getDate() + 2)
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
