@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { Input } from "./ui/input"
 import { Card } from "./ui/card"
+import { loadGoogleMaps } from "@/lib/google-maps"
 
 interface Location {
   name: string
@@ -22,11 +23,13 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (window.google) {
-      autocompleteService.current = new google.maps.places.AutocompleteService()
-      const mapDiv = document.createElement('div')
-      placesService.current = new google.maps.places.PlacesService(mapDiv)
-    }
+    loadGoogleMaps().then(() => {
+      if (window.google) {
+        autocompleteService.current = new google.maps.places.AutocompleteService()
+        const mapDiv = document.createElement('div')
+        placesService.current = new google.maps.places.PlacesService(mapDiv)
+      }
+    })
   }, [])
 
   const handleInput = (value: string) => {
