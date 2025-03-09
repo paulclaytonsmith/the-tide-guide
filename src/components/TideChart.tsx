@@ -32,9 +32,21 @@ export function TideChart({ data }: TideChartProps) {
       type: p.type
     }))
 
+  // Find yesterday's last tide to use as starting point
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const yesterdayLastTide = chartData
+    .filter(d => new Date(d.time) < today)
+    .pop()
+
+  // Filter data to start from yesterday's last tide
+  const filteredChartData = yesterdayLastTide 
+    ? chartData.filter(d => d.time >= yesterdayLastTide.time)
+    : chartData
+
   // Find max height for chart domain
-  const maxHeight = Math.ceil(Math.max(...chartData.map(d => d.height)))
-  const minHeight = Math.floor(Math.min(...chartData.map(d => d.height)))
+  const maxHeight = Math.ceil(Math.max(...filteredChartData.map(d => d.height)))
+  const minHeight = Math.floor(Math.min(...filteredChartData.map(d => d.height)))
 
   const formatTime = (time: Date | number) => {
     const date = time instanceof Date ? time : new Date(time)
@@ -47,8 +59,8 @@ export function TideChart({ data }: TideChartProps) {
 
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
-    const startTime = new Date(chartData[0].time)
-    const endTime = new Date(chartData[chartData.length - 1].time)
+    const startTime = new Date(filteredChartData[0].time)
+    const endTime = new Date(filteredChartData[filteredChartData.length - 1].time)
     
     // Round to the next 6-hour mark
     const firstTick = new Date(startTime)
@@ -68,114 +80,135 @@ export function TideChart({ data }: TideChartProps) {
     return ticks
   }
 
+  // Calculate the shift amount based on time difference
+  const calculateShiftAndWidth = () => {
+    if (!yesterdayLastTide) return { shift: 0, width: "200vw" }
+    
+    const totalTimeSpan = filteredChartData[filteredChartData.length - 1].time - filteredChartData[0].time
+    const timeToShift = today.getTime() - filteredChartData[0].time
+    const shiftPercentage = (timeToShift / totalTimeSpan) * 200 // 200 because total width is 200vw
+    
+    // Calculate remaining width after shift
+    const remainingWidth = 200 - shiftPercentage
+    
+    return {
+      shift: `${-shiftPercentage}vw`,
+      width: `${remainingWidth}vw`
+    }
+  }
+
+  const { shift, width } = calculateShiftAndWidth()
+
   return (
     <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background">
-      <div className="relative h-full w-[200vw]">
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-24 -mt-1" 
-          style={{ backgroundColor: "hsl(var(--chart-1))" }}
-        />
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart 
-            data={chartData}
-            margin={{ top: 30, right: 0, bottom: 0, left: 0 }}
-          >
-            <YAxis 
-              hide 
-              domain={[-10, maxHeight]}
-            />
-            <XAxis
-              dataKey="time"
-              height={60}
-              scale="time"
-              type="number"
-              domain={[chartData[0].time, chartData[chartData.length - 1].time]}
-              interval="preserveStart"
-              ticks={generateHourlyTicks()}
-              tick={(props) => {
-                const { x, y, payload } = props
-                const date = new Date(payload.value)
-                const isMidnight = date.getHours() === 0
-                const dateStr = isMidnight
-                  ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`
-                  : '\u00A0'  // Non-breaking space to maintain height
-                const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+      <div className="relative h-full overflow-hidden" style={{ width }}>
+        <div className="relative h-full w-[200vw]" style={{ transform: `translateX(${shift})` }}>
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-24 -mt-1" 
+            style={{ backgroundColor: "hsl(var(--chart-1))" }}
+          />
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart 
+              data={filteredChartData}
+              margin={{ top: 30, right: 0, bottom: 0, left: 0 }}
+            >
+              <YAxis 
+                hide 
+                domain={[-10, maxHeight]}
+              />
+              <XAxis
+                dataKey="time"
+                height={60}
+                scale="time"
+                type="number"
+                domain={[filteredChartData[0].time, filteredChartData[filteredChartData.length - 1].time]}
+                interval="preserveStart"
+                ticks={generateHourlyTicks()}
+                tick={(props) => {
+                  const { x, y, payload } = props
+                  const date = new Date(payload.value)
+                  const isMidnight = date.getHours() === 0
+                  const dateStr = isMidnight
+                    ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`
+                    : '\u00A0'  // Non-breaking space to maintain height
+                  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
 
-                return (
-                  <g transform={`translate(${x},${y + 10})`}>
-                    <text
-                      x={0}
-                      y={0}
-                      dy={0}
-                      textAnchor="start"
-                      fill="white"
-                      fontSize={12}
-                    >
-                      {dateStr}
-                    </text>
-                    <text
-                      x={0}
-                      y={0}
-                      dy={20}
-                      textAnchor="start"
-                      fill="white"
-                      fillOpacity={0.5}
-                      fontSize={12}
-                    >
-                      {time}
-                    </text>
-                  </g>
-                )
-              }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip
-              cursor={false}
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0].payload
-                  const date = new Date(data.time)
-                  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-                  const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })
                   return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="text-sm font-medium">
-                        {data.type} Tide
-                      </div>
-                      <div className="text-sm text-muted-foreground">
+                    <g transform={`translate(${x},${y + 10})`}>
+                      <text
+                        x={0}
+                        y={0}
+                        dy={0}
+                        textAnchor="start"
+                        fill="white"
+                        fontSize={12}
+                      >
+                        {dateStr}
+                      </text>
+                      <text
+                        x={0}
+                        y={0}
+                        dy={20}
+                        textAnchor="start"
+                        fill="white"
+                        fillOpacity={0.5}
+                        fontSize={12}
+                      >
                         {time}
-                      </div>
-                    </div>
+                      </text>
+                    </g>
                   )
-                }
-                return null
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="height"
-              stroke="hsl(var(--chart-1))"
-              strokeWidth={2}
-              fill="hsl(var(--chart-1))"
-              fillOpacity={1}
-              isAnimationActive={true}
-              animationDuration={750}
-              animationBegin={0}
-              animationEasing="ease-out"
-              baseValue={-10}
-              dot={{ r: 4, fill: "white", stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
-              label={{
-                position: "top",
-                fill: "hsl(var(--foreground))",
-                fontSize: 12,
-                formatter: (value: number) => `${value.toFixed(1)}'`,
-                dy: -15,
-                allowDuplicatedCategory: true
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+                }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <Tooltip
+                cursor={false}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload
+                    const date = new Date(data.time)
+                    const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })
+                    return (
+                      <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="text-sm font-medium">
+                          {data.type} Tide
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {time}
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="height"
+                stroke="hsl(var(--chart-1))"
+                strokeWidth={2}
+                fill="hsl(var(--chart-1))"
+                fillOpacity={1}
+                isAnimationActive={true}
+                animationDuration={750}
+                animationBegin={0}
+                animationEasing="ease-out"
+                baseValue={-10}
+                dot={{ r: 4, fill: "white", stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                label={{
+                  position: "top",
+                  fill: "hsl(var(--foreground))",
+                  fontSize: 12,
+                  formatter: (value: number) => `${value.toFixed(1)}'`,
+                  dy: -15,
+                  allowDuplicatedCategory: true
+                }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   )

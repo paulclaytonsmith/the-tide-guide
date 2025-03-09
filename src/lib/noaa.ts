@@ -39,6 +39,7 @@ export interface TideData {
 
 async function findNearestStation(lat: number, lon: number): Promise<Station | null> {
   const url = new URL("https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json")
+  url.searchParams.set("type", "tidepredictions")
 
   try {
     // First, get all stations
@@ -49,20 +50,13 @@ async function findNearestStation(lat: number, lon: number): Promise<Station | n
       name: string
       lat: string
       lng: string
-      portscode: string
-      products: string[]
     }> }
-
-    // Filter stations that support tide predictions
-    const tideStations = data.stations.filter(station => 
-      station.tidal === true
-    )
 
     // Find the closest station
     let closest = null
     let minDistance = Infinity
 
-    for (const station of tideStations) {
+    for (const station of data.stations) {
       const stationLat = parseFloat(station.lat)
       const stationLng = parseFloat(station.lng)
       const distance = getDistance(lat, lon, stationLat, stationLng)
@@ -109,8 +103,10 @@ function toRad(degrees: number): number {
 
 async function fetchTidePredictions(stationId: string): Promise<TidePrediction[] | null> {
   const today = new Date()
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 2)
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const endDate = new Date(today)
+  endDate.setDate(endDate.getDate() + 2)
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
@@ -119,8 +115,8 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const url = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
   url.searchParams.set("product", "predictions")
   url.searchParams.set("application", "tide_near")
-  url.searchParams.set("begin_date", formatDate(today))
-  url.searchParams.set("end_date", formatDate(tomorrow))
+  url.searchParams.set("begin_date", formatDate(yesterday))
+  url.searchParams.set("end_date", formatDate(endDate))
   url.searchParams.set("datum", "MLLW")
   url.searchParams.set("station", stationId)
   url.searchParams.set("time_zone", "lst_ldt")
