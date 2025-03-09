@@ -90,6 +90,7 @@ export function TideChart({ data }: TideChartProps) {
               scale="time"
               type="number"
               domain={[chartData[0].time, chartData[chartData.length - 1].time]}
+              interval="preserveStart"
               ticks={generateHourlyTicks()}
               tick={(props) => {
                 const { x, y, payload } = props
@@ -134,13 +135,16 @@ export function TideChart({ data }: TideChartProps) {
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload
+                  const date = new Date(data.time)
+                  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+                  const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })
                   return (
                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                       <div className="text-sm font-medium">
-                        {formatTime(data.time)}
+                        {data.type} Tide
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {data.type} tide • {data.height.toFixed(1)}'
+                        {time}
                       </div>
                     </div>
                   )
