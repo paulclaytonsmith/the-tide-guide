@@ -1,6 +1,6 @@
 import { TideData } from "@/lib/noaa"
 import { Area, AreaChart, ResponsiveContainer, YAxis, XAxis, Tooltip } from "recharts"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 
 interface TideChartProps {
   data: TideData
@@ -14,13 +14,30 @@ interface LabelProps {
 
 export function TideChart({ data }: TideChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [midnightShift, setMidnightShift] = useState<number | null>(null)
 
+  // Reset midnight shift when data changes
   useEffect(() => {
-    // Scroll to middle when data changes
-    if (containerRef.current) {
-      const scrollAmount = containerRef.current.scrollWidth / 4
-      containerRef.current.scrollLeft = scrollAmount
+    setMidnightShift(null)
+
+    // Find the midnight label after render
+    const findMidnightLabel = () => {
+      if (!contentRef.current) return
+      
+      const midnightLabel = contentRef.current.querySelector('[data-midnight="true"]')
+      if (midnightLabel) {
+        const labelRect = midnightLabel.getBoundingClientRect()
+        const containerRect = contentRef.current.getBoundingClientRect()
+        const relativeX = labelRect.left - containerRect.left
+        console.log('Found midnight label at:', relativeX)
+        setMidnightShift(relativeX)
+      }
     }
+
+    // Give the chart time to render
+    const timer = setTimeout(findMidnightLabel, 100)
+    return () => clearTimeout(timer)
   }, [data])
 
   // Sort predictions by time
@@ -90,29 +107,42 @@ export function TideChart({ data }: TideChartProps) {
     return ticks
   }
 
-  // Calculate the shift amount based on time difference
-  const calculateShiftAndWidth = () => {
-    if (!yesterdayLastTide) return { shift: 0, width: "200vw" }
-    
-    const totalTimeSpan = filteredChartData[filteredChartData.length - 1].time - filteredChartData[0].time
-    const timeToShift = today.getTime() - filteredChartData[0].time
-    const shiftPercentage = (timeToShift / totalTimeSpan) * 200 // 200 because total width is 200vw
-    
-    // Calculate remaining width after shift
-    const remainingWidth = 200 - shiftPercentage
-    
-    return {
-      shift: `${-shiftPercentage}vw`,
-      width: `${remainingWidth}vw`
-    }
+  const renderTick = (props: any) => {
+    const { x, y, payload } = props
+    const date = new Date(payload.value)
+    const isMidnight = date.getHours() === 0
+    const isTodayMidnight = isMidnight && date.getDate() === today.getDate()
+
+    const dateStr = isMidnight
+      ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`
+      : '\u00A0'
+    const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
+
+    return (
+      <g 
+        transform={`translate(${x},${y + 10})`}
+        data-midnight={isTodayMidnight ? "true" : undefined}
+      >
+        <text x={0} y={0} dy={0} textAnchor="start" fill="white" fontSize={12}>
+          {dateStr}
+        </text>
+        <text x={0} y={0} dy={20} textAnchor="start" fill="white" fillOpacity={0.5} fontSize={12}>
+          {time}
+        </text>
+      </g>
+    )
   }
 
-  const { shift, width } = calculateShiftAndWidth()
-
   return (
-    <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background">
-      <div className="relative h-full overflow-hidden" style={{ width }}>
-        <div className="relative h-full w-[200vw]" style={{ transform: `translateX(${shift})` }}>
+    <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background overflow-x-auto">
+      <div className="relative h-full">
+        <div 
+          ref={contentRef}
+          className="relative h-full w-[200vw]" 
+          style={{ 
+            transform: midnightShift ? `translateX(-${midnightShift}px)` : undefined 
+          }}
+        >
           <div 
             className="absolute bottom-0 left-0 right-0 h-24 -mt-1" 
             style={{ backgroundColor: "hsl(var(--chart-1))" }}
@@ -134,41 +164,7 @@ export function TideChart({ data }: TideChartProps) {
                 domain={[filteredChartData[0].time, filteredChartData[filteredChartData.length - 1].time]}
                 interval="preserveStart"
                 ticks={generateHourlyTicks()}
-                tick={(props) => {
-                  const { x, y, payload } = props
-                  const date = new Date(payload.value)
-                  const isMidnight = date.getHours() === 0
-                  const dateStr = isMidnight
-                    ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`
-                    : '\u00A0'  // Non-breaking space to maintain height
-                  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
-
-                  return (
-                    <g transform={`translate(${x},${y + 10})`}>
-                      <text
-                        x={0}
-                        y={0}
-                        dy={0}
-                        textAnchor="start"
-                        fill="white"
-                        fontSize={12}
-                      >
-                        {dateStr}
-                      </text>
-                      <text
-                        x={0}
-                        y={0}
-                        dy={20}
-                        textAnchor="start"
-                        fill="white"
-                        fillOpacity={0.5}
-                        fontSize={12}
-                      >
-                        {time}
-                      </text>
-                    </g>
-                  )
-                }}
+                tick={renderTick}
                 tickLine={false}
                 axisLine={false}
               />
