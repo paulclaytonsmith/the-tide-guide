@@ -90,7 +90,7 @@ export function TideChart({ data }: TideChartProps) {
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
     const startTime = new Date(yesterday)
-    const endTime = new Date(today.getTime() + (96 * 60 * 60 * 1000)) // Day +3 midnight
+    const endTime = new Date(today.getTime() + (72 * 60 * 60 * 1000)) // Day +3 midnight
     
     // Round to the next 6-hour mark
     const firstTick = new Date(startTime)
@@ -163,7 +163,7 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[275vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * 0.45}px)`
+            transform: `translateX(-${windowWidth * 0.62}px)`
           }}
         >
           <div 
@@ -187,7 +187,7 @@ export function TideChart({ data }: TideChartProps) {
                 type="number"
                 domain={[
                   yesterday.getTime() - (1000 * 60 * 5), // 5 min buffer before day -1 midnight
-                  today.getTime() + (96 * 60 * 60 * 1000) + (1000 * 60 * 5) // Day +3 midnight + 5 min buffer
+                  today.getTime() + (72 * 60 * 60 * 1000) + (1000 * 60 * 5) // Day +3 midnight + 5 min buffer
                 ]}
                 interval="preserveStart"
                 ticks={generateHourlyTicks()}
