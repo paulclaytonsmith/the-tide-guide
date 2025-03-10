@@ -110,7 +110,7 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   const endDate = new Date(today)
-  endDate.setDate(endDate.getDate() + 2)
+  endDate.setDate(endDate.getDate() + 3)
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]

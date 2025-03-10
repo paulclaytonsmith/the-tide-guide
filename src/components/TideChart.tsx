@@ -44,6 +44,14 @@ export function TideChart({ data }: TideChartProps) {
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
 
+  // Get three days after today at midnight
+  const threeDaysAfter = new Date(today)
+  threeDaysAfter.setDate(threeDaysAfter.getDate() + 3)
+
+  // Get two days after today at midnight (for filtering main data)
+  const twoDaysAfter = new Date(today)
+  twoDaysAfter.setDate(twoDaysAfter.getDate() + 2)
+
   // Find yesterday's tides
   const yesterdayTides = chartData.filter(d => {
     const date = new Date(d.time)
@@ -53,10 +61,27 @@ export function TideChart({ data }: TideChartProps) {
   // Get the last tide from yesterday
   const yesterdayLastTide = yesterdayTides.length > 0 ? yesterdayTides[yesterdayTides.length - 1] : null
 
-  // Filter data to start from yesterday's last tide
+  // Find the first tide of three days after
+  const threeDaysAfterFirstTide = chartData.find(d => {
+    const date = new Date(d.time)
+    return date.getTime() >= threeDaysAfter.getTime() && date.getTime() < threeDaysAfter.getTime() + (24 * 60 * 60 * 1000)
+  })
+
+  // Filter data to start from yesterday's last tide and go up to day +2
   const filteredChartData = yesterdayLastTide 
-    ? chartData.filter(d => d.time >= yesterdayLastTide.time)
-    : chartData
+    ? chartData.filter(d => {
+        const date = new Date(d.time)
+        return d.time >= yesterdayLastTide.time && date.getTime() < twoDaysAfter.getTime() + (24 * 60 * 60 * 1000)
+      })
+    : chartData.filter(d => {
+        const date = new Date(d.time)
+        return date.getTime() < twoDaysAfter.getTime() + (24 * 60 * 60 * 1000)
+      })
+
+  // Add the first tide of day +3
+  if (threeDaysAfterFirstTide) {
+    filteredChartData.push(threeDaysAfterFirstTide)
+  }
 
   // Find max height for chart domain
   const maxHeight = Math.ceil(Math.max(...filteredChartData.map(d => d.height)))
@@ -65,7 +90,7 @@ export function TideChart({ data }: TideChartProps) {
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
     const startTime = new Date(yesterday)
-    const endTime = new Date(today.getTime() + (48 * 60 * 60 * 1000)) // Day after tomorrow midnight
+    const endTime = new Date(today.getTime() + (96 * 60 * 60 * 1000)) // Day +3 midnight
     
     // Round to the next 6-hour mark
     const firstTick = new Date(startTime)
@@ -136,9 +161,9 @@ export function TideChart({ data }: TideChartProps) {
       <div className="relative h-full">
         <div 
           ref={contentRef}
-          className="relative h-full w-[200vw]" 
+          className="relative h-full w-[275vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * 0.605}px)`
+            transform: `translateX(-${windowWidth * 0.45}px)`
           }}
         >
           <div 
@@ -161,8 +186,8 @@ export function TideChart({ data }: TideChartProps) {
                 scale="time"
                 type="number"
                 domain={[
-                  yesterday.getTime() - (1000 * 60 * 5), // 5 min buffer before yesterday midnight
-                  today.getTime() + (48 * 60 * 60 * 1000) + (1000 * 60 * 5) // Day after tomorrow midnight + 5 min buffer
+                  yesterday.getTime() - (1000 * 60 * 5), // 5 min buffer before day -1 midnight
+                  today.getTime() + (96 * 60 * 60 * 1000) + (1000 * 60 * 5) // Day +3 midnight + 5 min buffer
                 ]}
                 interval="preserveStart"
                 ticks={generateHourlyTicks()}
