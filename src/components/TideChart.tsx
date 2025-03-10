@@ -138,7 +138,7 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[200vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * 0.63}px)`
+            transform: `translateX(-${windowWidth * 0.605}px)`
           }}
         >
           <div 
@@ -148,7 +148,7 @@ export function TideChart({ data }: TideChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
               data={filteredChartData}
-              margin={{ top: 30, right: 0, bottom: 15, left: 0 }}
+              margin={{ top: 30, right: 0, bottom: 40, left: 0 }}
               style={{ overflow: 'visible' }}
             >
               <YAxis 
