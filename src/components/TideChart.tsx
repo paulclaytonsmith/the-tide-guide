@@ -15,7 +15,17 @@ interface LabelProps {
 export function TideChart({ data }: TideChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const chartRef = useRef<HTMLDivElement>(null)
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+
+  // Add resize listener
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Sort predictions by time
   const chartData = [...data.predictions]
@@ -51,15 +61,6 @@ export function TideChart({ data }: TideChartProps) {
   // Find max height for chart domain
   const maxHeight = Math.ceil(Math.max(...filteredChartData.map(d => d.height)))
   const minHeight = Math.floor(Math.min(...filteredChartData.map(d => d.height)))
-
-  const formatTime = (time: Date | number) => {
-    const date = time instanceof Date ? time : new Date(time)
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
-  }
 
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
@@ -130,53 +131,6 @@ export function TideChart({ data }: TideChartProps) {
     )
   }
 
-  useEffect(() => {
-    // Give time for chart to render
-    const timer = setTimeout(() => {
-      if (!contentRef.current) return
-
-      const contentRect = contentRef.current.getBoundingClientRect()
-      console.log('Content container width:', contentRect.width)
-
-      // Find the blue background bar
-      const backgroundBar = contentRef.current.querySelector('[class*="absolute bottom-0"]')
-      if (backgroundBar) {
-        const barRect = backgroundBar.getBoundingClientRect()
-        console.log('Background bar width:', barRect.width)
-      }
-
-      // Find first and last points of the chart
-      const dots = contentRef.current.querySelectorAll('[class*="recharts-dot"]')
-      if (dots.length > 0) {
-        const firstDot = dots[0].getBoundingClientRect()
-        const lastDot = dots[dots.length - 1].getBoundingClientRect()
-        console.log('First dot position:', {
-          left: firstDot.left,
-          distanceFromContainer: firstDot.left - contentRect.left
-        })
-        console.log('Chart width (between first and last dots):', lastDot.right - firstDot.left)
-      }
-
-      // Log the first tick position
-      const firstTick = contentRef.current.querySelector('g[transform]')
-      if (firstTick) {
-        const tickRect = firstTick.getBoundingClientRect()
-        console.log('First tick position:', {
-          left: tickRect.left,
-          width: tickRect.width,
-          distanceFromContainer: tickRect.left - contentRect.left
-        })
-      }
-
-      // Log timezone info for context
-      const date = new Date(filteredChartData[0].time)
-      console.log('First data point time:', date.toLocaleString(), 'Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone)
-      
-    }, 1000) // Wait for animation and render
-
-    return () => clearTimeout(timer)
-  }, [data, filteredChartData])
-
   return (
     <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background overflow-x-auto">
       <div className="relative h-full">
@@ -184,18 +138,17 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[200vw]" 
           style={{ 
-            transform: `translateX(-${window.innerWidth * 0.63}px)`,
-            transition: 'transform 750ms ease-out'
+            transform: `translateX(-${windowWidth * 0.63}px)`
           }}
         >
           <div 
-            className="absolute bottom-0 left-0 right-0 h-24 -mt-1" 
+            className="absolute bottom-0 left-0 right-0 h-28 -mt-1" 
             style={{ backgroundColor: "hsl(var(--chart-1))" }}
           />
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
               data={filteredChartData}
-              margin={{ top: 30, right: 0, bottom: 0, left: 0 }}
+              margin={{ top: 30, right: 0, bottom: 15, left: 0 }}
               style={{ overflow: 'visible' }}
             >
               <YAxis 
