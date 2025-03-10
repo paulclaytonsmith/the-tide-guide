@@ -128,7 +128,7 @@ export function LocationSearch({ onLocationSelect }: LocationSearchProps) {
               {predictions.map((prediction, index) => (
                 <li
                   key={prediction.place_id}
-                  className={`px-4 py-2 cursor-pointer transition-colors ${
+                  className={`px-4 py-2 cursor-pointer transition-colors font-normal ${
                     index === selectedIndex 
                       ? "bg-primary/90 text-primary-foreground"
                       : "text-foreground hover:bg-muted"

@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { LocationSearch } from "@/components/LocationSearch"
 import { TideChart } from "@/components/TideChart"
 import { getTidePredictions } from "@/lib/noaa"
+import { Waves } from "lucide-react"
 import { useState } from "react"
 
 interface Location {
@@ -40,19 +41,22 @@ function App() {
       <div className="fixed top-0 left-0 p-6 z-10">
         <div className="flex flex-col gap-4 w-[320px]">
           <Card>
-            <CardHeader className="space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">The tide for</CardTitle>
+            <CardHeader className="space-y-0 pt-8 pb-4">
+              <div className="flex items-center justify-between px-4">
+                <CardTitle className="text-sm text-muted-foreground font-normal">The tides for</CardTitle>
+                <Waves className="h-4 w-4 text-primary" />
+              </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
+            <CardContent className="pt-0">
+              <div className="space-y-4">
                 <LocationSearch onLocationSelect={handleLocationSelect} />
                 {isLoading && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground px-4">
                     Loading tide data...
                   </div>
                 )}
                 {error && (
-                  <div className="text-sm text-destructive">
+                  <div className="text-sm text-destructive px-4">
                     {error}
                   </div>
                 )}
