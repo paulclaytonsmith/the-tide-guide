@@ -24,7 +24,7 @@ function App() {
     try {
       const data = await getTidePredictions(location.lat, location.lng)
       if (!data) {
-        setError("No tide stations found within 10 miles of this location.")
+        setError("No NOAA tide stations found within 10 miles of this location.")
       }
       setTideData(data)
     } catch (err) {
@@ -43,21 +43,22 @@ function App() {
             <CardHeader className="space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">The tide for</CardTitle>
             </CardHeader>
-            <CardContent className="pt-35">
-              <LocationSearch onLocationSelect={handleLocationSelect} />
+            <CardContent>
+              <div className="space-y-2">
+                <LocationSearch onLocationSelect={handleLocationSelect} />
+                {isLoading && (
+                  <div className="text-sm text-muted-foreground">
+                    Loading tide data...
+                  </div>
+                )}
+                {error && (
+                  <div className="text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-
-          {isLoading && (
-            <div className="text-sm text-muted-foreground">
-              Loading tide data...
-            </div>
-          )}
-          {error && (
-            <div className="text-sm text-destructive">
-              {error}
-            </div>
-          )}
         </div>
       </div>
 
