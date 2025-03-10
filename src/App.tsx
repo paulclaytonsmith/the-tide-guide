@@ -41,9 +41,9 @@ function App() {
         <div className="flex flex-col gap-4 w-[320px]">
           <Card>
             <CardHeader className="space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">The Tide Near</CardTitle>
+              <CardTitle className="text-lg font-medium">The tide for</CardTitle>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-35">
               <LocationSearch onLocationSelect={handleLocationSelect} />
             </CardContent>
           </Card>

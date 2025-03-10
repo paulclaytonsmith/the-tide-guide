@@ -140,7 +140,7 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[200vw]" 
           style={{ 
-            transform: midnightShift ? `translateX(-${midnightShift}px)` : undefined 
+            transform: midnightShift ? `translateX(-${midnightShift - 48}px)` : undefined 
           }}
         >
           <div 
