@@ -32,12 +32,22 @@ export function TideChart({ data }: TideChartProps) {
       type: p.type
     }))
 
-  // Find yesterday's last tide to use as starting point
+  // Get today at midnight in local time
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const yesterdayLastTide = chartData
-    .filter(d => new Date(d.time) < today)
-    .pop()
+  
+  // Get yesterday at midnight
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+
+  // Find yesterday's tides
+  const yesterdayTides = chartData.filter(d => {
+    const date = new Date(d.time)
+    return date >= yesterday && date < today
+  })
+
+  // Get the last tide from yesterday
+  const yesterdayLastTide = yesterdayTides.length > 0 ? yesterdayTides[yesterdayTides.length - 1] : null
 
   // Filter data to start from yesterday's last tide
   const filteredChartData = yesterdayLastTide 

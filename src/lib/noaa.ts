@@ -102,7 +102,11 @@ function toRad(degrees: number): number {
 }
 
 async function fetchTidePredictions(stationId: string): Promise<TidePrediction[] | null> {
+  // Get today at midnight in local time
   const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  // Calculate yesterday and end date based on local today
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   const endDate = new Date(today)
@@ -119,7 +123,7 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   url.searchParams.set("end_date", formatDate(endDate))
   url.searchParams.set("datum", "MLLW")
   url.searchParams.set("station", stationId)
-  url.searchParams.set("time_zone", "lst_ldt")
+  url.searchParams.set("time_zone", "lst_ldt")  // This ensures times are in station's local time
   url.searchParams.set("units", "english")
   url.searchParams.set("interval", "hilo")
   url.searchParams.set("format", "json")
