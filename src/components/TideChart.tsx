@@ -15,30 +15,7 @@ interface LabelProps {
 export function TideChart({ data }: TideChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const [midnightShift, setMidnightShift] = useState<number | null>(null)
-
-  // Reset midnight shift when data changes
-  useEffect(() => {
-    setMidnightShift(null)
-
-    // Find the midnight label after render
-    const findMidnightLabel = () => {
-      if (!contentRef.current) return
-      
-      const midnightLabel = contentRef.current.querySelector('[data-midnight="true"]')
-      if (midnightLabel) {
-        const labelRect = midnightLabel.getBoundingClientRect()
-        const containerRect = contentRef.current.getBoundingClientRect()
-        const relativeX = labelRect.left - containerRect.left
-        console.log('Found midnight label at:', relativeX)
-        setMidnightShift(relativeX)
-      }
-    }
-
-    // Give the chart time to render
-    const timer = setTimeout(findMidnightLabel, 100)
-    return () => clearTimeout(timer)
-  }, [data])
+  const chartRef = useRef<HTMLDivElement>(null)
 
   // Sort predictions by time
   const chartData = [...data.predictions]
@@ -86,8 +63,8 @@ export function TideChart({ data }: TideChartProps) {
 
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
-    const startTime = new Date(filteredChartData[0].time)
-    const endTime = new Date(filteredChartData[filteredChartData.length - 1].time)
+    const startTime = new Date(yesterday)
+    const endTime = new Date(today.getTime() + (48 * 60 * 60 * 1000)) // Day after tomorrow midnight
     
     // Round to the next 6-hour mark
     const firstTick = new Date(startTime)
@@ -122,16 +99,83 @@ export function TideChart({ data }: TideChartProps) {
       <g 
         transform={`translate(${x},${y + 10})`}
         data-midnight={isTodayMidnight ? "true" : undefined}
+        style={{ position: 'relative' }}
       >
-        <text x={0} y={0} dy={0} textAnchor="start" fill="white" fontSize={12}>
-          {dateStr}
-        </text>
-        <text x={0} y={0} dy={20} textAnchor="start" fill="white" fillOpacity={0.5} fontSize={12}>
-          {time}
-        </text>
+        <foreignObject x={0} y={0} width={200} height={50} style={{ overflow: 'visible' }}>
+          <div style={{ 
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '200px',
+            whiteSpace: 'nowrap'
+          }}>
+            <div style={{ 
+              color: 'white',
+              fontSize: '12px',
+              lineHeight: '20px'
+            }}>
+              {dateStr}
+            </div>
+            <div style={{ 
+              color: 'white',
+              fontSize: '12px',
+              lineHeight: '20px',
+              opacity: 0.5
+            }}>
+              {time}
+            </div>
+          </div>
+        </foreignObject>
       </g>
     )
   }
+
+  useEffect(() => {
+    // Give time for chart to render
+    const timer = setTimeout(() => {
+      if (!contentRef.current) return
+
+      const contentRect = contentRef.current.getBoundingClientRect()
+      console.log('Content container width:', contentRect.width)
+
+      // Find the blue background bar
+      const backgroundBar = contentRef.current.querySelector('[class*="absolute bottom-0"]')
+      if (backgroundBar) {
+        const barRect = backgroundBar.getBoundingClientRect()
+        console.log('Background bar width:', barRect.width)
+      }
+
+      // Find first and last points of the chart
+      const dots = contentRef.current.querySelectorAll('[class*="recharts-dot"]')
+      if (dots.length > 0) {
+        const firstDot = dots[0].getBoundingClientRect()
+        const lastDot = dots[dots.length - 1].getBoundingClientRect()
+        console.log('First dot position:', {
+          left: firstDot.left,
+          distanceFromContainer: firstDot.left - contentRect.left
+        })
+        console.log('Chart width (between first and last dots):', lastDot.right - firstDot.left)
+      }
+
+      // Log the first tick position
+      const firstTick = contentRef.current.querySelector('g[transform]')
+      if (firstTick) {
+        const tickRect = firstTick.getBoundingClientRect()
+        console.log('First tick position:', {
+          left: tickRect.left,
+          width: tickRect.width,
+          distanceFromContainer: tickRect.left - contentRect.left
+        })
+      }
+
+      // Log timezone info for context
+      const date = new Date(filteredChartData[0].time)
+      console.log('First data point time:', date.toLocaleString(), 'Timezone:', Intl.DateTimeFormat().resolvedOptions().timeZone)
+      
+    }, 1000) // Wait for animation and render
+
+    return () => clearTimeout(timer)
+  }, [data, filteredChartData])
 
   return (
     <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background overflow-x-auto">
@@ -140,7 +184,8 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[200vw]" 
           style={{ 
-            transform: midnightShift ? `translateX(-${midnightShift - 48}px)` : undefined 
+            transform: `translateX(-${window.innerWidth * 0.63}px)`,
+            transition: 'transform 750ms ease-out'
           }}
         >
           <div 
@@ -151,6 +196,7 @@ export function TideChart({ data }: TideChartProps) {
             <AreaChart 
               data={filteredChartData}
               margin={{ top: 30, right: 0, bottom: 0, left: 0 }}
+              style={{ overflow: 'visible' }}
             >
               <YAxis 
                 hide 
@@ -161,12 +207,17 @@ export function TideChart({ data }: TideChartProps) {
                 height={60}
                 scale="time"
                 type="number"
-                domain={[filteredChartData[0].time, filteredChartData[filteredChartData.length - 1].time]}
+                domain={[
+                  yesterday.getTime() - (1000 * 60 * 5), // 5 min buffer before yesterday midnight
+                  today.getTime() + (48 * 60 * 60 * 1000) + (1000 * 60 * 5) // Day after tomorrow midnight + 5 min buffer
+                ]}
                 interval="preserveStart"
                 ticks={generateHourlyTicks()}
                 tick={renderTick}
                 tickLine={false}
                 axisLine={false}
+                padding={{ left: 0, right: 0 }}
+                allowDataOverflow={true}
               />
               <Tooltip
                 cursor={false}
