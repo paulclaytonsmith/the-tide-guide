@@ -213,17 +213,43 @@ export function TideChart({ data }: TideChartProps) {
                     const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
                     const day = date.toLocaleDateString('en-US', { weekday: 'short' })
                     const dateStr = `${date.getMonth() + 1}/${date.getDate()}`
+
+                    // Find the index of current point
+                    const currentIndex = filteredChartData.findIndex(d => d.time === data.time)
+                    
+                    // Calculate flow rate if it's an hourly point (not high/low)
+                    let flowRate = null
+                    if (!data.type && currentIndex > 0) {
+                      const prevPoint = filteredChartData[currentIndex - 1]
+                      const timeDiffHours = (data.time - prevPoint.time) / (1000 * 60 * 60) // Convert ms to hours
+                      flowRate = (data.height - prevPoint.height) / timeDiffHours
+                    }
+
                     return (
-                      <div className="rounded-lg border bg-background p-2 shadow-sm">
-                        <div className="text-sm font-medium">
-                          {data.type} Tide
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {time}
-                        </div>
-                        <div className="text-xs text-muted-foreground/40  mt-2">
+                      <div className="rounded-lg border bg-background py-3 px-4 shadow-sm">
+                        <div className="text-[10px] text-muted-foreground">
                           {day} {dateStr}
                         </div>
+                        <div className="text-sm mt-4">
+                          {time}
+                        </div>
+                        <div className="text-sm">
+                          {data.height.toFixed(1)}'
+                        </div>
+                        <div className="text-[10px] mt-4">
+                          {data.type ? (
+                            // High/Low tide point - bold
+                            <span className="font-medium text-sm text-[hsl(var(--chart-1))]">{`${data.type} Tide`}</span>
+                          ) : (
+                            // Hourly point with flow rate - not bold
+                            flowRate !== null && (
+                              <span className="text-muted-foreground">
+                                <span className="text-[hsl(var(--chart-1))]">{flowRate > 0 ? '↑' : '↓'}</span> {Math.abs(flowRate).toFixed(1)}' / hr
+                              </span>
+                            )
+                          )}
+                        </div>
+
                       </div>
                     )
                   }
