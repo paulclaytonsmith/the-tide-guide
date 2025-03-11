@@ -38,16 +38,16 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed top-0 left-0 p-6 z-10">
-        <div className="flex flex-col gap-4 w-[320px]">
+      <div className="fixed top-0 left-0 right-0 p-6 z-10">
+        <div className="flex flex-col gap-4 max-w-[320px] w-full mx-auto sm:mx-0">
           <Card>
-            <CardHeader className="space-y-0 pt-8 pb-4">
+            <CardHeader className="space-y-0 pt-8 pb-6">
               <div className="flex items-center justify-between px-4">
-                <CardTitle className="text-sm text-muted-foreground font-normal">The tides for</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground font-normal">The tides near</CardTitle>
                 <Waves className="h-4 w-4 text-primary" />
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-6 border-t">
               <div className="space-y-4">
                 <LocationSearch onLocationSelect={handleLocationSelect} />
                 {isLoading && (

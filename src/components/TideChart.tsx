@@ -217,7 +217,8 @@ export function TideChart({ data }: TideChartProps) {
                     const data = payload[0].payload
                     const date = new Date(data.time)
                     const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-                    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' })
+                    const day = date.toLocaleDateString('en-US', { weekday: 'short' })
+                    const dateStr = `${date.getMonth() + 1}/${date.getDate()}`
                     return (
                       <div className="rounded-lg border bg-background p-2 shadow-sm">
                         <div className="text-sm font-medium">
@@ -225,6 +226,9 @@ export function TideChart({ data }: TideChartProps) {
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {time}
+                        </div>
+                        <div className="text-xs text-muted-foreground/40  mt-2">
+                          {day} {dateStr}
                         </div>
                       </div>
                     )
