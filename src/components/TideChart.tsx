@@ -162,7 +162,7 @@ export function TideChart({ data }: TideChartProps) {
   }
 
   return (
-    <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[70vh] md:h-[100vh] pt-[140px] sm:pt-[160px] md:pt-[200px] bg-background overflow-x-auto">
+    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-[70vh] md:h-[100vh] pt-[140px] sm:pt-[160px] md:pt-[200px] bg-background overflow-x-auto">
       <div className="relative h-full">
         <div 
           ref={contentRef}
