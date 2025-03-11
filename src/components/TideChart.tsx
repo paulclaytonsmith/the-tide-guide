@@ -20,7 +20,14 @@ export function TideChart({ data }: TideChartProps) {
   // Add resize listener
   useEffect(() => {
     const handleResize = () => {
-      setWindowWidth(window.innerWidth)
+      const width = window.innerWidth
+      setWindowWidth(width)
+      
+      // Force a re-render when switching between mobile and desktop breakpoints
+      if ((width < 640 && window.innerWidth >= 640) || 
+          (width >= 640 && window.innerWidth < 640)) {
+        setWindowWidth(window.innerWidth)
+      }
     }
 
     window.addEventListener('resize', handleResize)
@@ -155,13 +162,13 @@ export function TideChart({ data }: TideChartProps) {
   }
 
   return (
-    <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[100vh] pt-[200px] bg-background overflow-x-auto">
+    <div ref={containerRef} className="absolute bottom-0 left-0 right-0 h-[70vh] md:h-[100vh] pt-[140px] sm:pt-[160px] md:pt-[200px] bg-background overflow-x-auto">
       <div className="relative h-full">
         <div 
           ref={contentRef}
-          className="relative h-full w-[275vw]" 
+          className="relative h-full sm:w-[275vw] w-[400vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * 0.63}px)`
+            transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 0.75 : 0.63)}px)`
           }}
         >
           <div 
