@@ -95,9 +95,8 @@ export function TideChart({ data }: TideChartProps) {
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
     const startTime = new Date(yesterday)
-    const endTime = new Date(today.getTime() + (72 * 60 * 60 * 1000)) // Day +3 midnight
+    const endTime = new Date(today.getTime() + (72 * 60 * 60 * 1000))
     
-    // Round to the next 6-hour mark
     const firstTick = new Date(startTime)
     firstTick.setMinutes(0, 0, 0)
     const currentHour = firstTick.getHours()
@@ -109,7 +108,7 @@ export function TideChart({ data }: TideChartProps) {
     
     while (currentTime <= endTime) {
       ticks.push(currentTime.getTime())
-      currentTime.setHours(currentTime.getHours() + 6)
+      currentTime.setHours(currentTime.getHours() + (window.innerWidth < 640 ? 12 : 6))
     }
     
     return ticks
@@ -126,49 +125,53 @@ export function TideChart({ data }: TideChartProps) {
       : '\u00A0'
     const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true })
 
+    const isMobile = window.innerWidth < 640
+    const fontSize = isMobile ? '12px' : '12px'
+    
+    // Adjust the y-positions based on device
+    const firstLineY = isMobile ? 12 : 15
+    const secondLineY = isMobile ? 30 : 33
+
     return (
-      <g 
-        transform={`translate(${x},${y + 10})`}
-        data-midnight={isTodayMidnight ? "true" : undefined}
-        style={{ position: 'relative' }}
-      >
-        <foreignObject x={0} y={0} width={200} height={50} style={{ overflow: 'visible' }}>
-          <div style={{ 
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '200px',
-            whiteSpace: 'nowrap'
-          }}>
-            <div style={{ 
-              color: 'white',
-              fontSize: '12px',
-              lineHeight: '20px'
-            }}>
-              {dateStr}
-            </div>
-            <div style={{ 
-              color: 'white',
-              fontSize: '12px',
-              lineHeight: '20px',
-              opacity: 0.5
-            }}>
-              {time}
-            </div>
-          </div>
-        </foreignObject>
+      <g transform={`translate(${x},${y})`}>
+        <text
+          x={0}
+          y={firstLineY}
+          textAnchor="start"
+          fill="white"
+          style={{
+            fontSize,
+          }}
+        >
+          {dateStr}
+        </text>
+        <text
+          x={0}
+          y={secondLineY}
+          textAnchor="start"
+          fill="white"
+          style={{
+            fontSize,
+            opacity: 0.5
+          }}
+        >
+          {time}
+        </text>
       </g>
     )
   }
 
   return (
-    <div ref={containerRef} className="fixed bottom-0 left-0 right-0 h-[70vh] md:h-[100vh] pt-[140px] sm:pt-[160px] md:pt-[200px] bg-background overflow-x-auto">
+    <div 
+      ref={containerRef} 
+      className="fixed bottom-0 left-0 right-0 h-[70vh] md:h-[100vh] pt-[140px] sm:pt-[160px] md:pt-[200px] bg-background overflow-x-auto overscroll-none"
+    >
       <div className="relative h-full">
         <div 
           ref={contentRef}
-          className="relative h-full sm:w-[275vw] w-[400vw]" 
+          className="relative h-full sm:w-[275vw] w-[500vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 0.75 : 0.63)}px)`
+            transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 1.13 : 0.63)}px)`
           }}
         >
           <div 
@@ -178,7 +181,12 @@ export function TideChart({ data }: TideChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart 
               data={filteredChartData}
-              margin={{ top: 30, right: 0, bottom: 40, left: 0 }}
+              margin={{ 
+                top: 30, 
+                right: 0, 
+                bottom: window.innerWidth < 640 ? 10 : 30, 
+                left: 0 
+              }}
               style={{ overflow: 'visible' }}
             >
               <YAxis 
