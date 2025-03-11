@@ -257,15 +257,26 @@ export function TideChart({ data }: TideChartProps) {
                   // High/Low points - always shown, bigger on hover
                   if (props.payload.type) {
                     return (
-                      <circle
-                        key={`dot-${props.payload.time}`}
-                        cx={props.cx}
-                        cy={props.cy}
-                        r={props.active ? 6 : 4}  // Bigger radius on hover
-                        fill="white"
-                        stroke="hsl(var(--chart-1))"
-                        strokeWidth={props.active ? 3 : 2}  // Thicker stroke on hover
-                      />
+                      <g key={`dot-group-${props.payload.time}`}>
+                        <circle
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={props.active ? 6 : 4}
+                          fill="white"
+                          stroke="hsl(var(--chart-1))"
+                          strokeWidth={props.active ? 3 : 2}
+                        />
+                        <text
+                          x={props.cx}
+                          y={props.cy - 15}
+                          fill="hsl(var(--foreground))"
+                          fontSize={12}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                        >
+                          {`${props.payload.height.toFixed(1)}'`}
+                        </text>
+                      </g>
                     );
                   }
                   
@@ -284,19 +295,15 @@ export function TideChart({ data }: TideChartProps) {
                     );
                   }
 
-                  // No dot for non-hovered hourly points
-                  return null;
-                }}
-                label={{
-                  position: "top",
-                  fill: "hsl(var(--foreground))",
-                  fontSize: 12,
-                  formatter: (value: number, entry: any) => {
-                    if (!entry || !entry.payload || !entry.payload.type) return null;
-                    return `${value.toFixed(1)}'`;
-                  },
-                  dy: -15,
-                  allowDuplicatedCategory: true
+                  // For non-hovered hourly points, return an empty circle
+                  return (
+                    <circle
+                      key={`dot-${props.payload.time}`}
+                      cx={0}
+                      cy={0}
+                      r={0}
+                    />
+                  );
                 }}
               />
             </AreaChart>
