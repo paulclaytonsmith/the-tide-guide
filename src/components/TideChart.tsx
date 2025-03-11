@@ -254,8 +254,23 @@ export function TideChart({ data }: TideChartProps) {
                     );
                   }
                   
-                  // High/Low points - white dots with blue stroke
+                  // High/Low points - always shown, bigger on hover
                   if (props.payload.type) {
+                    return (
+                      <circle
+                        key={`dot-${props.payload.time}`}
+                        cx={props.cx}
+                        cy={props.cy}
+                        r={props.active ? 6 : 4}  // Bigger radius on hover
+                        fill="white"
+                        stroke="hsl(var(--chart-1))"
+                        strokeWidth={props.active ? 3 : 2}  // Thicker stroke on hover
+                      />
+                    );
+                  }
+                  
+                  // Hourly points - only show on hover
+                  if (props.active) {
                     return (
                       <circle
                         key={`dot-${props.payload.time}`}
@@ -268,27 +283,17 @@ export function TideChart({ data }: TideChartProps) {
                       />
                     );
                   }
-                  
-                  // Hourly points - solid white dots, no stroke
-                  return (
-                    <circle
-                      key={`dot-${props.payload.time}`}
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={4}
-                      fill="hsl(var(--chart-1))"
-                      stroke="white"
-                      strokeWidth={2}
-                    />
-                  );
+
+                  // No dot for non-hovered hourly points
+                  return null;
                 }}
                 label={{
                   position: "top",
                   fill: "hsl(var(--foreground))",
                   fontSize: 12,
                   formatter: (value: number, entry: any) => {
-                    if (!entry || !entry.payload) return null;
-                    return (entry.payload.type === "High" || entry.payload.type === "Low") ? `${value.toFixed(1)}'` : null;
+                    if (!entry || !entry.payload || !entry.payload.type) return null;
+                    return `${value.toFixed(1)}'`;
                   },
                   dy: -15,
                   allowDuplicatedCategory: true
