@@ -58,30 +58,28 @@ export function TideChart({ data }: TideChartProps) {
     return date >= yesterday && date < today
   })
 
-  // Get the last tide from yesterday
-  const yesterdayLastTide = yesterdayTides.length > 0 ? yesterdayTides[yesterdayTides.length - 1] : null
+  // Get the second to last tide from yesterday
+  const yesterdaySecondLastTide = yesterdayTides.length > 1 ? yesterdayTides[yesterdayTides.length - 2] : yesterdayTides[0]
 
-  // Find the first tide of three days after
-  const threeDaysAfterFirstTide = chartData.find(d => {
+  // Find the first two tides of three days after
+  const threeDaysAfterTides = chartData.filter(d => {
     const date = new Date(d.time)
     return date.getTime() >= threeDaysAfter.getTime() && date.getTime() < threeDaysAfter.getTime() + (24 * 60 * 60 * 1000)
-  })
+  }).slice(0, 2)
 
-  // Filter data to start from yesterday's last tide and go up to day +2
-  const filteredChartData = yesterdayLastTide 
+  // Filter data to start from yesterday's second to last tide and go up to day +2
+  const filteredChartData = yesterdaySecondLastTide 
     ? chartData.filter(d => {
         const date = new Date(d.time)
-        return d.time >= yesterdayLastTide.time && date.getTime() < twoDaysAfter.getTime() + (24 * 60 * 60 * 1000)
+        return d.time >= yesterdaySecondLastTide.time && date.getTime() < twoDaysAfter.getTime() + (24 * 60 * 60 * 1000)
       })
     : chartData.filter(d => {
         const date = new Date(d.time)
         return date.getTime() < twoDaysAfter.getTime() + (24 * 60 * 60 * 1000)
       })
 
-  // Add the first tide of day +3
-  if (threeDaysAfterFirstTide) {
-    filteredChartData.push(threeDaysAfterFirstTide)
-  }
+  // Add the first two tides of day +3
+  filteredChartData.push(...threeDaysAfterTides)
 
   // Find max height for chart domain
   const maxHeight = Math.ceil(Math.max(...filteredChartData.map(d => d.height)))
@@ -163,7 +161,7 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full w-[275vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * 0.62}px)`
+            transform: `translateX(-${windowWidth * 0.63}px)`
           }}
         >
           <div 
