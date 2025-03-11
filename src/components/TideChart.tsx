@@ -165,7 +165,7 @@ export function TideChart({ data }: TideChartProps) {
           ref={contentRef}
           className="relative h-full sm:w-[275vw] w-[500vw]" 
           style={{ 
-            transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 1.13 : 0.63)}px)`
+            transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 1.13 : 0.65)}px)`
           }}
         >
           <div 
