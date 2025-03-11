@@ -1,15 +1,9 @@
 import { TideData } from "@/lib/noaa"
 import { Area, AreaChart, ResponsiveContainer, YAxis, XAxis, Tooltip } from "recharts"
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 
 interface TideChartProps {
   data: TideData
-}
-
-interface LabelProps {
-  x: number
-  y: number
-  value: number
 }
 
 export function TideChart({ data }: TideChartProps) {
@@ -90,7 +84,6 @@ export function TideChart({ data }: TideChartProps) {
 
   // Find max height for chart domain
   const maxHeight = Math.ceil(Math.max(...filteredChartData.map(d => d.height)))
-  const minHeight = Math.floor(Math.min(...filteredChartData.map(d => d.height)))
 
   // Generate ticks for every 6 hours aligned to 12AM
   const generateHourlyTicks = () => {
@@ -117,8 +110,9 @@ export function TideChart({ data }: TideChartProps) {
   const renderTick = (props: any) => {
     const { x, y, payload } = props
     const date = new Date(payload.value)
-    const isMidnight = date.getHours() === 0
-    const isTodayMidnight = isMidnight && date.getDate() === today.getDate()
+    const hour = date.getHours()
+    const minute = date.getMinutes()
+    const isMidnight = hour === 0 && minute === 0
 
     const dateStr = isMidnight
       ? `${date.toLocaleDateString('en-US', { weekday: 'long' })} ${date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' })}`

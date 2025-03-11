@@ -12,13 +12,11 @@ interface Location {
 }
 
 function App() {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [tideData, setTideData] = useState<Awaited<ReturnType<typeof getTidePredictions>>>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleLocationSelect = async (location: Location) => {
-    setSelectedLocation(location)
     setIsLoading(true)
     setError(null)
 

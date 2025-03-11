@@ -16,17 +16,6 @@ interface TidePredictions {
   predictions: TidePrediction[]
 }
 
-interface StationMetadata {
-  stations: Array<{
-    id: string
-    name: string
-    lat: string
-    lng: string
-    tidal: boolean
-    shefcode: string
-  }>
-}
-
 export interface TideData {
   stationName: string
   stationId: string
