@@ -9,7 +9,7 @@ interface Station {
 interface TidePrediction {
   t: string  // time
   v: string  // height
-  type: "H" | "L"  // high or low tide
+  type: "H" | "L" | null  // high or low tide or null
 }
 
 interface TidePredictions {
@@ -22,7 +22,7 @@ export interface TideData {
   predictions: Array<{
     time: Date
     height: number
-    type: "High" | "Low"
+    type?: "High" | "Low"  // Make type optional
   }>
 }
 
@@ -144,11 +144,21 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
     const hourlyData = await hourlyResponse.json() as TidePredictions
     const hiloData = await hiloResponse.json() as TidePredictions
 
+    // Transform hourly data to have type: null
+    const hourlyPredictions = (hourlyData.predictions || []).map(p => ({
+      t: p.t,
+      v: p.v,
+      type: null as any  // Force type to be null for hourly points
+    }))
+
+    // Keep the type for hilo data
+    const hiloPredictions = hiloData.predictions || []
+
     // Combine the datasets
     const combinedPredictions = [
-      ...(hiloData.predictions || []),
-      ...(hourlyData.predictions || [])
-    ]
+      ...hiloPredictions,
+      ...hourlyPredictions
+    ] as TidePrediction[]
 
     return combinedPredictions
   } catch (error) {
@@ -170,7 +180,9 @@ export async function getTidePredictions(lat: number, lon: number): Promise<Tide
     predictions: predictions.map(p => ({
       time: new Date(p.t),
       height: parseFloat(p.v),
-      type: p.type === "H" ? "High" : "Low"
+      type: p.type === "H" ? "High" : 
+            p.type === "L" ? "Low" : 
+            undefined  // For hourly points where type is null
     }))
   }
 } 

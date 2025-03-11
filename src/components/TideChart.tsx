@@ -242,20 +242,45 @@ export function TideChart({ data }: TideChartProps) {
                 animationBegin={0}
                 animationEasing="ease-out"
                 baseValue={-10}
-                dot={(props) => {
-                  if (!props || !props.payload) return null;
-                  // Only show dots for high/low points
-                  return props.payload.type ? (
+                dot={(props): React.ReactElement<SVGElement> => {
+                  if (!props || !props.payload) {
+                    return (
+                      <circle
+                        key="empty"
+                        cx={0}
+                        cy={0}
+                        r={0}
+                      />
+                    );
+                  }
+                  
+                  // High/Low points - white dots with blue stroke
+                  if (props.payload.type) {
+                    return (
+                      <circle
+                        key={`dot-${props.payload.time}`}
+                        cx={props.cx}
+                        cy={props.cy}
+                        r={4}
+                        fill="white"
+                        stroke="hsl(var(--chart-1))"
+                        strokeWidth={2}
+                      />
+                    );
+                  }
+                  
+                  // Hourly points - solid white dots, no stroke
+                  return (
                     <circle
                       key={`dot-${props.payload.time}`}
                       cx={props.cx}
                       cy={props.cy}
                       r={4}
-                      fill="white"
-                      stroke="hsl(var(--chart-1))"
+                      fill="hsl(var(--chart-1))"
+                      stroke="white"
                       strokeWidth={2}
                     />
-                  ) : null
+                  );
                 }}
                 label={{
                   position: "top",
@@ -263,7 +288,7 @@ export function TideChart({ data }: TideChartProps) {
                   fontSize: 12,
                   formatter: (value: number, entry: any) => {
                     if (!entry || !entry.payload) return null;
-                    return entry.payload.type ? `${value.toFixed(1)}'` : null;
+                    return (entry.payload.type === "High" || entry.payload.type === "Low") ? `${value.toFixed(1)}'` : null;
                   },
                   dy: -15,
                   allowDuplicatedCategory: true
