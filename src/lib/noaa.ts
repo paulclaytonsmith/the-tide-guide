@@ -95,7 +95,7 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   
-  // Calculate yesterday and end date based on local today
+  // Calculate dates
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   const endDate = new Date(today)
@@ -105,23 +105,52 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
     return date.toISOString().split('T')[0]
   }
 
-  const url = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
-  url.searchParams.set("product", "predictions")
-  url.searchParams.set("application", "tide_near")
-  url.searchParams.set("begin_date", formatDate(yesterday))
-  url.searchParams.set("end_date", formatDate(endDate))
-  url.searchParams.set("datum", "MLLW")
-  url.searchParams.set("station", stationId)
-  url.searchParams.set("time_zone", "lst_ldt")  // This ensures times are in station's local time
-  url.searchParams.set("units", "english")
-  url.searchParams.set("interval", "hilo")
-  url.searchParams.set("format", "json")
-
   try {
-    const response = await fetch(url.toString())
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json() as TidePredictions
-    return data.predictions || null
+    // First get the hourly data
+    const hourlyUrl = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
+    hourlyUrl.searchParams.set("product", "predictions")
+    hourlyUrl.searchParams.set("application", "tide_near")
+    hourlyUrl.searchParams.set("begin_date", formatDate(today))
+    hourlyUrl.searchParams.set("end_date", formatDate(new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000)))
+    hourlyUrl.searchParams.set("datum", "MLLW")
+    hourlyUrl.searchParams.set("station", stationId)
+    hourlyUrl.searchParams.set("time_zone", "lst_ldt")
+    hourlyUrl.searchParams.set("units", "english")
+    hourlyUrl.searchParams.set("interval", "60")
+    hourlyUrl.searchParams.set("format", "json")
+
+    // Then get the hilo data
+    const hiloUrl = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
+    hiloUrl.searchParams.set("product", "predictions")
+    hiloUrl.searchParams.set("application", "tide_near")
+    hiloUrl.searchParams.set("begin_date", formatDate(yesterday))
+    hiloUrl.searchParams.set("end_date", formatDate(endDate))
+    hiloUrl.searchParams.set("datum", "MLLW")
+    hiloUrl.searchParams.set("station", stationId)
+    hiloUrl.searchParams.set("time_zone", "lst_ldt")
+    hiloUrl.searchParams.set("units", "english")
+    hiloUrl.searchParams.set("interval", "hilo")
+    hiloUrl.searchParams.set("format", "json")
+
+    const [hourlyResponse, hiloResponse] = await Promise.all([
+      fetch(hourlyUrl.toString()),
+      fetch(hiloUrl.toString())
+    ])
+
+    if (!hourlyResponse.ok || !hiloResponse.ok) {
+      throw new Error(`HTTP error! status: ${hourlyResponse.status} or ${hiloResponse.status}`)
+    }
+
+    const hourlyData = await hourlyResponse.json() as TidePredictions
+    const hiloData = await hiloResponse.json() as TidePredictions
+
+    // Combine the datasets
+    const combinedPredictions = [
+      ...(hiloData.predictions || []),
+      ...(hourlyData.predictions || [])
+    ]
+
+    return combinedPredictions
   } catch (error) {
     console.error("Error fetching tide predictions:", error)
     return null

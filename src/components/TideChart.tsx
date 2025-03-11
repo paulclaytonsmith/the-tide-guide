@@ -242,12 +242,29 @@ export function TideChart({ data }: TideChartProps) {
                 animationBegin={0}
                 animationEasing="ease-out"
                 baseValue={-10}
-                dot={{ r: 4, fill: "white", stroke: "hsl(var(--chart-1))", strokeWidth: 2 }}
+                dot={(props) => {
+                  if (!props || !props.payload) return null;
+                  // Only show dots for high/low points
+                  return props.payload.type ? (
+                    <circle
+                      key={`dot-${props.payload.time}`}
+                      cx={props.cx}
+                      cy={props.cy}
+                      r={4}
+                      fill="white"
+                      stroke="hsl(var(--chart-1))"
+                      strokeWidth={2}
+                    />
+                  ) : null
+                }}
                 label={{
                   position: "top",
                   fill: "hsl(var(--foreground))",
                   fontSize: 12,
-                  formatter: (value: number) => `${value.toFixed(1)}'`,
+                  formatter: (value: number, entry: any) => {
+                    if (!entry || !entry.payload) return null;
+                    return entry.payload.type ? `${value.toFixed(1)}'` : null;
+                  },
                   dy: -15,
                   allowDuplicatedCategory: true
                 }}
