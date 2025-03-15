@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react"
 import { loadGoogleMaps } from "@/lib/google-maps"
 import "./Location.css"
 
+const INPUT_PLACEHOLDER = "Enter Location"
+const PLACEHOLDER_STATS = "Search for places near the coastal USA"
+const LOADING_STATS = "Loading tide data..."
+
+
 interface Location {
   name: string
   lat: number
@@ -10,10 +15,9 @@ interface Location {
 
 interface LocationProps {
   onLocationSelect: (location: Location) => void
-  placeholder?: string
 }
 
-export function Location({ onLocationSelect, placeholder = "Enter Location" }: LocationProps) {
+export function Location({ onLocationSelect }: LocationProps) {
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
@@ -45,11 +49,6 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
         const span = document.createElement('span')
         // Copy all relevant styles that could affect text width
         const inputStyles = window.getComputedStyle(inputRef.current)
-        console.log('Input styles on mount:', {
-          font: inputStyles.font,
-          letterSpacing: inputStyles.letterSpacing,
-          computedWidth: inputRef.current.getBoundingClientRect().width
-        })
         
         span.style.font = inputStyles.font
         span.style.letterSpacing = inputStyles.letterSpacing
@@ -58,18 +57,12 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
         span.style.whiteSpace = 'pre'
         
         // Use input value or placeholder
-        const textToMeasure = inputValue || placeholder || ''
+        const textToMeasure = inputValue || INPUT_PLACEHOLDER || ''
         span.textContent = textToMeasure
         
         document.body.appendChild(span)
         const width = Math.ceil(span.getBoundingClientRect().width)
         document.body.removeChild(span)
-        
-        console.log('Width calculation:', {
-          text: textToMeasure,
-          measuredWidth: width,
-          finalWidth: width
-        })
         
         // Use exact measured width without padding
         wrapperRef.current.style.width = `${width}px`
@@ -78,9 +71,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
     }
 
     // Initial update with a small delay to ensure styles are loaded
-    console.log('Setting up initial width calculation')
     const initialTimeoutId = setTimeout(() => {
-      console.log('Running delayed width calculation')
       updateWidth()
     }, 100)  // Increased delay to ensure styles are loaded
     
@@ -90,7 +81,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
       window.removeEventListener('resize', updateWidth)
       clearTimeout(initialTimeoutId)
     }
-  }, [inputValue, placeholder]) // Added dependencies back
+  }, [inputValue])
 
   const handleInput = async (value: string) => {
     setInputValue(value)
@@ -125,7 +116,6 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
       setPredictions(results)
       setShowDropdown(true)
     } catch (error) {
-      console.error('Error fetching predictions:', error)
       setPredictions([])
     } finally {
       setIsLoading(false)
@@ -161,7 +151,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
         inputRef.current?.blur()
       }
     } catch (error) {
-      console.error('Error fetching place details:', error)
+      // Error handling for place details
     }
   }
 
@@ -213,7 +203,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
             ref={inputRef}
             type="text"
             className="location-input"
-            placeholder={placeholder}
+            placeholder={INPUT_PLACEHOLDER}
             value={inputValue}
             onChange={(e) => handleInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -237,13 +227,13 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
             </div>
           )}
         </div>
-        {selectedLocation && (
-          <div className="location-stats">
-            <span className="location-stats-text">
-              {formatCoordinates(selectedLocation.lat, selectedLocation.lng)}
-            </span>
-          </div>
-        )}
+        <div className="location-stats">
+          <span className="location-stats-text">
+            {selectedLocation ? formatCoordinates(selectedLocation.lat, selectedLocation.lng) :
+             isLoading ? LOADING_STATS :
+             !inputValue ? PLACEHOLDER_STATS : null}
+          </span>
+        </div>
       </div>
     </div>
   )

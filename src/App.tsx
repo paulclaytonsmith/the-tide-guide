@@ -19,7 +19,6 @@ function App() {
     <div className="app">
       <Location 
         onLocationSelect={handleLocationSelect}
-        placeholder="Enter Location"
       />
     </div>
   )
