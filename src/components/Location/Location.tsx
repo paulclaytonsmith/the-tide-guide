@@ -1,0 +1,194 @@
+import { useEffect, useRef, useState } from "react"
+import { loadGoogleMaps } from "@/lib/google-maps"
+import "./Location.css"
+
+interface Location {
+  name: string
+  lat: number
+  lng: number
+}
+
+interface LocationProps {
+  onLocationSelect: (location: Location) => void
+  placeholder?: string
+}
+
+export function Location({ onLocationSelect, placeholder = "Enter Location" }: LocationProps) {
+  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(-1)
+  const [hoveredIndex, setHoveredIndex] = useState(-1)
+  const [inputValue, setInputValue] = useState("")
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  
+  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
+  const placesService = useRef<google.maps.places.PlacesService | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    loadGoogleMaps().then(() => {
+      if (window.google) {
+        autocompleteService.current = new google.maps.places.AutocompleteService()
+        const mapDiv = document.createElement('div')
+        placesService.current = new google.maps.places.PlacesService(mapDiv)
+      }
+    })
+  }, [])
+
+  const handleInput = async (value: string) => {
+    setInputValue(value)
+    setSelectedIndex(-1)
+    setSelectedLocation(null) // Hide stats when typing
+
+    if (!value.trim()) {
+      setPredictions([])
+      setShowDropdown(false)
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const results = await new Promise<google.maps.places.AutocompletePrediction[]>((resolve, reject) => {
+        autocompleteService.current?.getPlacePredictions(
+          {
+            input: value,
+            types: ['locality', 'administrative_area_level_1', 'administrative_area_level_2', 'natural_feature']
+          },
+          (results, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+              resolve(results)
+            } else {
+              reject(new Error('Failed to get predictions'))
+            }
+          }
+        )
+      })
+
+      setPredictions(results)
+      setShowDropdown(true)
+    } catch (error) {
+      console.error('Error fetching predictions:', error)
+      setPredictions([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSelect = async (prediction: google.maps.places.AutocompletePrediction) => {
+    try {
+      const place = await new Promise<google.maps.places.PlaceResult>((resolve, reject) => {
+        placesService.current?.getDetails(
+          { placeId: prediction.place_id },
+          (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+              resolve(place)
+            } else {
+              reject(new Error('Failed to get place details'))
+            }
+          }
+        )
+      })
+
+      if (place.geometry?.location) {
+        const location: Location = {
+          name: prediction.description,
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        }
+        setSelectedLocation(location)
+        onLocationSelect(location)
+        setInputValue(prediction.description)
+        setShowDropdown(false)
+        setPredictions([])
+        inputRef.current?.blur()
+      }
+    } catch (error) {
+      console.error('Error fetching place details:', error)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || predictions.length === 0) return
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        setSelectedIndex(prev => {
+          const next = prev + 1
+          return next >= predictions.length ? prev : next
+        })
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        setSelectedIndex(prev => {
+          const next = prev - 1
+          return next < 0 ? 0 : next
+        })
+        break
+      case "Enter":
+        e.preventDefault()
+        if (selectedIndex >= 0) {
+          handleSelect(predictions[selectedIndex])
+        }
+        break
+      case "Escape":
+        e.preventDefault()
+        setShowDropdown(false)
+        break
+    }
+  }
+
+  const formatCoordinates = (lat: number, lng: number) => {
+    const latDeg = Math.floor(lat)
+    const latMin = ((lat - latDeg) * 60).toFixed(1)
+    const lngDeg = Math.floor(lng)
+    const lngMin = ((lng - lngDeg) * 60).toFixed(1)
+    
+    return `${latDeg}° ${latMin} N ${lngDeg}° ${lngMin} W`
+  }
+
+  return (
+    <div className="location-container">
+      <div className="location">
+        <div className="location-input-wrapper">
+          <input
+            ref={inputRef}
+            type="text"
+            className="location-input"
+            placeholder={placeholder}
+            value={inputValue}
+            onChange={(e) => handleInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => inputValue && setShowDropdown(true)}
+          />
+          {showDropdown && predictions.length > 0 && (
+            <div className="location-dropdown">
+              <ul className="location-list">
+                {predictions.map((prediction, index) => (
+                  <li
+                    key={prediction.place_id}
+                    className={`location-item ${index === selectedIndex ? 'selected' : ''}`}
+                    onClick={() => handleSelect(prediction)}
+                    onMouseEnter={() => setHoveredIndex(index)}
+                    onMouseLeave={() => setHoveredIndex(-1)}
+                  >
+                    {prediction.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        {selectedLocation && (
+          <div className="location-stats">
+            <span className="location-stats-text">
+              {formatCoordinates(selectedLocation.lat, selectedLocation.lng)}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+} 

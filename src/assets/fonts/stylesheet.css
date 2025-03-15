@@ -1,0 +1,90 @@
+@font-face {
+    font-family: 'Founders Grotesk Condensed';
+    src: url('FoundersGroteskCondensed-Light.woff2') format('woff2'),
+        url('FoundersGroteskCondensed-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Condensed';
+    src: url('FoundersGroteskCondensed-Medium.woff2') format('woff2'),
+        url('FoundersGroteskCondensed-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Condensed';
+    src: url('FoundersGroteskCondensed-Bold.woff2') format('woff2'),
+        url('FoundersGroteskCondensed-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Condensed';
+    src: url('FoundersGroteskCondensed-Regular.woff2') format('woff2'),
+        url('FoundersGroteskCondensed-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Mono';
+    src: url('FoundersGroteskMono-Regular.woff2') format('woff2'),
+        url('FoundersGroteskMono-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Condensed';
+    src: url('FoundersGroteskCondensed-Semibold.woff2') format('woff2'),
+        url('FoundersGroteskCondensed-Semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Mono';
+    src: url('FoundersGroteskMono-Light.woff2') format('woff2'),
+        url('FoundersGroteskMono-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Mono';
+    src: url('FoundersGroteskMono-Medium.woff2') format('woff2'),
+        url('FoundersGroteskMono-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Mono';
+    src: url('FoundersGroteskMono-Bold.woff2') format('woff2'),
+        url('FoundersGroteskMono-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Founders Grotesk Mono';
+    src: url('FoundersGroteskMono-Semibold.woff2') format('woff2'),
+        url('FoundersGroteskMono-Semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
