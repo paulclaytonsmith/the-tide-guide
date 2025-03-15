@@ -1,5 +1,5 @@
 .location-container {
-  --input-underline-gap: 4px;    /* Space between input text and underline */
+  --input-underline-gap: 8px;    /* Space between input text and underline */
   --stats-top-margin: 12px;      /* Space above stats */
   --dropdown-offset: -12px;      /* Offset for dropdown position */
   --dropdown-underline-gap: 12px; /* Space between last item and dropdown underline */
@@ -17,10 +17,23 @@
 .location-input-wrapper {
   display: inline-block;
   position: relative;
-  border-bottom: 4px solid var(--color-blue);  /* Back to original 4px thickness */
-  width: 161px;
+  min-width: 161px;
 }
 
+.input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 0;
+  background-color: var(--color-blue);
+}
+
+/* When wrapper is initialized, expand underline to full width */
+.location-input-wrapper.initialized .input-underline {
+  width: 100%;
+  transition: width 0.3s ease-out;
+}
 
 /* More specific selector to override Google Maps styles */
 .location-container .location .location-input-wrapper .location-input {
@@ -69,13 +82,15 @@
   margin-top: var(--dropdown-offset);
   padding-bottom: var(--dropdown-underline-gap);
   background: transparent;
-  border-bottom: 4px solid var(--color-blue);
   transform: translateY(4px);
 }
 
 /* Hide input border when dropdown is shown */
 .location-input-wrapper:has(.location-dropdown) {
-  border-bottom: none;
+  .input-underline {
+    width: 0;
+    transition: none; /* Immediately snap to width 0 */
+  }
 }
 
 .location-list {

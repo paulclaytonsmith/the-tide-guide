@@ -80,7 +80,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
     // Initial update with a small delay to ensure styles are loaded
     const initialTimeoutId = setTimeout(() => {
       updateWidth()
-    }, 100)  // Increased delay to ensure styles are loaded
+    }, 33)  // Increased delay to ensure styles are loaded
     
     // Update on window resize
     window.addEventListener('resize', updateWidth)
@@ -216,6 +216,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
             onKeyDown={handleKeyDown}
             onFocus={() => inputValue && setShowDropdown(true)}
           />
+          <div className="input-underline" />
           {showDropdown && predictions.length > 0 && (
             <div className="location-dropdown">
               <ul className="location-list">
