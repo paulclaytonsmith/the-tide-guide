@@ -49,6 +49,9 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
   useEffect(() => {
     const updateWidth = () => {
       if (inputRef.current && wrapperRef.current) {
+        // Only skip width update if dropdown is open AND has results
+        if (showDropdown && predictions.length > 0) return
+        
         // Create a temporary span to measure text width
         const span = document.createElement('span')
         // Copy all relevant styles that could affect text width
@@ -85,7 +88,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
       window.removeEventListener('resize', updateWidth)
       clearTimeout(initialTimeoutId)
     }
-  }, [inputValue])
+  }, [inputValue, showDropdown, predictions.length])
 
   const handleInput = async (value: string) => {
     setInputValue(value)

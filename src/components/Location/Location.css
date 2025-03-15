@@ -21,14 +21,11 @@
   width: 161px;
 }
 
-/* Add transition only after initial render */
-.location-input-wrapper.initialized {
-  transition: width 0.2s ease;
-}
 
 /* More specific selector to override Google Maps styles */
 .location-container .location .location-input-wrapper .location-input {
   all: unset;
+  width: 100%;  /* Make input fill its wrapper */
   font-family: var(--font-primary);
   font-weight: var(--font-semibold);
   font-size: 32px;
@@ -36,7 +33,6 @@
   letter-spacing: -0.01em;
   color: var(--color-dark);
   margin-bottom: var(--input-underline-gap);
-  display: block;
 }
 
 .location-input::placeholder {
