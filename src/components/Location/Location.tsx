@@ -68,13 +68,12 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
         console.log('Width calculation:', {
           text: textToMeasure,
           measuredWidth: width,
-          finalWidth: width + (textToMeasure ? 4 : 0)
+          finalWidth: width
         })
         
-        // Add minimal padding for cursor
-        const finalWidth = width + (textToMeasure ? 4 : 0)
-        wrapperRef.current.style.width = `${finalWidth}px`
-        wrapperRef.current.classList.add('initialized')  // Add class after first measurement
+        // Use exact measured width without padding
+        wrapperRef.current.style.width = `${width}px`
+        wrapperRef.current.classList.add('initialized')
       }
     }
 
