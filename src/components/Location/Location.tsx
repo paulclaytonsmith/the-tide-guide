@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useMemo } from "react"
 import { loadGoogleMaps } from "@/lib/google-maps"
 import { useTypeout } from "@/hooks/useTypeout"
 import "./Location.css"
@@ -20,8 +20,20 @@ interface LocationProps {
 
 // Configuration
 const TYPEOUT_CONFIG = {
-  numChars: 1,
-  delay: 20
+  placeholder: {
+    numChars: 1,
+    delay: 20,
+    initialDelay: 400,
+    scramble: true,
+    scrambleAhead: 3
+  },
+  stats: {
+    numChars: 1,
+    delay: 15,  // Slightly faster
+    initialDelay: 100,
+    scramble: true,
+    scrambleAhead: 2  // Slightly fewer scrambled chars
+  }
 } as const
 
 // UI Text Constants
@@ -54,7 +66,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
   // Typeout effect for placeholder stats, only on first mount
   const { displayText: typeoutPlaceholder } = useTypeout(
     isFirstMount.current ? UI_TEXT.stats.placeholder : UI_TEXT.stats.placeholder,
-    TYPEOUT_CONFIG
+    TYPEOUT_CONFIG.placeholder
   )
 
   // Set isFirstMount to false after first mount
@@ -229,12 +241,34 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
     return `${latDeg}° ${latMin} N ${lngDeg}° ${lngMin} W`
   }
 
-  // Combine coordinates and station ID into a single string
-  const statsText = selectedLocation ? 
-    `${formatCoordinates(selectedLocation.lat, selectedLocation.lng)}${stationId ? `\nStation ${stationId}` : ''}` : 
-    ""
-  const { displayText: typeoutStats } = useTypeout(statsText, TYPEOUT_CONFIG)
+  // Memoize the stats text to prevent unnecessary resets
+  const statsText = useMemo(() => {
+    if (!selectedLocation || !stationId) return ""
+    
+    // Pre-calculate the full text to ensure consistent length
+    const coords = formatCoordinates(selectedLocation.lat, selectedLocation.lng)
+    const station = `\nStation ${stationId}`
+    return coords + station
+  }, [selectedLocation?.lat, selectedLocation?.lng, stationId]) // Only depend on the specific values we need
 
+  // Create a stable key that changes only when we want to restart the animation
+  const typeoutKey = useMemo(() => {
+    if (!selectedLocation || !stationId) return ""
+    // Include a version number to force a fresh animation when switching between locations
+    return `v1-${selectedLocation.lat}-${selectedLocation.lng}-${stationId}`
+  }, [selectedLocation?.lat, selectedLocation?.lng, stationId])
+
+  // Pass key to useTypeout to force reset only when location or station changes
+  const { displayText: typeoutStats } = useTypeout(
+    statsText,
+    {
+      ...TYPEOUT_CONFIG.stats,
+      // Increase initial delay to ensure all data is ready
+      initialDelay: 200
+    },
+    typeoutKey
+  )
+  
   return (
     <div className="location-container">
       <div className="location">
@@ -269,12 +303,12 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
           )}
         </div>
         <div className="location-stats">
-          <span className={`location-stats-text ${tideError && selectedLocation ? 'error' : ''}`}>
+          <span className={`location-stats-text ${selectedLocation && tideError ? 'error' : ''}`}>
             {selectedLocation ? 
               (isLoadingTides ? UI_TEXT.stats.loading :
                tideError ? UI_TEXT.stats.error :
                typeoutStats.split('\n').map((line, index) => (
-                 <React.Fragment key={index}>
+                 <React.Fragment key={`${typeoutKey}-${index}`}>
                    {index > 0 && <br />}
                    {line}
                  </React.Fragment>
