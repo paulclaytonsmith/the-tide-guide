@@ -2,7 +2,6 @@
   --input-underline-gap: 8px;    /* Space between input text and underline */
   --stats-top-margin: 12px;      /* Space above stats */
   --dropdown-offset: -12px;      /* Offset for dropdown position */
-  --dropdown-underline-gap: 12px; /* Space between last item and dropdown underline */
 
   width: 100%;
   padding: 48px 48px 0;
@@ -80,9 +79,8 @@
   left: 0;
   width: max-content;
   margin-top: var(--dropdown-offset);
-  padding-bottom: var(--dropdown-underline-gap);
   background: transparent;
-  transform: translateY(4px);
+  /* transform: translateY(4px); */
 }
 
 /* Hide input border when dropdown is shown */
