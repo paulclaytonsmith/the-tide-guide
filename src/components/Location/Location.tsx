@@ -25,6 +25,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
   const placesService = useRef<google.maps.places.PlacesService | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadGoogleMaps().then(() => {
@@ -35,6 +36,62 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
       }
     })
   }, [])
+
+  // Effect for initial setup and resize handling
+  useEffect(() => {
+    const updateWidth = () => {
+      if (inputRef.current && wrapperRef.current) {
+        // Create a temporary span to measure text width
+        const span = document.createElement('span')
+        // Copy all relevant styles that could affect text width
+        const inputStyles = window.getComputedStyle(inputRef.current)
+        console.log('Input styles on mount:', {
+          font: inputStyles.font,
+          letterSpacing: inputStyles.letterSpacing,
+          computedWidth: inputRef.current.getBoundingClientRect().width
+        })
+        
+        span.style.font = inputStyles.font
+        span.style.letterSpacing = inputStyles.letterSpacing
+        span.style.visibility = 'hidden'
+        span.style.position = 'absolute'
+        span.style.whiteSpace = 'pre'
+        
+        // Use input value or placeholder
+        const textToMeasure = inputValue || placeholder || ''
+        span.textContent = textToMeasure
+        
+        document.body.appendChild(span)
+        const width = Math.ceil(span.getBoundingClientRect().width)
+        document.body.removeChild(span)
+        
+        console.log('Width calculation:', {
+          text: textToMeasure,
+          measuredWidth: width,
+          finalWidth: width + (textToMeasure ? 4 : 0)
+        })
+        
+        // Add minimal padding for cursor
+        const finalWidth = width + (textToMeasure ? 4 : 0)
+        wrapperRef.current.style.width = `${finalWidth}px`
+        wrapperRef.current.classList.add('initialized')  // Add class after first measurement
+      }
+    }
+
+    // Initial update with a small delay to ensure styles are loaded
+    console.log('Setting up initial width calculation')
+    const initialTimeoutId = setTimeout(() => {
+      console.log('Running delayed width calculation')
+      updateWidth()
+    }, 100)  // Increased delay to ensure styles are loaded
+    
+    // Update on window resize
+    window.addEventListener('resize', updateWidth)
+    return () => {
+      window.removeEventListener('resize', updateWidth)
+      clearTimeout(initialTimeoutId)
+    }
+  }, [inputValue, placeholder]) // Added dependencies back
 
   const handleInput = async (value: string) => {
     setInputValue(value)
@@ -152,7 +209,7 @@ export function Location({ onLocationSelect, placeholder = "Enter Location" }: L
   return (
     <div className="location-container">
       <div className="location">
-        <div className="location-input-wrapper">
+        <div className="location-input-wrapper" ref={wrapperRef}>
           <input
             ref={inputRef}
             type="text"
