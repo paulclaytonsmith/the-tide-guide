@@ -22,10 +22,12 @@ dd {
 :root {
   /* Core Brand Colors */
   --color-dark: #1A264F;
+  --color-dark50: rgba(26, 38, 79, 0.5);  /* #1A264F at 50% opacity */
   --color-blue: #42B7ED;
   --color-green: #32D3A1;
   --color-cyan: #55EFF8;
   --color-off-white: #F6F5FA;
+  --color-error: rgba(250, 1, 1, 0.8);  /* #FA0101 at 50% opacity */
 
   /* Functional Colors */
   --color-background: var(--color-off-white);

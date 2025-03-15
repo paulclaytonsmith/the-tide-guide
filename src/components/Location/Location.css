@@ -59,7 +59,11 @@
   font-size: 12px;
   line-height: 1.28em;
   letter-spacing: -0.01em;
-  color: rgba(20, 38, 76, 0.5);
+  color: var(--color-dark50);
+}
+
+.location-stats-text.error {
+  color: var(--color-error);
 }
 
 .location-dropdown {

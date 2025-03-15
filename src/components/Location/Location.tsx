@@ -3,8 +3,9 @@ import { loadGoogleMaps } from "@/lib/google-maps"
 import "./Location.css"
 
 const INPUT_PLACEHOLDER = "Enter Location"
-const PLACEHOLDER_STATS = "Search for places near the coastal USA"
+const PLACEHOLDER_STATS = <>Search for areas near<br />the coastal USA</>
 const LOADING_STATS = "Loading tide data..."
+const ERROR_STATS = "No tide data available"
 
 
 interface Location {
@@ -15,9 +16,12 @@ interface Location {
 
 interface LocationProps {
   onLocationSelect: (location: Location) => void
+  isLoadingTides?: boolean
+  tideError?: string | null
+  stationId?: string
 }
 
-export function Location({ onLocationSelect }: LocationProps) {
+export function Location({ onLocationSelect, isLoadingTides = false, tideError, stationId }: LocationProps) {
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [hoveredIndex, setHoveredIndex] = useState(-1)
@@ -228,9 +232,14 @@ export function Location({ onLocationSelect }: LocationProps) {
           )}
         </div>
         <div className="location-stats">
-          <span className="location-stats-text">
-            {selectedLocation ? formatCoordinates(selectedLocation.lat, selectedLocation.lng) :
-             isLoading ? LOADING_STATS :
+          <span className={`location-stats-text ${tideError && selectedLocation ? 'error' : ''}`}>
+            {selectedLocation ? 
+              (isLoadingTides ? LOADING_STATS :
+               tideError ? ERROR_STATS :
+               <>
+                 {formatCoordinates(selectedLocation.lat, selectedLocation.lng)}
+                 {stationId && <><br />Station {stationId}</>}
+               </>) :
              !inputValue ? PLACEHOLDER_STATS : null}
           </span>
         </div>
