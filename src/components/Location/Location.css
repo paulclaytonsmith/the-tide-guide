@@ -13,9 +13,11 @@
 
 .location-input-wrapper {
   display: inline-block;
-  width: auto;
+  width: max-content;
   padding: 0;
+  padding-bottom: 12px;
   position: relative;
+  border-bottom: 4px solid var(--color-blue);
 }
 
 .location-input {
@@ -59,23 +61,28 @@
 .location-dropdown {
   position: absolute;
   left: 0;
-  right: 0;
-  margin-top: -0.2em;
-  padding: 0;
+  width: 100%;
+  margin-top: -0.5em;
+  padding-bottom: 24px;
   background: transparent;
-  box-shadow: none;
+  border-bottom: 4px solid var(--color-blue);
+  transform: translateY(4px);
+}
+
+/* Hide input border when dropdown is shown */
+.location-input-wrapper:has(.location-dropdown) {
+  border-bottom: none;
 }
 
 .location-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  width: 100%;
+  width: max-content;
 }
 
 .location-item {
   display: block;
-  width: max-content;
   padding: 0;
   margin-top: 0;
   cursor: pointer;
