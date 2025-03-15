@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from "react"
 import { loadGoogleMaps } from "@/lib/google-maps"
+import { useTypeout } from "@/hooks/useTypeout"
 import "./Location.css"
+import React from "react"
 
-const INPUT_PLACEHOLDER = "Enter Location"
-const PLACEHOLDER_STATS = <>Search for areas near<br />the coastal USA</>
-const LOADING_STATS = "Loading tide data..."
-const ERROR_STATS = "No tide data available"
-
-
+// Types
 interface Location {
   name: string
   lat: number
@@ -20,6 +17,24 @@ interface LocationProps {
   tideError?: string | null
   stationId?: string
 }
+
+// Configuration
+const TYPEOUT_CONFIG = {
+  numChars: 1,
+  delay: 20
+} as const
+
+// UI Text Constants
+const UI_TEXT = {
+  input: {
+    placeholder: "Enter Location"
+  },
+  stats: {
+    placeholder: "Search for areas near\nthe coastal USA",
+    loading: "Loading tide data...",
+    error: "No tide data available"
+  }
+} as const
 
 export function Location({ onLocationSelect, isLoadingTides = false, tideError, stationId }: LocationProps) {
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
@@ -34,6 +49,18 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
   const placesService = useRef<google.maps.places.PlacesService | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const isFirstMount = useRef(true)
+
+  // Typeout effect for placeholder stats, only on first mount
+  const { displayText: typeoutPlaceholder } = useTypeout(
+    isFirstMount.current ? UI_TEXT.stats.placeholder : UI_TEXT.stats.placeholder,
+    TYPEOUT_CONFIG
+  )
+
+  // Set isFirstMount to false after first mount
+  useEffect(() => {
+    isFirstMount.current = false
+  }, [])
 
   useEffect(() => {
     loadGoogleMaps().then(() => {
@@ -64,7 +91,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
         span.style.whiteSpace = 'pre'
         
         // Use input value or placeholder
-        const textToMeasure = inputValue || INPUT_PLACEHOLDER || ''
+        const textToMeasure = inputValue || UI_TEXT.input.placeholder || ''
         span.textContent = textToMeasure
         
         document.body.appendChild(span)
@@ -202,6 +229,12 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
     return `${latDeg}° ${latMin} N ${lngDeg}° ${lngMin} W`
   }
 
+  // Combine coordinates and station ID into a single string
+  const statsText = selectedLocation ? 
+    `${formatCoordinates(selectedLocation.lat, selectedLocation.lng)}${stationId ? `\nStation ${stationId}` : ''}` : 
+    ""
+  const { displayText: typeoutStats } = useTypeout(statsText, TYPEOUT_CONFIG)
+
   return (
     <div className="location-container">
       <div className="location">
@@ -210,7 +243,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
             ref={inputRef}
             type="text"
             className="location-input"
-            placeholder={INPUT_PLACEHOLDER}
+            placeholder={UI_TEXT.input.placeholder}
             value={inputValue}
             onChange={(e) => handleInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -238,13 +271,20 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
         <div className="location-stats">
           <span className={`location-stats-text ${tideError && selectedLocation ? 'error' : ''}`}>
             {selectedLocation ? 
-              (isLoadingTides ? LOADING_STATS :
-               tideError ? ERROR_STATS :
-               <>
-                 {formatCoordinates(selectedLocation.lat, selectedLocation.lng)}
-                 {stationId && <><br />Station {stationId}</>}
-               </>) :
-             !inputValue ? PLACEHOLDER_STATS : null}
+              (isLoadingTides ? UI_TEXT.stats.loading :
+               tideError ? UI_TEXT.stats.error :
+               typeoutStats.split('\n').map((line, index) => (
+                 <React.Fragment key={index}>
+                   {index > 0 && <br />}
+                   {line}
+                 </React.Fragment>
+               ))) :
+             !inputValue ? typeoutPlaceholder.split('\n').map((line, index) => (
+               <React.Fragment key={index}>
+                 {index > 0 && <br />}
+                 {line}
+               </React.Fragment>
+             )) : null}
           </span>
         </div>
       </div>
