@@ -1,0 +1,7 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-off-white);
+  gap: 48px;
+} 

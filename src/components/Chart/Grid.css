@@ -1,0 +1,35 @@
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  width: 100%;
+  border: 2px solid #FFFFFF;
+}
+
+.grid-tile {
+  width: 96px;
+  height: 96px;
+  border: 1px solid #FFFFFF;
+  position: relative;
+}
+
+.grid-tile::before,
+.grid-tile::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.grid-tile::before {
+  width: 2px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.grid-tile::after {
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+} 
