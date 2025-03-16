@@ -23,6 +23,7 @@
   display: inline-block;
   position: relative;
   min-width: 161px;
+  max-width: calc(100vw - (var(--page-padding) * 2));  /* Use viewport width instead */
 }
 
 .input-underline {
@@ -53,6 +54,10 @@
   letter-spacing: -0.01em;
   color: var(--color-dark);
   margin-bottom: var(--input-underline-gap);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;  /* Ensure the text-overflow works properly */
 }
 
 .location-input::placeholder {
@@ -81,10 +86,10 @@
 .location-dropdown {
   position: absolute;
   left: 0;
-  width: max-content;
+  max-width: calc(100vw - (var(--page-padding) * 2));  /* Match max-width of wrapper */
+  width: max-content;  /* Allow natural width up to max-width */
   margin-top: var(--dropdown-offset);
   background: transparent;
-  /* transform: translateY(4px); */
 }
 
 /* Hide input border when dropdown is shown */
@@ -103,6 +108,10 @@
   display: block;
   padding: 0;
   margin-top: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;  /* Ensure it respects parent max-width */
   cursor: pointer;
   font-family: var(--font-primary);
   font-weight: var(--font-semibold);
