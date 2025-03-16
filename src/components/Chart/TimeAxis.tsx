@@ -16,18 +16,22 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ timeLabels }) => {
       // Split date into day and time parts
       const [day, time] = label.split(/(?<=\d{1,2}\/\d{1,2})\s+/);
       return (
-        <>
-          <span>{day}</span>
-          <span className="secondary">{time}</span>
-        </>
+        <div role="group" aria-label="Time axis label">
+          <p className="chart-label">
+            <span className="chart-label__day">{day}</span>
+            <span className="chart-label__time" aria-label={`Time: ${time}`}>{time}</span>
+          </p>
+        </div>
       );
     } else {
       // For time-only labels, add a blank line before the time
       return (
-        <>
-          <span>&nbsp;</span>
-          <span className="secondary">{label}</span>
-        </>
+        <div role="group" aria-label="Time axis label">
+          <p className="chart-label">
+            <span>&nbsp;</span>
+            <span className="secondary">{label}</span>
+          </p>
+        </div>
       );
     }
   };

@@ -294,7 +294,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
             </div>
           )}
         </div>
-        <div className="location-stats">
+        <p className="location-stats">
           <span className={`location-stats-text ${selectedLocation && tideError ? 'error' : ''}`}>
             {selectedLocation ? 
               (isLoadingTides ? UI_TEXT.stats.loading :
@@ -312,7 +312,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
                </React.Fragment>
              )) : null}
           </span>
-        </div>
+        </p>
       </div>
     </div>
   )
