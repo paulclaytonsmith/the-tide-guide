@@ -4,11 +4,14 @@
   align-items: flex-end;
   width: 100%;
   border: 2px solid #FFFFFF;
+  gap: 0;
 }
 
 .grid-tile {
-  width: 96px;
-  height: 96px;
+  flex: 1 1 96px;
+  min-width: 0;
+  width: calc(100% / var(--columns));
+  aspect-ratio: 1;
   border: 1px solid #FFFFFF;
   position: relative;
 }
