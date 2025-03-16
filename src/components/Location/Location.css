@@ -24,14 +24,16 @@
   bottom: 0;
   left: 0;
   height: 4px;
-  width: 0;
+  width: 100%;
   background-color: var(--color-blue);
+  transform: scaleX(0);
+  transform-origin: left;
 }
 
 /* When wrapper is initialized, expand underline to full width */
 .location-input-wrapper.initialized .input-underline {
-  width: 100%;
-  transition: width 0.3s ease-out;
+  transform: scaleX(1);
+  transition: transform 0.33s cubic-bezier(.8,0,.2,1);
 }
 
 /* More specific selector to override Google Maps styles */
@@ -86,8 +88,8 @@
 /* Hide input border when dropdown is shown */
 .location-input-wrapper:has(.location-dropdown) {
   .input-underline {
-    width: 0;
-    transition: none; /* Immediately snap to width 0 */
+    transform: scaleX(0);
+    transition: none; /* Immediately snap to hidden state */
   }
 }
 
