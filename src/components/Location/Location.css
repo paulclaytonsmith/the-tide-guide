@@ -22,7 +22,7 @@
 .location-input-wrapper {
   display: inline-block;
   position: relative;
-  min-width: 161px;
+  min-width: 100px;
   max-width: calc(100vw - (var(--page-padding) * 2));  /* Use viewport width instead */
 }
 
