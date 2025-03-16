@@ -1,7 +1,9 @@
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  width: 100%;
   background: var(--color-off-white);
   gap: 48px;
+  overflow: hidden;
 } 
