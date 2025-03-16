@@ -3,20 +3,14 @@
 import React from 'react';
 import './Grid.css';
 
-interface GridProps {
-  columns: number;
-  rows: number;
-}
-
-export const Grid: React.FC<GridProps> = ({ columns, rows }) => {
+export const Grid: React.FC = () => {
   return (
-    <div 
-      className="grid-container"
-      style={{ '--columns': columns } as React.CSSProperties}
-    >
-      {Array.from({ length: columns * rows }).map((_, index) => (
-        <div key={index} className="grid-tile" />
-      ))}
+    <div className="grid-container">
+      <div className="grid">
+        {Array.from({ length: 100 }).map((_, index) => (
+          <div key={index} className="grid-tile" />
+        ))}
+      </div>
     </div>
   );
 }; 

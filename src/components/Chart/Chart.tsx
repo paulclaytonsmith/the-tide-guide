@@ -10,15 +10,13 @@ interface ChartProps {
     label: string;
     isDate?: boolean;
   }[];
-  columns: number;
-  rows: number;
 }
 
-export const Chart: React.FC<ChartProps> = ({ timeLabels, columns, rows }) => {
+export const Chart: React.FC<ChartProps> = ({ timeLabels }) => {
   return (
     <div className="chart-container">
       <TimeAxis timeLabels={timeLabels} />
-      <Grid columns={columns} rows={rows} />
+      <Grid />
     </div>
   );
 }; 

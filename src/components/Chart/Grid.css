@@ -1,38 +1,49 @@
 .grid-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  --tile-size: 100px;
+  --line-color: rgb(255, 255, 255);
+  --center-line-color: rgba(255, 255, 255, 0.66);
+  --line-width: 2px;
+  --center-line-width: 1px;
+  
   width: 100%;
-  border: 2px solid #FFFFFF;
-  gap: 0;
+  flex: 1;
+  padding: 0 48px;
+  display: flex;
+  /* Enable GPU acceleration for the container */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000;
+  will-change: transform;
+}
+
+.grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(var(--tile-size), 1fr));
+  grid-auto-rows: 1fr;
+  overflow: hidden;
+  border: var(--line-width) solid var(--line-color);
+  /* Enable GPU acceleration for the grid */
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 }
 
 .grid-tile {
-  flex: 1 1 96px;
-  min-width: 0;
-  width: calc(100% / var(--columns));
+  min-width: var(--tile-size);
   aspect-ratio: 1;
-  border: 1px solid #FFFFFF;
   position: relative;
-}
-
-.grid-tile::before,
-.grid-tile::after {
-  content: '';
-  position: absolute;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.grid-tile::before {
-  width: 2px;
-  height: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.grid-tile::after {
-  width: 100%;
-  height: 2px;
-  top: 50%;
-  transform: translateY(-50%);
+  background-image: 
+    /* Vertical center lines */
+    linear-gradient(90deg, transparent calc(50% - var(--center-line-width)), var(--center-line-color) calc(50% - var(--center-line-width)), var(--center-line-color) calc(50% + var(--center-line-width)), transparent calc(50% + var(--center-line-width))),
+    /* Horizontal center lines */
+    linear-gradient(180deg, transparent calc(50% - var(--center-line-width)), var(--center-line-color) calc(50% - var(--center-line-width)), var(--center-line-color) calc(50% + var(--center-line-width)), transparent calc(50% + var(--center-line-width)));
+  background-size: 100% 100%;
+  background-position: 0 0;
+  border-right: var(--line-width) solid var(--line-color);
+  border-bottom: var(--line-width) solid var(--line-color);
+  margin-right: calc(var(--line-width) * -1);
+  margin-bottom: calc(var(--line-width) * -1);
+  /* Enable GPU acceleration for tiles */
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
 } 
