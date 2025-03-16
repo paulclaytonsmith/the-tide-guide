@@ -51,10 +51,8 @@ const UI_TEXT = {
 export function Location({ onLocationSelect, isLoadingTides = false, tideError, stationId }: LocationProps) {
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
-  const [hoveredIndex, setHoveredIndex] = useState(-1)
   const [inputValue, setInputValue] = useState("")
   const [showDropdown, setShowDropdown] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
   
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
@@ -140,8 +138,6 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
       return
     }
 
-    setIsLoading(true)
-
     try {
       const results = await new Promise<google.maps.places.AutocompletePrediction[]>((resolve, reject) => {
         autocompleteService.current?.getPlacePredictions(
@@ -163,8 +159,6 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
       setShowDropdown(true)
     } catch (error) {
       setPredictions([])
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -292,8 +286,6 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
                     key={prediction.place_id}
                     className={`location-item ${index === selectedIndex ? 'selected' : ''}`}
                     onClick={() => handleSelect(prediction)}
-                    onMouseEnter={() => setHoveredIndex(index)}
-                    onMouseLeave={() => setHoveredIndex(-1)}
                   >
                     {prediction.description}
                   </li>

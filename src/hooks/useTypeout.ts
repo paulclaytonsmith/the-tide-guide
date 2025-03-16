@@ -25,14 +25,14 @@ export function useTypeout(
   const [displayText, setDisplayText] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const previousKey = useRef(key)
-  const intervalRef = useRef<NodeJS.Timeout>()
-  const initialTimeoutRef = useRef<NodeJS.Timeout>()
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const initialTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const currentLengthRef = useRef(0)
 
   // Reset function to clean up all timers and state
   const reset = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current as NodeJS.Timeout)
-    if (initialTimeoutRef.current) clearTimeout(initialTimeoutRef.current as NodeJS.Timeout)
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (initialTimeoutRef.current) clearTimeout(initialTimeoutRef.current)
     setDisplayText("")
     currentLengthRef.current = 0
     setIsTyping(false)
@@ -84,7 +84,7 @@ export function useTypeout(
     }, initialDelay)
 
     return reset
-  }, [text, numChars, delay, initialDelay, scramble, scrambleAhead, key]) // Add key to dependencies
+  }, [text, numChars, delay, initialDelay, scramble, scrambleAhead, key])
 
   return { displayText, isTyping }
 } 
