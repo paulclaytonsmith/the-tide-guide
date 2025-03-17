@@ -13,13 +13,13 @@ interface TimeAxisProps {
 export const TimeAxis: React.FC<TimeAxisProps> = ({ timeLabels }) => {
   const formatLabel = (label: string, isDate: boolean | undefined) => {
     if (isDate) {
-      // Split date into day and time parts
-      const [day, time] = label.split(/(?<=\d{1,2}\/\d{1,2})\s+/);
+      // Split into date and time parts
+      const [dateStr, timeStr] = label.split('\n');
       return (
         <div role="group" aria-label="Time axis label">
           <p className="chart-label">
-            <span className="chart-label__day">{day}</span>
-            <span className="chart-label__time" aria-label={`Time: ${time}`}>{time}</span>
+            <span className="chart-label__day">{dateStr}</span>
+            <span className="chart-label__time" aria-label={`Time: ${timeStr}`}>{timeStr}</span>
           </p>
         </div>
       );
