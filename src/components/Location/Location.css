@@ -2,15 +2,32 @@
   --input-underline-gap: 8px;    /* Space between input text and underline */
   --stats-top-margin: 12px;      /* Space above stats */
   --dropdown-offset: -12px;      /* Offset for dropdown position */
+  --container-height: 160px;      /* Desktop height */
+  --container-height-open: 270px; /* Desktop open height */
+}
 
+@media (max-width: 767px) {
+  .location-container {
+    --container-height: 130px;     /* Default height for mobile */
+    --container-height-open: 220px; /* Default open height for mobile */
+  }
+}
+
+.location-container{
   width: 100%;
-  height: 150px;
-  min-height: 150px;  /* Add min-height to prevent collapse */
+  height: var(--container-height);
+  min-height: var(--container-height);  /* Add min-height to prevent collapse */
   padding: var(--page-padding) var(--page-padding) 0;
   background: var(--color-off-white);
   display: flex;
   flex-direction: column;
   background-color: lightblue;
+}
+
+/* Increase height when dropdown is open */
+.location-container:has(.location-dropdown) {
+  height: var(--container-height-open);
+  min-height: var(--container-height-open);
 }
 
 .location {
