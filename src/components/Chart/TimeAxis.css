@@ -3,11 +3,13 @@
   justify-content: space-between;
   align-items: flex-end;
   width: 100%;
+  position: relative;
 }
 
 .time-axis-label {
   font-size: 12px;
   text-align: left;
+  white-space: nowrap;
 }
 
 .time-axis-label--date,

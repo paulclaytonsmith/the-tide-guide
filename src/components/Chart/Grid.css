@@ -4,13 +4,20 @@
   --center-line-color: rgba(255, 255, 255, 0.66);
   --line-width: 2px;
   --center-line-width: 1px;
-
+}
   @media (max-width: 768px) {
-    --tile-size: 50px;
+    .grid-container {
+      --tile-size: 50px;
+    }
   }
-  
-  width: 100%;
-  flex: 1;
+
+.grid-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
   padding: 0 var(--page-padding);
   display: flex;
   /* Enable GPU acceleration for the container */
