@@ -1,13 +1,16 @@
 .chart-drawing {
   position: relative;
   width: 100%;
-  height: calc(var(--vh, 1vh) * 50);
-  overflow: hidden;
+  height: 100%;
+  margin-top: auto;
+  overflow: visible;
+  background-color: lightblue;
 }
 
 .chart-drawing svg {
   width: 100%;
-  height: calc(var(--vh, 1vh) * 50);
+  height: 100%;
+  overflow: visible;
 }
 
 .wave-path {

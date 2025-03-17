@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ChartDrawing.css';
 
 interface Point {
@@ -14,19 +14,20 @@ interface ChartDrawingProps {
 }
 
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth * 3, // 300vw
-    height: window.innerHeight * 0.5
+    height: 0 // Will be set after measuring container
   });
 
   useEffect(() => {
     const updateDimensions = () => {
-      const vh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) || window.innerHeight * 0.01;
-      const height = vh * 50; // 50vh equivalent
-      setDimensions({
-        width: window.innerWidth * 3, // 300vw
-        height: height
-      });
+      if (containerRef.current) {
+        setDimensions({
+          width: window.innerWidth * 3, // 300vw
+          height: containerRef.current.clientHeight
+        });
+      }
     };
 
     // Initial update
@@ -88,24 +89,57 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     const maxHeight = Math.max(...data.map(p => p.height));
     const minHeight = Math.min(...data.map(p => p.height));
     const heightRange = maxHeight - minHeight;
-    const heightPadding = heightRange * 0.1; // 10% padding
-    const heightScale = (dimensions.height * 0.8) / (heightRange + heightPadding * 2);
+    
+    // Scale heights to fit full container height
+    const heightScale = dimensions.height / heightRange;
+
+    // Find highest and lowest tides in the filtered set
+    const filteredPoints = data.filter(point => point.time >= startTide.time && point.time <= endTide.time);
+    const lowestTide = filteredPoints.reduce((min, p) => p.height < min.height ? p : min, filteredPoints[0]);
+    const highestTide = filteredPoints.reduce((max, p) => p.height > max.height ? p : max, filteredPoints[0]);
+
+    console.log('Tide Range Debug:', {
+      lowestTide: {
+        height: lowestTide.height,
+        time: lowestTide.time.toLocaleString(),
+        yPos: dimensions.height - ((lowestTide.height - minHeight) * heightScale)
+      },
+      highestTide: {
+        height: highestTide.height,
+        time: highestTide.time.toLocaleString(),
+        yPos: dimensions.height - ((highestTide.height - minHeight) * heightScale)
+      },
+      bounds: {
+        topY: 0,
+        bottomY: dimensions.height,
+        containerHeight: dimensions.height
+      }
+    });
+
+    console.log('All Tides Y Positions:', filteredPoints.map(p => ({
+      height: p.height.toFixed(2),
+      time: p.time.toLocaleString(),
+      yPos: (dimensions.height - ((p.height - minHeight) * heightScale)).toFixed(2),
+      type: p.type
+    })));
 
     // Create path starting from the first point
     const pathPoints = data
       .filter(point => point.time >= startTide.time && point.time <= endTide.time)
       .map((point, i) => {
         const x = leftInset + ((point.time.getTime() - startTide.time.getTime()) * timeScale);
-        const y = dimensions.height - ((point.height - minHeight + heightPadding) * heightScale);
+        // Position y so minHeight = dimensions.height and maxHeight = 0
+        const y = dimensions.height - ((point.height - minHeight) * heightScale);
         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
       });
 
-    // Close the path by adding bottom corners
-    return `${pathPoints.join(' ')} L ${dimensions.width - rightInset} ${dimensions.height} L ${leftInset} ${dimensions.height} Z`;
+    // Close the path by adding bottom corners at the bottom of the drawing area
+    const bottomY = dimensions.height;
+    return `${pathPoints.join(' ')} L ${dimensions.width - rightInset} ${bottomY} L ${leftInset} ${bottomY} Z`;
   };
 
   return (
-    <div className="chart-drawing">
+    <div className="chart-drawing" ref={containerRef}>
       <svg 
         width={dimensions.width} 
         height={dimensions.height} 
