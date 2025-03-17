@@ -112,6 +112,10 @@
 .location-stats-text {
   font-weight: var(--font-regular);
   color: var(--color-dark50);
+  -webkit-touch-callout: none;  /* Disable iOS callout */
+  -webkit-text-fill-color: currentColor;  /* Ensure text color is respected */
+  text-decoration: none !important;  /* Prevent any automatic link styling */
+  pointer-events: none;  /* Prevent interaction with auto-detected content */
 }
 
 .location-stats-text.error {

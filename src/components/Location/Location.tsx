@@ -310,9 +310,10 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
     
     // Pre-calculate the full text to ensure consistent length
     const coords = formatCoordinates(selectedLocation.lat, selectedLocation.lng)
-    const station = `\nStation ${stationId}`
-    return coords + station
-  }, [selectedLocation?.lat, selectedLocation?.lng, stationId]) // Only depend on the specific values we need
+    // Add zero-width space between characters to prevent iOS from detecting as phone number
+    const formattedStationId = stationId.split('').join('\u200B')
+    return coords + `\nStation ${formattedStationId}`
+  }, [selectedLocation?.lat, selectedLocation?.lng, stationId])
 
   // Create a stable key that changes only when we want to restart the animation
   const typeoutKey = useMemo(() => {
