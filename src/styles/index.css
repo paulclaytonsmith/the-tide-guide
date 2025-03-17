@@ -67,6 +67,10 @@ body {
   font-weight: var(--font-regular);
   background-color: var(--color-off-white);
   color: var(--color-dark);
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  touch-action: none; /* Prevents pull-to-refresh and other touch gestures */
 }
 
 /* Make images easier to work with */
