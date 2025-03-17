@@ -4,6 +4,8 @@
   flex: 1;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior-x: none;
+
 }
 
 .chart-scroll-container {
@@ -15,6 +17,9 @@
   z-index: 1;
   overflow-x: scroll;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+
 }
 
 .chart-scroll-content {
@@ -22,13 +27,24 @@
   width: 200vh;
   height: 100%;
   min-width: 100%;
+
 }
 
 .chart {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
   height: 100%;
   width: 100%;
+}
+
+/* Position TimeAxis at top */
+.time-axis {
+  flex: 0 0 auto;
+}
+
+/* Make ChartDrawing stick to bottom */
+.chart-drawing {
+  margin-top: auto;
+  height: calc(var(--vh, 1vh) * 50);
 } 

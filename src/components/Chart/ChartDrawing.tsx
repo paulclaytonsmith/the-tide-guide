@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ChartDrawing.css';
 
 interface Point {
@@ -20,35 +20,61 @@ const dummyData: Point[] = [
 ];
 
 export const ChartDrawing: React.FC = () => {
-  // SVG dimensions - using viewport units
-  const width = window.innerHeight * 2; // 200vh
-  const height = 400;
+  const [dimensions, setDimensions] = useState({
+    width: window.innerHeight * 2,
+    height: window.innerHeight * 0.5
+  });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      const vh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) || window.innerHeight * 0.01;
+      const height = vh * 50; // 50vh equivalent
+      setDimensions({
+        width: window.innerHeight * 2, // 200vh
+        height: height
+      });
+    };
+
+    // Initial update
+    updateDimensions();
+
+    // Update on viewport changes
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
 
   // Scale points to SVG dimensions
   const getScaledPath = () => {
     // Scale time values to width
-    const timeScale = width / (dummyData.length - 1);
+    const timeScale = dimensions.width / (dummyData.length - 1);
     
     // Scale height values to SVG height (leaving some padding)
     const maxHeight = Math.max(...dummyData.map(p => p.height));
     const minHeight = Math.min(...dummyData.map(p => p.height));
     const heightRange = maxHeight - minHeight;
-    const heightScale = (height * 0.6) / heightRange;  // Use 60% of height for wave
+    const heightScale = (dimensions.height * 1) / heightRange;  // Use 100% of height for wave
 
     // Create path starting from the first point
     const pathPoints = dummyData.map((point, i) => {
       const x = point.time * timeScale;
-      const y = height - (point.height - minHeight) * heightScale;
+      const y = dimensions.height - (point.height - minHeight) * heightScale;
       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
     });
 
     // Close the path by adding bottom corners
-    return `${pathPoints.join(' ')} L ${width} ${height} L 0 ${height} Z`;
+    return `${pathPoints.join(' ')} L ${dimensions.width} ${dimensions.height} L 0 ${dimensions.height} Z`;
   };
 
   return (
     <div className="chart-drawing">
-      <svg width={width} height={height} preserveAspectRatio="none">
+      <svg 
+        width={dimensions.width} 
+        height={dimensions.height} 
+        preserveAspectRatio="none"
+      >
         <path
           d={getScaledPath()}
           fill="var(--color-blue)"

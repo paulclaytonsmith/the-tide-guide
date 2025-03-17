@@ -16,9 +16,7 @@ interface ChartProps {
 export const Chart: React.FC<ChartProps> = ({ timeLabels }) => {
   return (
     <div className="chart-container">
-      <div className="chart-grid-wrapper">
-        <Grid />
-      </div>
+      <Grid />
       
       <div className="chart-scroll-container">
         <div className="chart-scroll-content">
