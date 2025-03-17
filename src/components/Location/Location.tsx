@@ -48,12 +48,51 @@ const UI_TEXT = {
   }
 } as const
 
+// Add error boundary at the top of the file
+class LocationErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('[Location] Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="location-container">
+          <div className="location">
+            <div className="location-input-wrapper">
+              <input
+                type="text"
+                className="location-input"
+                placeholder="Location search unavailable"
+                disabled
+              />
+              <div className="input-underline" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export function Location({ onLocationSelect, isLoadingTides = false, tideError, stationId }: LocationProps) {
   const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [inputValue, setInputValue] = useState("")
   const [showDropdown, setShowDropdown] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null)
+  const [showStats, setShowStats] = useState(true)  // New state for controlling stats visibility
   
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
   const placesService = useRef<google.maps.places.PlacesService | null>(null)
@@ -85,45 +124,75 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
   // Effect for initial setup and resize handling
   useEffect(() => {
     const updateWidth = () => {
-      if (inputRef.current && wrapperRef.current) {
+      // Guard against component being unmounted
+      if (!inputRef.current || !wrapperRef.current) return;
+      
+      try {
         // Only skip width update if dropdown is open AND has results
         if (showDropdown && predictions.length > 0) return
         
         // Create a temporary span to measure text width
         const span = document.createElement('span')
-        // Copy all relevant styles that could affect text width
-        const inputStyles = window.getComputedStyle(inputRef.current)
         
-        span.style.font = inputStyles.font
-        span.style.letterSpacing = inputStyles.letterSpacing
-        span.style.visibility = 'hidden'
-        span.style.position = 'absolute'
-        span.style.whiteSpace = 'pre'
+        // Defensive check for getComputedStyle
+        let inputStyles: CSSStyleDeclaration;
+        try {
+          inputStyles = window.getComputedStyle(inputRef.current)
+        } catch (e) {
+          console.error('[Location] Error getting computed style:', e)
+          return
+        }
+        
+        // Set minimal required styles
+        span.style.cssText = `
+          visibility: hidden;
+          position: absolute;
+          white-space: pre;
+          font: ${inputStyles.font};
+          letter-spacing: ${inputStyles.letterSpacing};
+        `
         
         // Use input value or placeholder
         const textToMeasure = inputValue || UI_TEXT.input.placeholder || ''
         span.textContent = textToMeasure
         
-        document.body.appendChild(span)
-        const width = Math.ceil(span.getBoundingClientRect().width)
-        document.body.removeChild(span)
-        
-        // Use exact measured width without padding
-        wrapperRef.current.style.width = `${width}px`
-        wrapperRef.current.classList.add('initialized')
+        // Measure in a try-catch block
+        try {
+          document.body.appendChild(span)
+          const width = Math.ceil(span.getBoundingClientRect().width)
+          document.body.removeChild(span)
+          
+          // Update width only if component is still mounted
+          if (wrapperRef.current) {
+            wrapperRef.current.style.width = `${width}px`
+            wrapperRef.current.classList.add('initialized')
+          }
+        } catch (e) {
+          console.error('[Location] Error measuring text:', e)
+          if (document.body.contains(span)) {
+            document.body.removeChild(span)
+          }
+        }
+      } catch (e) {
+        console.error('[Location] Error in updateWidth:', e)
       }
     }
 
-    // Initial update with a small delay to ensure styles are loaded
-    const initialTimeoutId = setTimeout(() => {
-      updateWidth()
-    }, 33)  // Increased delay to ensure styles are loaded
+    // Debounce the width update
+    const timeoutId = setTimeout(updateWidth, 50)
     
-    // Update on window resize
-    window.addEventListener('resize', updateWidth)
+    // Update on window resize with debounce
+    let resizeTimeoutId: NodeJS.Timeout
+    const handleResize = () => {
+      clearTimeout(resizeTimeoutId)
+      resizeTimeoutId = setTimeout(updateWidth, 100)
+    }
+    
+    window.addEventListener('resize', handleResize)
     return () => {
-      window.removeEventListener('resize', updateWidth)
-      clearTimeout(initialTimeoutId)
+      window.removeEventListener('resize', handleResize)
+      clearTimeout(timeoutId)
+      clearTimeout(resizeTimeoutId)
     }
   }, [inputValue, showDropdown, predictions.length])
 
@@ -191,7 +260,7 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
         inputRef.current?.blur()
       }
     } catch (error) {
-      // Error handling for place details
+      // Silently handle error
     }
   }
 
@@ -263,65 +332,104 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
     typeoutKey
   )
   
+  // Modify the focus handler to be more defensive
+  const handleFocus = () => {
+    if (!selectedLocation) return;
+    
+    // First hide the stats component
+    setShowStats(false)
+    
+    // Then clear other states after a short delay
+    setTimeout(() => {
+      setPredictions([])
+      setShowDropdown(false)
+      setSelectedLocation(null)
+      setInputValue("")
+      
+      // Finally show the stats again
+      setTimeout(() => {
+        setShowStats(true)
+      }, 100)
+    }, 50)
+  }
+
+  // Wrap the stats text rendering in error boundary and add defensive checks
+  const renderStats = () => {
+    try {
+      if (selectedLocation) {
+        if (isLoadingTides) return UI_TEXT.stats.loading
+        if (tideError) return UI_TEXT.stats.error
+        
+        // Only attempt typeout if we have valid data
+        if (typeoutStats && typeof typeoutStats === 'string') {
+          return typeoutStats.split('\n').map((line, index) => (
+            <React.Fragment key={`${typeoutKey}-${index}`}>
+              {index > 0 && <br />}
+              {line}
+            </React.Fragment>
+          ))
+        }
+        return null
+      }
+      
+      if (!inputValue && typeoutPlaceholder && typeof typeoutPlaceholder === 'string') {
+        return typeoutPlaceholder.split('\n').map((line, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <br />}
+            {line}
+          </React.Fragment>
+        ))
+      }
+      
+      return null
+    } catch (error) {
+      console.error('[Location] Error rendering stats:', error)
+      return null
+    }
+  }
+
+  // Wrap the entire component in error boundary
   return (
-    <div className="location-container">
-      <div className="location">
-        <div className="location-input-wrapper" ref={wrapperRef}>
-          <input
-            ref={inputRef}
-            type="text"
-            className="location-input"
-            placeholder={UI_TEXT.input.placeholder}
-            value={inputValue}
-            onChange={(e) => handleInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              if (selectedLocation) {
-                setInputValue("")
-                setSelectedLocation(null)
-              }
-              if (inputValue) {
-                setShowDropdown(true)
-              }
-            }}
-          />
-          <div className="input-underline" />
-          {showDropdown && predictions.length > 0 && (
-            <div className="location-dropdown">
-              <ul className="location-list">
-                {predictions.map((prediction, index) => (
-                  <li
-                    key={prediction.place_id}
-                    className={`location-item ${index === selectedIndex ? 'selected' : ''}`}
-                    onClick={() => handleSelect(prediction)}
-                  >
-                    {prediction.description}
-                  </li>
-                ))}
-              </ul>
-            </div>
+    <LocationErrorBoundary>
+      <div className="location-container">
+        <div className="location">
+          <div className="location-input-wrapper" ref={wrapperRef}>
+            <input
+              ref={inputRef}
+              type="text"
+              className="location-input"
+              placeholder={UI_TEXT.input.placeholder}
+              value={inputValue}
+              onChange={(e) => handleInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={handleFocus}
+            />
+            <div className="input-underline" />
+            {showDropdown && predictions.length > 0 && (
+              <div className="location-dropdown">
+                <ul className="location-list">
+                  {predictions.map((prediction, index) => (
+                    <li
+                      key={prediction.place_id}
+                      className={`location-item ${index === selectedIndex ? 'selected' : ''}`}
+                      onClick={() => handleSelect(prediction)}
+                    >
+                      {prediction.description}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          {showStats && (
+            <p className="location-stats">
+              <span className={`location-stats-text ${selectedLocation && tideError ? 'error' : ''}`}>
+                {renderStats()}
+              </span>
+            </p>
           )}
         </div>
-        <p className="location-stats">
-          <span className={`location-stats-text ${selectedLocation && tideError ? 'error' : ''}`}>
-            {selectedLocation ? 
-              (isLoadingTides ? UI_TEXT.stats.loading :
-               tideError ? UI_TEXT.stats.error :
-               typeoutStats.split('\n').map((line, index) => (
-                 <React.Fragment key={`${typeoutKey}-${index}`}>
-                   {index > 0 && <br />}
-                   {line}
-                 </React.Fragment>
-               ))) :
-             !inputValue ? typeoutPlaceholder.split('\n').map((line, index) => (
-               <React.Fragment key={index}>
-                 {index > 0 && <br />}
-                 {line}
-               </React.Fragment>
-             )) : null}
-          </span>
-        </p>
       </div>
-    </div>
+    </LocationErrorBoundary>
   )
 } 
