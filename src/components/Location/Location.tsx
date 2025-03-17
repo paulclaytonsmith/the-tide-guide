@@ -275,7 +275,15 @@ export function Location({ onLocationSelect, isLoadingTides = false, tideError, 
             value={inputValue}
             onChange={(e) => handleInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={() => inputValue && setShowDropdown(true)}
+            onFocus={() => {
+              if (selectedLocation) {
+                setInputValue("")
+                setSelectedLocation(null)
+              }
+              if (inputValue) {
+                setShowDropdown(true)
+              }
+            }}
           />
           <div className="input-underline" />
           {showDropdown && predictions.length > 0 && (
