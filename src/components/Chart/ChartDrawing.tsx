@@ -13,9 +13,9 @@ interface ChartDrawingProps {
   data: Point[];
 }
 
-const RANGE_MULTIPLIER = 2;           // Extends range 3x in both directions
-const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing
-const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing
+const RANGE_MULTIPLIER = 2;           // Extends range in both directions
+const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing in pixels
+const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing in percentage of chart height
 
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -119,38 +119,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     const filteredPoints = data.filter(point => point.time >= startTide.time && point.time <= endTide.time);
     const lowestTide = filteredPoints.reduce((min, p) => p.height < min.height ? p : min, filteredPoints[0]);
     const highestTide = filteredPoints.reduce((max, p) => p.height > max.height ? p : max, filteredPoints[0]);
-
-    console.log('Tide Range Debug:', {
-      lowestTide: {
-        height: lowestTide.height,
-        time: lowestTide.time.toLocaleString(),
-        yPos: calculateYPosition(lowestTide.height)
-      },
-      highestTide: {
-        height: highestTide.height,
-        time: highestTide.time.toLocaleString(),
-        yPos: calculateYPosition(highestTide.height)
-      },
-      bounds: {
-        displayMin,
-        displayMax,
-        actualMin: minHeight,
-        actualMax: maxHeight,
-        multiplier: RANGE_MULTIPLIER,
-        rangeExtension,
-        topOffset: TOP_OFFSET_HEIGHT,
-        bottomOffset,
-        availableHeight,
-        containerHeight: dimensions.height
-      }
-    });
-
-    console.log('All Tides Y Positions:', filteredPoints.map(p => ({
-      height: p.height.toFixed(2),
-      time: p.time.toLocaleString(),
-      yPos: calculateYPosition(p.height).toFixed(2),
-      type: p.type
-    })));
 
     // Create path starting from the first point
     const pathPoints = data
