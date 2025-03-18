@@ -142,11 +142,11 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
 
     if (!hiloData || !hourlyData) return null
 
-    // Get 6 PM timestamps for filtering
+    // Get 9 PM to 3 AM timestamps for filtering
     const startTimestamp = new Date(startDate)
-    startTimestamp.setHours(18, 0, 0, 0)
+    startTimestamp.setHours(21, 0, 0, 0)  // 9 PM
     const endTimestamp = new Date(endDate)
-    endTimestamp.setHours(18, 0, 0, 0)
+    endTimestamp.setHours(3, 0, 0, 0)  // 3 AM
 
     // Combine predictions and filter to our desired time range
     return [...hiloData, ...hourlyData]

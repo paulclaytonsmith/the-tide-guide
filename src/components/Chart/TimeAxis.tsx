@@ -3,6 +3,8 @@
 import React from 'react';
 import './TimeAxis.css';
 
+const LABEL_FREQUENCY = 6; // Hours between each label
+
 interface Point {
   time: Date;
   height: number;
@@ -19,17 +21,16 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime }) 
   const generateTimeLabels = () => {
     const labels = [];
     
-    // Start at midnight of the day of startTime
+    // Start at the first LABEL_FREQUENCY-hour mark after startTime
     const firstLabel = new Date(startTime);
-    firstLabel.setHours(0, 0, 0, 0);
+    // Round up to next LABEL_FREQUENCY-hour mark
+    const currentHour = firstLabel.getHours();
+    const hoursToNext = (LABEL_FREQUENCY - (currentHour % LABEL_FREQUENCY)) % LABEL_FREQUENCY;
+    firstLabel.setMinutes(0, 0, 0); // Reset minutes and seconds
+    firstLabel.setHours(currentHour + hoursToNext);
     
-    // If we're not already at midnight of the previous day, go back one day
-    if (firstLabel.getTime() > startTime.getTime()) {
-      firstLabel.setDate(firstLabel.getDate() - 1);
-    }
-    
-    // Generate labels every 6 hours until we reach endTime
-    for (let time = new Date(firstLabel); time <= endTime; time = new Date(time.getTime() + (6 * 60 * 60 * 1000))) {
+    // Generate labels every LABEL_FREQUENCY hours until we reach endTime
+    for (let time = new Date(firstLabel); time <= endTime; time = new Date(time.getTime() + (LABEL_FREQUENCY * 60 * 60 * 1000))) {
       const isMidnight = time.getHours() === 0;
       labels.push({
         time: new Date(time),
@@ -61,11 +62,12 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime }) 
       {timeLabels.map((label, index) => (
         <span 
           key={index}
-          className={`time-axis-label ${label.isMidnight ? 'time-axis-label--date' : 'time-axis-label--time'}`}
+          className={`time-axis-label ${label.isMidnight ? 'time-axis-label--date' : 'time-axis-label--time'} ${
+            index === 0 || index === timeLabels.length - 1 ? 'time-axis-label--edge' : ''
+          }`}
           style={{
             position: 'absolute',
             left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * 100}%`,
-            transform: 'translateX(-50%)'
           }}
         >
           {formatLabel(label.dateLabel, label.timeLabel, label.isMidnight)}

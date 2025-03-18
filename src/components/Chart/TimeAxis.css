@@ -13,7 +13,6 @@
   text-align: left;
   white-space: nowrap;
   position: absolute;
-  transform: translateX(-50%);
 }
 
 .time-axis-label--date,
