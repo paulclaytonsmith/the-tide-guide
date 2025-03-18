@@ -13,6 +13,10 @@ interface ChartDrawingProps {
   data: Point[];
 }
 
+const RANGE_MULTIPLIER = 2;           // Extends range 3x in both directions
+const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing
+const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing
+
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
@@ -85,13 +89,31 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     // Scale time values to width, using actual tide points instead of midnight
     const timeScale = drawingWidth / (endTide.time.getTime() - startTide.time.getTime());
     
-    // Scale height values to SVG height
+    // Scale height values to SVG height with multiplier
     const maxHeight = Math.max(...data.map(p => p.height));
     const minHeight = Math.min(...data.map(p => p.height));
-    const heightRange = maxHeight - minHeight;
+    const actualRange = maxHeight - minHeight;
     
-    // Scale heights to fit full container height
-    const heightScale = dimensions.height / heightRange;
+    // Calculate the extended range
+    const rangeExtension = (actualRange * (RANGE_MULTIPLIER - 1)) / 2;
+    const displayMin = minHeight - rangeExtension;
+    const displayMax = maxHeight + rangeExtension;
+    const heightRange = displayMax - displayMin;
+    
+    // Calculate available drawing height after offsets
+    const bottomOffset = dimensions.height * BOTTOM_OFFSET_PERCENTAGE;
+    const availableHeight = dimensions.height - TOP_OFFSET_HEIGHT - bottomOffset;
+    
+    // Scale heights to fit available drawing height
+    const heightScale = availableHeight / heightRange;
+
+    // Helper function to calculate y position with offsets
+    const calculateYPosition = (height: number) => {
+      // First scale the height to the available drawing space
+      const scaledHeight = (height - displayMin) * heightScale;
+      // Then position it with the top offset
+      return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
+    };
 
     // Find highest and lowest tides in the filtered set
     const filteredPoints = data.filter(point => point.time >= startTide.time && point.time <= endTide.time);
@@ -102,16 +124,23 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
       lowestTide: {
         height: lowestTide.height,
         time: lowestTide.time.toLocaleString(),
-        yPos: dimensions.height - ((lowestTide.height - minHeight) * heightScale)
+        yPos: calculateYPosition(lowestTide.height)
       },
       highestTide: {
         height: highestTide.height,
         time: highestTide.time.toLocaleString(),
-        yPos: dimensions.height - ((highestTide.height - minHeight) * heightScale)
+        yPos: calculateYPosition(highestTide.height)
       },
       bounds: {
-        topY: 0,
-        bottomY: dimensions.height,
+        displayMin,
+        displayMax,
+        actualMin: minHeight,
+        actualMax: maxHeight,
+        multiplier: RANGE_MULTIPLIER,
+        rangeExtension,
+        topOffset: TOP_OFFSET_HEIGHT,
+        bottomOffset,
+        availableHeight,
         containerHeight: dimensions.height
       }
     });
@@ -119,7 +148,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     console.log('All Tides Y Positions:', filteredPoints.map(p => ({
       height: p.height.toFixed(2),
       time: p.time.toLocaleString(),
-      yPos: (dimensions.height - ((p.height - minHeight) * heightScale)).toFixed(2),
+      yPos: calculateYPosition(p.height).toFixed(2),
       type: p.type
     })));
 
@@ -128,8 +157,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
       .filter(point => point.time >= startTide.time && point.time <= endTide.time)
       .map((point, i) => {
         const x = leftInset + ((point.time.getTime() - startTide.time.getTime()) * timeScale);
-        // Position y so minHeight = dimensions.height and maxHeight = 0
-        const y = dimensions.height - ((point.height - minHeight) * heightScale);
+        const y = calculateYPosition(point.height);
         return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
       });
 
