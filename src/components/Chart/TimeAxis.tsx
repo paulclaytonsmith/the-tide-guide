@@ -59,33 +59,36 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
   const timeLabels = generateTimeLabels();
   const timeRange = endTime.getTime() - startTime.getTime();
 
-  const formatLabel = (dateLabel: string, timeLabel: string, isMidnight: boolean) => {
-    return (
-      <div role="group" aria-label="Time axis label">
-        <p className="chart-label">
-          {dateLabel && <span className="chart-label__day">{dateLabel}</span>}
-          <span className={isMidnight ? "chart-label__day" : "secondary"}>{timeLabel}</span>
-        </p>
-      </div>
-    );
-  };
-
   return (
     <div className="time-axis">
-      {timeLabels.map((label, index) => (
-        <span 
-          key={index}
-          className={`time-axis-label ${label.isMidnight ? 'time-axis-label--date' : 'time-axis-label--time'} ${
-            index === 0 || index === timeLabels.length - 1 ? 'time-axis-label--edge' : ''
-          }`}
-          style={{
-            position: 'absolute',
-            left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
-          }}
-        >
-          {formatLabel(label.dateLabel, label.timeLabel, label.isMidnight)}
-        </span>
-      ))}
+      <div className="time-axis__dates">
+        {timeLabels.filter(label => label.isMidnight).map((label, index) => (
+          <p 
+            key={`date-${index}`}
+            className="time-axis-label chart-label"
+            style={{
+              position: 'absolute',
+              left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
+            }}
+          >
+            {label.dateLabel}
+          </p>
+        ))}
+      </div>
+      <div className="time-axis__times">
+        {timeLabels.map((label, index) => (
+          <p 
+            key={index}
+            className="time-axis-label chart-label"
+            style={{
+              position: 'absolute',
+              left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
+            }}
+          >
+            {label.timeLabel}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }; 
