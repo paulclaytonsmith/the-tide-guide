@@ -6,6 +6,8 @@ interface Station {
   distance: number
 }
 
+const DAYS_TO_DISPLAY = 3; // Number of days to show in the chart, including today
+
 interface TidePrediction {
   t: string  // time
   v: string  // height
@@ -95,11 +97,12 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   
-  // Calculate yesterday and end date based on local today
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  // Calculate yesterday and end date
+  const startDate = new Date(today)
+  startDate.setDate(startDate.getDate() - 1)  // Go to yesterday
+  
   const endDate = new Date(today)
-  endDate.setDate(endDate.getDate() + 4) // Extended to day+4 to match chart range
+  endDate.setDate(endDate.getDate() + DAYS_TO_DISPLAY)
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
@@ -110,7 +113,7 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
     const url = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
     url.searchParams.set("product", "predictions")
     url.searchParams.set("application", "tide_near")
-    url.searchParams.set("begin_date", formatDate(yesterday))
+    url.searchParams.set("begin_date", formatDate(startDate))
     url.searchParams.set("end_date", formatDate(endDate))
     url.searchParams.set("datum", "MLLW")
     url.searchParams.set("station", stationId)
@@ -139,10 +142,19 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
 
     if (!hiloData || !hourlyData) return null
 
-    // Combine and sort all predictions
-    return [...hiloData, ...hourlyData].sort((a, b) => 
-      new Date(a.t).getTime() - new Date(b.t).getTime()
-    )
+    // Get 6 PM timestamps for filtering
+    const startTimestamp = new Date(startDate)
+    startTimestamp.setHours(18, 0, 0, 0)
+    const endTimestamp = new Date(endDate)
+    endTimestamp.setHours(18, 0, 0, 0)
+
+    // Combine predictions and filter to our desired time range
+    return [...hiloData, ...hourlyData]
+      .sort((a, b) => new Date(a.t).getTime() - new Date(b.t).getTime())
+      .filter(prediction => {
+        const predTime = new Date(prediction.t)
+        return predTime >= startTimestamp && predTime <= endTimestamp
+      })
   } catch (error) {
     console.error("Error fetching predictions:", error)
     return null
