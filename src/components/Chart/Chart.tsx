@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
+import { TideLabels } from './TideLabels';
 import './Chart.css';
 
 interface Point {
@@ -78,10 +79,16 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
               endTime={endTime}
               contentWidth={contentWidth}
             />
-            <ChartDrawing 
-              data={tideData}
-              contentWidth={contentWidth}
-            />
+            <div className="chart-overlay-container">
+              <ChartDrawing 
+                data={tideData}
+                contentWidth={contentWidth}
+              />
+              <TideLabels
+                data={tideData}
+                contentWidth={contentWidth}
+              />
+            </div>
           </div>
         </div>
       </div>

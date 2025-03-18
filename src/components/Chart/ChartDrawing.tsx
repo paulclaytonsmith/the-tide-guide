@@ -90,9 +90,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
     // Start at the bottom left
     pathPoints.push(`M 0 ${dimensions.height}`);
 
-    // Tension controls how smooth the curve is (0 to 1, lower = smoother)
-    const tension = 0.3;
-
     if (sortedData.length > 0) {
       // Move to first point
       const firstPoint = sortedData[0];
@@ -205,26 +202,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
                   stroke="var(--color-blue)" 
                   strokeWidth="2"
                 />
-                <text
-                  x={x}
-                  y={y - 20}
-                  textAnchor="middle"
-                  fill="var(--color-text)"
-                  fontSize="12"
-                  fontFamily="monospace"
-                >
-                  {time}
-                </text>
-                <text
-                  x={x}
-                  y={y - 8}
-                  textAnchor="middle"
-                  fill="var(--color-text)"
-                  fontSize="12"
-                  fontFamily="monospace"
-                >
-                  {`${point.height.toFixed(1)}'`}
-                </text>
               </g>
             );
           })}
