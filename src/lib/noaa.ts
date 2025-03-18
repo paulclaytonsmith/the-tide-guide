@@ -9,7 +9,7 @@ interface Station {
 interface TidePrediction {
   t: string  // time
   v: string  // height
-  type: "H" | "L"  // high or low tide
+  type: "H" | "L" | null  // high, low, or hourly (null)
 }
 
 interface TidePredictions {
@@ -22,7 +22,7 @@ export interface TideData {
   predictions: Array<{
     time: Date
     height: number
-    type: "High" | "Low"
+    type: "High" | "Low" | "Hourly"
   }>
 }
 
@@ -99,31 +99,52 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
   const endDate = new Date(today)
-  endDate.setDate(endDate.getDate() + 3)
+  endDate.setDate(endDate.getDate() + 4) // Extended to day+4 to match chart range
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
   }
 
-  const url = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
-  url.searchParams.set("product", "predictions")
-  url.searchParams.set("application", "tide_near")
-  url.searchParams.set("begin_date", formatDate(yesterday))
-  url.searchParams.set("end_date", formatDate(endDate))
-  url.searchParams.set("datum", "MLLW")
-  url.searchParams.set("station", stationId)
-  url.searchParams.set("time_zone", "lst_ldt")  // This ensures times are in station's local time
-  url.searchParams.set("units", "english")
-  url.searchParams.set("interval", "hilo")
-  url.searchParams.set("format", "json")
+  // Fetch both high/low and hourly predictions
+  const fetchPredictions = async (interval: "hilo" | "h") => {
+    const url = new URL("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter")
+    url.searchParams.set("product", "predictions")
+    url.searchParams.set("application", "tide_near")
+    url.searchParams.set("begin_date", formatDate(yesterday))
+    url.searchParams.set("end_date", formatDate(endDate))
+    url.searchParams.set("datum", "MLLW")
+    url.searchParams.set("station", stationId)
+    url.searchParams.set("time_zone", "lst_ldt")
+    url.searchParams.set("units", "english")
+    url.searchParams.set("interval", interval)
+    url.searchParams.set("format", "json")
+
+    try {
+      const response = await fetch(url.toString())
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+      const data = await response.json() as TidePredictions
+      return data.predictions || null
+    } catch (error) {
+      console.error(`Error fetching ${interval} predictions:`, error)
+      return null
+    }
+  }
 
   try {
-    const response = await fetch(url.toString())
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-    const data = await response.json() as TidePredictions
-    return data.predictions || null
+    // Fetch both types of predictions concurrently
+    const [hiloData, hourlyData] = await Promise.all([
+      fetchPredictions("hilo"),
+      fetchPredictions("h")
+    ])
+
+    if (!hiloData || !hourlyData) return null
+
+    // Combine and sort all predictions
+    return [...hiloData, ...hourlyData].sort((a, b) => 
+      new Date(a.t).getTime() - new Date(b.t).getTime()
+    )
   } catch (error) {
-    console.error("Error fetching tide predictions:", error)
+    console.error("Error fetching predictions:", error)
     return null
   }
 }
@@ -141,7 +162,7 @@ export async function getTidePredictions(lat: number, lon: number): Promise<Tide
     predictions: predictions.map(p => ({
       time: new Date(p.t),
       height: parseFloat(p.v),
-      type: p.type === "H" ? "High" : "Low"
+      type: p.type === "H" ? "High" : p.type === "L" ? "Low" : "Hourly"
     }))
   }
 } 

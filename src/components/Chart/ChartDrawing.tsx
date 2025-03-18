@@ -6,7 +6,7 @@ import './ChartDrawing.css';
 interface Point {
   time: Date;
   height: number;
-  type: "High" | "Low";
+  type: "High" | "Low" | "Hourly";
 }
 
 interface ChartDrawingProps {
@@ -89,9 +89,14 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     // Scale time values to width, using actual tide points instead of midnight
     const timeScale = drawingWidth / (endTide.time.getTime() - startTide.time.getTime());
     
+    // Get all points within our time range
+    const filteredPoints = data.filter(point => 
+      point.time >= startTide.time && point.time <= endTide.time
+    );
+    
     // Scale height values to SVG height with multiplier
-    const maxHeight = Math.max(...data.map(p => p.height));
-    const minHeight = Math.min(...data.map(p => p.height));
+    const maxHeight = Math.max(...filteredPoints.map(p => p.height));
+    const minHeight = Math.min(...filteredPoints.map(p => p.height));
     const actualRange = maxHeight - minHeight;
     
     // Calculate the extended range
@@ -115,19 +120,12 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
       return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
     };
 
-    // Find highest and lowest tides in the filtered set
-    const filteredPoints = data.filter(point => point.time >= startTide.time && point.time <= endTide.time);
-    const lowestTide = filteredPoints.reduce((min, p) => p.height < min.height ? p : min, filteredPoints[0]);
-    const highestTide = filteredPoints.reduce((max, p) => p.height > max.height ? p : max, filteredPoints[0]);
-
     // Create path starting from the first point
-    const pathPoints = data
-      .filter(point => point.time >= startTide.time && point.time <= endTide.time)
-      .map((point, i) => {
-        const x = leftInset + ((point.time.getTime() - startTide.time.getTime()) * timeScale);
-        const y = calculateYPosition(point.height);
-        return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-      });
+    const pathPoints = filteredPoints.map((point, i) => {
+      const x = leftInset + ((point.time.getTime() - startTide.time.getTime()) * timeScale);
+      const y = calculateYPosition(point.height);
+      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+    });
 
     // Close the path by adding bottom corners at the bottom of the drawing area
     const bottomY = dimensions.height;
