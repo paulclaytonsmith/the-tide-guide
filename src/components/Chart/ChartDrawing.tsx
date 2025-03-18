@@ -49,49 +49,44 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
   const getScaledPath = () => {
     if (data.length === 0) return '';
 
-    // Get time range (yesterday midnight to day+4 midnight)
+    // Get time range
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    const fourDaysAfter = new Date(today);
-    fourDaysAfter.setDate(fourDaysAfter.getDate() + 4);
+    const threeDaysAfter = new Date(today);
+    threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
 
-    // Total time range (for calculating insets)
-    const totalTimeRange = fourDaysAfter.getTime() - yesterday.getTime();
+    // Get yesterday's tides
+    const yesterdayTides = data.filter(point => 
+      point.time >= yesterday && point.time < today
+    ).sort((a, b) => a.time.getTime() - b.time.getTime());
 
-    // Find the second to last tide from yesterday
-    const yesterdayTides = data.filter(d => 
-      d.time >= yesterday && d.time < today
-    );
-    const startTide = yesterdayTides.length > 1 
+    // Get the second to last tide from yesterday
+    const startFromTide = yesterdayTides.length > 1 
       ? yesterdayTides[yesterdayTides.length - 2] 
       : yesterdayTides[0];
 
-    // Find the second tide of day+3
-    const threeDaysAfter = new Date(today);
-    threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
-    const day3Tides = data.filter(d => 
-      d.time.getTime() >= threeDaysAfter.getTime() && 
-      d.time.getTime() < threeDaysAfter.getTime() + (24 * 60 * 60 * 1000)
-    );
-    const endTide = day3Tides.length > 1 ? day3Tides[1] : day3Tides[0];
+    // Get day+3 tides
+    const day3Tides = data.filter(point => 
+      point.time.getTime() >= threeDaysAfter.getTime() && 
+      point.time.getTime() < threeDaysAfter.getTime() + (24 * 60 * 60 * 1000)
+    ).slice(0, 2);
 
-    if (!startTide || !endTide) return '';
+    // Filter points to match reference implementation's range
+    const filteredPoints = startFromTide 
+      ? data.filter(point => 
+          point.time >= startFromTide.time && 
+          (day3Tides.length === 0 || point.time <= day3Tides[day3Tides.length - 1].time)
+        ).sort((a, b) => a.time.getTime() - b.time.getTime())
+      : [];
 
-    // Calculate insets as percentages of total width
-    const leftInset = ((startTide.time.getTime() - yesterday.getTime()) / totalTimeRange) * dimensions.width;
-    const rightInset = ((fourDaysAfter.getTime() - endTide.time.getTime()) / totalTimeRange) * dimensions.width;
-
-    // Available width for drawing (total width minus insets)
-    const drawingWidth = dimensions.width - (leftInset + rightInset);
-
-    // Scale time values to width, using actual tide points instead of midnight
-    const timeScale = drawingWidth / (endTide.time.getTime() - startTide.time.getTime());
+    if (filteredPoints.length === 0) return '';
     
-    // Get all points within our time range
-    const filteredPoints = data.filter(point => 
-      point.time >= startTide.time && point.time <= endTide.time
+    // Scale time values to width
+    const timeScale = dimensions.width / (
+      (day3Tides.length > 0 ? day3Tides[day3Tides.length - 1].time.getTime() : threeDaysAfter.getTime()) - 
+      (startFromTide ? startFromTide.time.getTime() : yesterday.getTime())
     );
     
     // Scale height values to SVG height with multiplier
@@ -121,15 +116,25 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     };
 
     // Create path starting from the first point
-    const pathPoints = filteredPoints.map((point, i) => {
-      const x = leftInset + ((point.time.getTime() - startTide.time.getTime()) * timeScale);
+    const pathPoints = [];
+    
+    // Start at the bottom left
+    pathPoints.push(`M 0 ${dimensions.height}`);
+    
+    // Add all the tide points
+    filteredPoints.forEach(point => {
+      const x = (point.time.getTime() - (startFromTide ? startFromTide.time.getTime() : yesterday.getTime())) * timeScale;
       const y = calculateYPosition(point.height);
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+      pathPoints.push(`L ${x} ${y}`);
     });
-
-    // Close the path by adding bottom corners at the bottom of the drawing area
+    
+    // Add bottom right point and close the path
     const bottomY = dimensions.height;
-    return `${pathPoints.join(' ')} L ${dimensions.width - rightInset} ${bottomY} L ${leftInset} ${bottomY} Z`;
+    pathPoints.push(`L ${dimensions.width} ${bottomY}`);
+    pathPoints.push(`L 0 ${bottomY}`);
+    pathPoints.push('Z');
+
+    return pathPoints.join(' ');
   };
 
   return (
