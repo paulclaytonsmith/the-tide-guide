@@ -96,13 +96,18 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   // Get today at midnight in local time
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+  console.log('NOAA - Today midnight:', today.toLocaleString())
   
   // Calculate yesterday and end date
   const startDate = new Date(today)
   startDate.setDate(startDate.getDate() - 1)  // Go to yesterday
+  console.log('NOAA - Start date:', startDate.toLocaleString())
   
+  // Set end date to midnight of day+3 instead of end of day+3
   const endDate = new Date(today)
   endDate.setDate(endDate.getDate() + DAYS_TO_DISPLAY)
+  endDate.setHours(0, 0, 0, 0)  // Set to midnight
+  console.log('NOAA - End date for API:', endDate.toLocaleString())
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
@@ -142,19 +147,30 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
 
     if (!hiloData || !hourlyData) return null
 
-    // Get 9 PM to 3 AM timestamps for filtering
+    // Get exact times for the range start and end
     const startTimestamp = new Date(startDate)
-    startTimestamp.setHours(21, 0, 0, 0)  // 9 PM
-    const endTimestamp = new Date(endDate)
-    endTimestamp.setHours(3, 0, 0, 0)  // 3 AM
-
+    startTimestamp.setHours(21, 0, 0, 0)  // Start at 9 PM yesterday
+    const endTimestamp = new Date(endDate)  // ends at midnight of last day
+    console.log('NOAA - Filtering range:', {
+      start: startTimestamp.toLocaleString(),
+      end: endTimestamp.toLocaleString()
+    })
+    
     // Combine predictions and filter to our desired time range
-    return [...hiloData, ...hourlyData]
+    const filtered = [...hiloData, ...hourlyData]
       .sort((a, b) => new Date(a.t).getTime() - new Date(b.t).getTime())
       .filter(prediction => {
         const predTime = new Date(prediction.t)
         return predTime >= startTimestamp && predTime <= endTimestamp
       })
+
+    console.log('NOAA - Filtered data range:', {
+      start: new Date(filtered[0].t).toLocaleString(),
+      end: new Date(filtered[filtered.length - 1].t).toLocaleString(),
+      count: filtered.length
+    })
+
+    return filtered
   } catch (error) {
     console.error("Error fetching predictions:", error)
     return null

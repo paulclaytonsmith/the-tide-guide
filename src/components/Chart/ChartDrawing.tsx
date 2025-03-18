@@ -11,16 +11,17 @@ interface Point {
 
 interface ChartDrawingProps {
   data: Point[];
+  contentWidth: number;
 }
 
 const RANGE_MULTIPLIER = 2;           // Extends range in both directions
 const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing in pixels
 const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing in percentage of chart height
 
-export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
+export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
-    width: window.innerWidth * 3, // 300vw
+    width: (window.innerWidth * contentWidth) / 100, // Convert vw to pixels
     height: 0 // Will be set after measuring container
   });
 
@@ -28,7 +29,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     const updateDimensions = () => {
       if (containerRef.current) {
         setDimensions({
-          width: window.innerWidth * 3, // 300vw
+          width: (window.innerWidth * contentWidth) / 100, // Convert vw to pixels
           height: containerRef.current.clientHeight
         });
       }
@@ -43,7 +44,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     return () => {
       window.removeEventListener('resize', updateDimensions);
     };
-  }, []);
+  }, [contentWidth]);
 
   // Scale points to SVG dimensions
   const getScaledPath = () => {

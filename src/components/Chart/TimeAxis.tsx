@@ -15,9 +15,16 @@ interface TimeAxisProps {
   data: Point[];
   startTime: Date;
   endTime: Date;
+  contentWidth: number;  // Add this prop to receive the total width
 }
 
-export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime }) => {
+export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, contentWidth }) => {
+  console.log('TimeAxis - Props:', {
+    start: startTime.toLocaleString(),
+    end: endTime.toLocaleString(),
+    dataPoints: data.length
+  });
+
   const generateTimeLabels = () => {
     const labels = [];
     
@@ -29,8 +36,14 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime }) 
     firstLabel.setMinutes(0, 0, 0); // Reset minutes and seconds
     firstLabel.setHours(currentHour + hoursToNext);
     
-    // Generate labels every LABEL_FREQUENCY hours until we reach endTime
-    for (let time = new Date(firstLabel); time <= endTime; time = new Date(time.getTime() + (LABEL_FREQUENCY * 60 * 60 * 1000))) {
+    // Get the midnight of the last day (which we don't want to include)
+    const lastDayMidnight = new Date(endTime);
+    lastDayMidnight.setHours(0, 0, 0, 0);
+    
+    // Generate labels every LABEL_FREQUENCY hours until we reach the last day's midnight (exclusive)
+    for (let time = new Date(firstLabel); 
+         time < lastDayMidnight;  // Changed to < instead of <= to exclude the last midnight
+         time = new Date(time.getTime() + (LABEL_FREQUENCY * 60 * 60 * 1000))) {
       const isMidnight = time.getHours() === 0;
       labels.push({
         time: new Date(time),
@@ -67,7 +80,7 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime }) 
           }`}
           style={{
             position: 'absolute',
-            left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * 100}%`,
+            left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
           }}
         >
           {formatLabel(label.dateLabel, label.timeLabel, label.isMidnight)}
