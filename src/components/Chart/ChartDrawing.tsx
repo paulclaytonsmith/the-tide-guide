@@ -46,9 +46,21 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
     };
   }, [contentWidth]);
 
+  // Helper function to calculate y position with offsets
+  const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
+    // First scale the height to the available drawing space
+    const scaledHeight = (height - displayMin) * heightScale;
+    // Then position it with the top offset
+    return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
+  };
+
   // Scale points to SVG dimensions
   const getScaledPath = () => {
     if (data.length === 0) return '';
+
+    // Sort all points by time to ensure correct order
+    const sortedData = [...data].sort((a, b) => a.time.getTime() - b.time.getTime());
+    if (sortedData.length === 0) return '';
 
     // Scale time values to width
     const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
@@ -72,26 +84,69 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
     // Scale heights to fit available drawing height
     const heightScale = availableHeight / heightRange;
 
-    // Helper function to calculate y position with offsets
-    const calculateYPosition = (height: number) => {
-      // First scale the height to the available drawing space
-      const scaledHeight = (height - displayMin) * heightScale;
-      // Then position it with the top offset
-      return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
-    };
-
     // Create path starting from the first point
     const pathPoints = [];
     
     // Start at the bottom left
     pathPoints.push(`M 0 ${dimensions.height}`);
-    
-    // Add all the tide points
-    data.forEach(point => {
-      const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
-      const y = calculateYPosition(point.height);
-      pathPoints.push(`L ${x} ${y}`);
-    });
+
+    // Tension controls how smooth the curve is (0 to 1, lower = smoother)
+    const tension = 0.3;
+
+    if (sortedData.length > 0) {
+      // Move to first point
+      const firstPoint = sortedData[0];
+      const firstX = (firstPoint.time.getTime() - data[0].time.getTime()) * timeScale;
+      const firstY = calculateYPosition(firstPoint.height, displayMin, heightScale, availableHeight);
+      pathPoints.push(`L ${firstX} ${firstY}`);
+
+      // Create smooth curve through all points
+      for (let i = 0; i < sortedData.length - 1; i++) {
+        const current = sortedData[i];
+        const next = sortedData[i + 1];
+        
+        const currentX = (current.time.getTime() - data[0].time.getTime()) * timeScale;
+        const currentY = calculateYPosition(current.height, displayMin, heightScale, availableHeight);
+        const nextX = (next.time.getTime() - data[0].time.getTime()) * timeScale;
+        const nextY = calculateYPosition(next.height, displayMin, heightScale, availableHeight);
+
+        // Get points before and after for tangent calculation
+        const prev = sortedData[Math.max(0, i - 1)];
+        const after = sortedData[Math.min(sortedData.length - 1, i + 2)];
+        
+        // Calculate tangents
+        const prevX = (prev.time.getTime() - data[0].time.getTime()) * timeScale;
+        const prevY = calculateYPosition(prev.height, displayMin, heightScale, availableHeight);
+        const afterX = (after.time.getTime() - data[0].time.getTime()) * timeScale;
+        const afterY = calculateYPosition(after.height, displayMin, heightScale, availableHeight);
+
+        // Calculate the slope of the line between previous and next points
+        const dx = nextX - currentX;
+        const dy = nextY - currentY;
+        const prevDx = currentX - prevX;
+        const prevDy = currentY - prevY;
+        const nextDx = afterX - nextX;
+        const nextDy = afterY - nextY;
+
+        // Calculate the average slope to smooth transitions
+        const prevSlope = prevDx !== 0 ? prevDy / prevDx : 0;
+        const nextSlope = dx !== 0 ? dy / dx : 0;
+        const afterSlope = nextDx !== 0 ? nextDy / nextDx : 0;
+
+        // Use weighted average for smoother transitions
+        const weightedSlope1 = (prevSlope + nextSlope) / 2;
+        const weightedSlope2 = (nextSlope + afterSlope) / 2;
+
+        // Calculate control points using weighted slopes
+        const thirdX = dx / 3;
+        const controlX1 = currentX + thirdX;
+        const controlY1 = currentY + (thirdX * weightedSlope1);
+        const controlX2 = nextX - thirdX;
+        const controlY2 = nextY - (thirdX * weightedSlope2);
+
+        pathPoints.push(`C ${controlX1} ${controlY1} ${controlX2} ${controlY2} ${nextX} ${nextY}`);
+      }
+    }
     
     // Add bottom right point and close the path
     const bottomY = dimensions.height;
@@ -132,7 +187,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
             const heightScale = availableHeight / heightRange;
 
             const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
-            const y = TOP_OFFSET_HEIGHT + (availableHeight - ((point.height - displayMin) * heightScale));
+            const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
 
             const time = point.time.toLocaleTimeString([], { 
               hour: 'numeric',
@@ -173,6 +228,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
               </g>
             );
           })}
+       
       </svg>
     </div>
   );
