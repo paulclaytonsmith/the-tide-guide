@@ -65,7 +65,7 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
         {timeLabels.filter(label => label.isMidnight).map((label, index) => (
           <p 
             key={`date-${index}`}
-            className="time-axis-label chart-label"
+            className="chart-label"
             style={{
               position: 'absolute',
               left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
@@ -79,7 +79,7 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
         {timeLabels.map((label, index) => (
           <p 
             key={index}
-            className="time-axis-label chart-label"
+            className="chart-label"
             style={{
               position: 'absolute',
               left: `${((label.time.getTime() - startTime.getTime()) / timeRange) * contentWidth}vw`,
