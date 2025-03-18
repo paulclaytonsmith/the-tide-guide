@@ -49,49 +49,13 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
   const getScaledPath = () => {
     if (data.length === 0) return '';
 
-    // Get time range
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const threeDaysAfter = new Date(today);
-    threeDaysAfter.setDate(threeDaysAfter.getDate() + 3);
-
-    // Get yesterday's tides
-    const yesterdayTides = data.filter(point => 
-      point.time >= yesterday && point.time < today
-    ).sort((a, b) => a.time.getTime() - b.time.getTime());
-
-    // Get the second to last tide from yesterday
-    const startFromTide = yesterdayTides.length > 1 
-      ? yesterdayTides[yesterdayTides.length - 2] 
-      : yesterdayTides[0];
-
-    // Get day+3 tides
-    const day3Tides = data.filter(point => 
-      point.time.getTime() >= threeDaysAfter.getTime() && 
-      point.time.getTime() < threeDaysAfter.getTime() + (24 * 60 * 60 * 1000)
-    ).slice(0, 2);
-
-    // Filter points to match reference implementation's range
-    const filteredPoints = startFromTide 
-      ? data.filter(point => 
-          point.time >= startFromTide.time && 
-          (day3Tides.length === 0 || point.time <= day3Tides[day3Tides.length - 1].time)
-        ).sort((a, b) => a.time.getTime() - b.time.getTime())
-      : [];
-
-    if (filteredPoints.length === 0) return '';
-    
     // Scale time values to width
-    const timeScale = dimensions.width / (
-      (day3Tides.length > 0 ? day3Tides[day3Tides.length - 1].time.getTime() : threeDaysAfter.getTime()) - 
-      (startFromTide ? startFromTide.time.getTime() : yesterday.getTime())
-    );
+    const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
+    const timeScale = dimensions.width / timeRange;
     
     // Scale height values to SVG height with multiplier
-    const maxHeight = Math.max(...filteredPoints.map(p => p.height));
-    const minHeight = Math.min(...filteredPoints.map(p => p.height));
+    const maxHeight = Math.max(...data.map(p => p.height));
+    const minHeight = Math.min(...data.map(p => p.height));
     const actualRange = maxHeight - minHeight;
     
     // Calculate the extended range
@@ -122,8 +86,8 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
     pathPoints.push(`M 0 ${dimensions.height}`);
     
     // Add all the tide points
-    filteredPoints.forEach(point => {
-      const x = (point.time.getTime() - (startFromTide ? startFromTide.time.getTime() : yesterday.getTime())) * timeScale;
+    data.forEach(point => {
+      const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
       const y = calculateYPosition(point.height);
       pathPoints.push(`L ${x} ${y}`);
     });
@@ -149,6 +113,65 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data }) => {
           fill="var(--color-blue)"
           className="wave-path"
         />
+        {data.length > 0 && data
+          .filter(point => point.type === "High" || point.type === "Low")
+          .map((point, index) => {
+            const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
+            const timeScale = dimensions.width / timeRange;
+
+            const maxHeight = Math.max(...data.map(p => p.height));
+            const minHeight = Math.min(...data.map(p => p.height));
+            const actualRange = maxHeight - minHeight;
+            const rangeExtension = (actualRange * (RANGE_MULTIPLIER - 1)) / 2;
+            const displayMin = minHeight - rangeExtension;
+            const displayMax = maxHeight + rangeExtension;
+            const heightRange = displayMax - displayMin;
+            const bottomOffset = dimensions.height * BOTTOM_OFFSET_PERCENTAGE;
+            const availableHeight = dimensions.height - TOP_OFFSET_HEIGHT - bottomOffset;
+            const heightScale = availableHeight / heightRange;
+
+            const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
+            const y = TOP_OFFSET_HEIGHT + (availableHeight - ((point.height - displayMin) * heightScale));
+
+            const time = point.time.toLocaleTimeString([], { 
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true 
+            });
+
+            return (
+              <g key={index}>
+                <circle 
+                  cx={x} 
+                  cy={y} 
+                  r="4" 
+                  fill="white" 
+                  stroke="var(--color-blue)" 
+                  strokeWidth="2"
+                />
+                <text
+                  x={x}
+                  y={y - 20}
+                  textAnchor="middle"
+                  fill="var(--color-text)"
+                  fontSize="12"
+                  fontFamily="monospace"
+                >
+                  {time}
+                </text>
+                <text
+                  x={x}
+                  y={y - 8}
+                  textAnchor="middle"
+                  fill="var(--color-text)"
+                  fontSize="12"
+                  fontFamily="monospace"
+                >
+                  {`${point.height.toFixed(1)}'`}
+                </text>
+              </g>
+            );
+          })}
       </svg>
     </div>
   );

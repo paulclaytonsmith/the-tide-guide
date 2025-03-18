@@ -1,25 +1,34 @@
 .time-axis {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
   width: 100%;
   position: relative;
+  height: 60px;
+  padding-bottom: 12px;
+  flex: 0 0 auto;
 }
 
 .time-axis-label {
-  font-size: 12px;
   text-align: left;
   white-space: nowrap;
+  position: absolute;
+  transform: translateX(-50%);
 }
 
 .time-axis-label--date,
 .time-axis-label--time {
-  font-family: 'Test Founders Grotesk Mono';
   font-weight: 700;
-  line-height: 1.03em;
-  color: #14264C;
+  line-height: 1em;
+  color: var(--color-dark);
 }
 
 .time-axis-label span {
   display: block;
+}
+
+.chart-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }

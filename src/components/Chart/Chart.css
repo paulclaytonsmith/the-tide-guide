@@ -33,9 +33,4 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-}
-
-/* Position TimeAxis at top */
-.time-axis {
-  flex: 0 0 auto;
 } 
