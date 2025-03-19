@@ -29,24 +29,55 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   // Use initial tide data when no real data is provided
   const currentTideData = useMemo(() => {
     const data = tideData.length === 0 ? generateInitialTideData().predictions : tideData;
-    console.log('Current tide data:', {
-      length: data.length,
-      firstHeight: data[0]?.height,
-      lastHeight: data[data.length - 1]?.height,
-      isInitialData: tideData.length === 0
-    });
+
+    // Analyze tide pattern if this is real data
+    if (tideData.length > 0) {
+      const startTime = data[0].time;
+      const endTime = data[data.length - 1].time;
+      const totalHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+      const days = totalHours / 24;
+
+      const highPoints = data.filter(p => p.type === "High");
+      const lowPoints = data.filter(p => p.type === "Low");
+      
+      const highsPerDay = highPoints.length / days;
+      const lowsPerDay = lowPoints.length / days;
+
+      // Calculate how many additional points we'd need for a 4-tide pattern
+      const targetHighsPerDay = 2;
+      const targetLowsPerDay = 2;
+      const additionalHighs = Math.ceil((targetHighsPerDay - highsPerDay) * days);
+      const additionalLows = Math.ceil((targetLowsPerDay - lowsPerDay) * days);
+
+      if (highsPerDay < 2 || lowsPerDay < 2) {
+        console.log('Two-tide location detected:', {
+          days,
+          currentPattern: {
+            highsPerDay,
+            lowsPerDay,
+            totalHighs: highPoints.length,
+            totalLows: lowPoints.length,
+          },
+          additionalPointsNeeded: {
+            highs: Math.max(0, additionalHighs),
+            lows: Math.max(0, additionalLows),
+            total: Math.max(0, additionalHighs) + Math.max(0, additionalLows)
+          },
+          timeRange: {
+            start: startTime.toISOString(),
+            end: endTime.toISOString(),
+            hours: totalHours
+          }
+        });
+      }
+    }
+
     return data;
   }, [tideData]);
 
   // When tideData changes and it's not empty, we're no longer in initial load
   useEffect(() => {
     if (tideData.length > 0 && isInitialLoad && !hasStartedTransition) {
-      console.log('Starting transition from initial to real data:', {
-        initialDataLength: currentTideData.length,
-        newDataLength: tideData.length,
-        initialFirstHeight: currentTideData[0]?.height,
-        newFirstHeight: tideData[0]?.height
-      });
       setHasStartedTransition(true);
       setIsInitialLoad(false);
     }
@@ -103,17 +134,14 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   }, [startTime, endTime]);
 
   const handleAnimationStart = () => {
-    console.log('Animation started');
     setIsAnimating(true);
     // Start fading in labels after a longer delay
     setTimeout(() => {
-      console.log('Setting showLabels to true');
       setShowLabels(true);
     }, 5000);
   };
 
   const handleAnimationComplete = () => {
-    console.log('Animation completed');
     setIsAnimating(false);
   };
 

@@ -16,16 +16,20 @@ export const TIME_AXIS_CONFIG = {
 
 // Animation settings
 export const SPRING_CONFIG = { // for wave and labels
-  stiffness: 150,
+  stiffness: 15,    // Reduced from 50
   damping: 15,
-  mass: 0.8,
+  mass: 6,         // Increased from 2
   restSpeed: 0.001,
   restDelta: 0.001
 } as const;
 
 export const ANIMATION_CONFIG = {
   wave: {
-    spring: SPRING_CONFIG
+    spring: SPRING_CONFIG,
+    duration: {
+      duration: 5,  // 5 seconds
+      ease: [0.4, 0, 0.2, 1]  // Custom easing for smooth animation
+    }
   },
   labels: {
     spring: SPRING_CONFIG,

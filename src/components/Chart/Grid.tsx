@@ -10,8 +10,6 @@ interface GridProps {
 }
 
 export const Grid: React.FC<GridProps> = ({ isInitialLoad }) => {
-  console.log('Grid render:', { isInitialLoad });
-
   return (
     <motion.div 
       className="grid-container"

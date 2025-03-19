@@ -32,8 +32,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     height: 0
   });
 
-  console.log('ChartDrawing render:', { isInitialLoad, dataLength: data.length });
-
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
     const scaledHeight = (height - displayMin) * heightScale;
@@ -142,7 +140,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
 
   // Calculate the current path
   const currentPath = useMemo(() => {
-    console.log('Calculating path:', { isInitialLoad });
     return getScaledPath();
   }, [data, dimensions, isInitialLoad]);
 
@@ -171,34 +168,30 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
         height={dimensions.height} 
         preserveAspectRatio="none"
       >
-        <motion.path
-          d={currentPath}
-          fill="var(--color-blue)"
-          className="wave-path"
-          initial={isInitialLoad ? { d: currentPath } : false}
-          animate={{ d: currentPath }}
-          transition={ANIMATION_CONFIG.wave.spring}
-          onAnimationStart={() => {
-            console.log('Wave animation started:', { 
-              isInitialLoad,
-              pathLength: currentPath.length,
-              dataLength: data.length,
-              firstHeight: data[0]?.height,
-              lastHeight: data[data.length - 1]?.height
-            });
-            onAnimationStart?.();
-          }}
-          onAnimationComplete={() => {
-            console.log('Wave animation completed:', { 
-              isInitialLoad,
-              pathLength: currentPath.length,
-              dataLength: data.length,
-              firstHeight: data[0]?.height,
-              lastHeight: data[data.length - 1]?.height
-            });
-            onAnimationComplete?.();
-          }}
-        />
+        {dimensions.height > 0 && (
+          <motion.path
+            d={currentPath}
+            fill="var(--color-blue)"
+            className="wave-path"
+            initial={{ d: currentPath }}
+            animate={{ d: currentPath }}
+            transition={ANIMATION_CONFIG.wave.duration}
+            onAnimationStart={() => {
+              console.log('Wave points:', { 
+                initial: {
+                  total: data.length,
+                  byType: data.reduce((acc, p) => {
+                    acc[p.type] = (acc[p.type] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>)
+                },
+                pathCommands: currentPath.split(' ').filter(cmd => ['M', 'L', 'C', 'Z'].includes(cmd[0])).length
+              });
+              onAnimationStart?.();
+            }}
+            onAnimationComplete={onAnimationComplete}
+          />
+        )}
       </svg>
     </div>
   );

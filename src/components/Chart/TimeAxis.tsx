@@ -26,8 +26,6 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
   contentWidth,
   isInitialLoad 
 }) => {
-  console.log('TimeAxis render:', { isInitialLoad, dataLength: data.length });
-
   const generateTimeLabels = () => {
     const labels = [];
     
