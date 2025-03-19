@@ -1,3 +1,5 @@
+import { TIME_CONFIG } from '../components/Chart/config';
+
 interface Station {
   id: string
   name: string
@@ -5,8 +7,6 @@ interface Station {
   lng: number
   distance: number
 }
-
-const DAYS_TO_DISPLAY = 3; // Number of days to show in the chart, including today
 
 interface TidePrediction {
   t: string  // time
@@ -101,9 +101,9 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   const startDate = new Date(today)
   startDate.setDate(startDate.getDate() - 1)  // Go to yesterday
   
-  // Set end date to midnight of day+3 instead of end of day+3
+  // Set end date to midnight of day+N instead of end of day+N
   const endDate = new Date(today)
-  endDate.setDate(endDate.getDate() + DAYS_TO_DISPLAY)
+  endDate.setDate(endDate.getDate() + TIME_CONFIG.daysToDisplay)
   endDate.setHours(0, 0, 0, 0)  // Set to midnight
 
   const formatDate = (date: Date) => {
@@ -146,7 +146,7 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
 
     // Get exact times for the range start and end
     const startTimestamp = new Date(startDate)
-    startTimestamp.setHours(21, 0, 0, 0)  // Start at 9 PM yesterday
+    startTimestamp.setHours(TIME_CONFIG.startHour, 0, 0, 0)  // Start at configured hour yesterday
     const endTimestamp = new Date(endDate)  // ends at midnight of last day
     
     // Combine predictions and filter to our desired time range

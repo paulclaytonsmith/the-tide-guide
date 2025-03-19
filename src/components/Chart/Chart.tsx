@@ -7,6 +7,7 @@ import { ChartDrawing } from './ChartDrawing';
 import { TideLabels } from './TideLabels';
 import { Tooltip } from './Tooltip';
 import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG } from './config';
+import { generateInitialTideData } from '../../lib/initialTideData';
 import './Chart.css';
 
 interface Point {
@@ -25,46 +26,39 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [hasStartedTransition, setHasStartedTransition] = useState(false);
 
-  console.log('Chart render:', { isInitialLoad, tideDataLength: tideData.length, hasStartedTransition });
+  // Use initial tide data when no real data is provided
+  const currentTideData = useMemo(() => {
+    const data = tideData.length === 0 ? generateInitialTideData().predictions : tideData;
+    console.log('Current tide data:', {
+      length: data.length,
+      firstHeight: data[0]?.height,
+      lastHeight: data[data.length - 1]?.height,
+      isInitialData: tideData.length === 0
+    });
+    return data;
+  }, [tideData]);
 
   // When tideData changes and it's not empty, we're no longer in initial load
   useEffect(() => {
-    console.log('tideData changed:', { tideDataLength: tideData.length, isInitialLoad, hasStartedTransition });
     if (tideData.length > 0 && isInitialLoad && !hasStartedTransition) {
-      console.log('Starting transition sequence');
+      console.log('Starting transition from initial to real data:', {
+        initialDataLength: currentTideData.length,
+        newDataLength: tideData.length,
+        initialFirstHeight: currentTideData[0]?.height,
+        newFirstHeight: tideData[0]?.height
+      });
       setHasStartedTransition(true);
-      // Add a small delay before starting the transition
-      setTimeout(() => {
-        console.log('Setting isInitialLoad to false');
-        setIsInitialLoad(false);
-      }, 100);
+      setIsInitialLoad(false);
     }
-  }, [tideData, isInitialLoad, hasStartedTransition]);
+  }, [tideData, isInitialLoad, hasStartedTransition, currentTideData]);
 
-  // Get start and end times from the full dataset
-  const startTime = useMemo(() => {
-    if (tideData.length === 0) {
-      // If no data, use current time and 24 hours ahead
-      const now = new Date();
-      return now;
-    }
-    return tideData[0].time;
-  }, [tideData]);
-
-  const endTime = useMemo(() => {
-    if (tideData.length === 0) {
-      // If no data, use current time and 24 hours ahead
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setHours(now.getHours() + 24);
-      return tomorrow;
-    }
-    return tideData[tideData.length - 1].time;
-  }, [tideData]);
+  // Get start and end times from the current dataset
+  const startTime = currentTideData[0].time;
+  const endTime = currentTideData[currentTideData.length - 1].time;
 
   // Find the midnight point and calculate its rate
   const midnightPoint = useMemo(() => {
-    const midnight = tideData.find(point => {
+    const midnight = currentTideData.find(point => {
       const hours = point.time.getHours();
       const minutes = point.time.getMinutes();
       return hours === 0 && minutes === 0;
@@ -72,8 +66,8 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
 
     if (!midnight) return null;
 
-    const pointIndex = tideData.indexOf(midnight);
-    const nextPoint = tideData[pointIndex + 1];
+    const pointIndex = currentTideData.indexOf(midnight);
+    const nextPoint = currentTideData[pointIndex + 1];
     const rate = nextPoint 
       ? (nextPoint.height - midnight.height) / 
         ((nextPoint.time.getTime() - midnight.time.getTime()) / (1000 * 60 * 60))
@@ -83,7 +77,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
       point: midnight,
       rate
     };
-  }, [tideData]);
+  }, [currentTideData]);
 
   // Calculate offset to align midnight with the edge
   const { offsetPercentage, contentWidth } = useMemo(() => {
@@ -149,7 +143,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
             }}
           >
             <TimeAxis 
-              data={tideData}
+              data={currentTideData}
               startTime={startTime}
               endTime={endTime}
               contentWidth={contentWidth}
@@ -157,14 +151,14 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
             />
             <div className="chart-overlay-container">
               <ChartDrawing 
-                data={tideData}
+                data={currentTideData}
                 contentWidth={contentWidth}
                 onAnimationStart={handleAnimationStart}
                 onAnimationComplete={handleAnimationComplete}
                 isInitialLoad={isInitialLoad}
               />
               <TideLabels
-                data={tideData}
+                data={currentTideData}
                 contentWidth={contentWidth}
                 isAnimating={!showLabels || isInitialLoad}
               />

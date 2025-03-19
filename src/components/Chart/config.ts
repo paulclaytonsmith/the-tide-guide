@@ -1,3 +1,10 @@
+// Time settings
+export const TIME_CONFIG = {
+  daysToDisplay: 3,     // Number of days to show in the chart, including today
+  hourlyInterval: 1,    // Hours between each tide prediction
+  startHour: 21,       // Start at 9 PM yesterday (21:00)
+} as const;
+
 // Viewport and layout
 export const VIEWPORT_WIDTHS = 3;  // How many viewport widths wide the chart should be
 
@@ -25,7 +32,7 @@ export const INITIAL_WAVE_CONFIG = {
     restDelta: 0.001
   },
   amplitude: 0.1,  // 10% of height
-  frequency: Math.PI * 2  // One complete wave
+  frequency: Math.PI * 16  // Increased from 1.5π to 8π for many more waves
 } as const;
 
 export const ANIMATION_CONFIG = {
