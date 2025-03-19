@@ -28,52 +28,18 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
 
   // Use initial tide data when no real data is provided
   const currentTideData = useMemo(() => {
-    const data = tideData.length === 0 ? generateInitialTideData().predictions : tideData;
-
-    // Analyze tide pattern if this is real data
-    if (tideData.length > 0) {
-      const startTime = data[0].time;
-      const endTime = data[data.length - 1].time;
-      const totalHours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
-      const days = totalHours / 24;
-
-      const highPoints = data.filter(p => p.type === "High");
-      const lowPoints = data.filter(p => p.type === "Low");
-      
-      const highsPerDay = highPoints.length / days;
-      const lowsPerDay = lowPoints.length / days;
-
-      // Calculate how many additional points we'd need for a 4-tide pattern
-      const targetHighsPerDay = 2;
-      const targetLowsPerDay = 2;
-      const additionalHighs = Math.ceil((targetHighsPerDay - highsPerDay) * days);
-      const additionalLows = Math.ceil((targetLowsPerDay - lowsPerDay) * days);
-
-      if (highsPerDay < 2 || lowsPerDay < 2) {
-        console.log('Two-tide location detected:', {
-          days,
-          currentPattern: {
-            highsPerDay,
-            lowsPerDay,
-            totalHighs: highPoints.length,
-            totalLows: lowPoints.length,
-          },
-          additionalPointsNeeded: {
-            highs: Math.max(0, additionalHighs),
-            lows: Math.max(0, additionalLows),
-            total: Math.max(0, additionalHighs) + Math.max(0, additionalLows)
-          },
-          timeRange: {
-            start: startTime.toISOString(),
-            end: endTime.toISOString(),
-            hours: totalHours
-          }
-        });
-      }
-    }
-
-    return data;
+    return tideData.length === 0 ? generateInitialTideData().predictions : tideData;
   }, [tideData]);
+
+  // Filter to only use hourly points for the wave drawing
+  const hourlyData = useMemo(() => {
+    return currentTideData.filter(point => point.type === "Hourly");
+  }, [currentTideData]);
+
+  // Keep all points for labels
+  const allData = useMemo(() => {
+    return currentTideData;
+  }, [currentTideData]);
 
   // When tideData changes and it's not empty, we're no longer in initial load
   useEffect(() => {
@@ -179,14 +145,14 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
             />
             <div className="chart-overlay-container">
               <ChartDrawing 
-                data={currentTideData}
+                data={hourlyData}
                 contentWidth={contentWidth}
                 onAnimationStart={handleAnimationStart}
                 onAnimationComplete={handleAnimationComplete}
                 isInitialLoad={isInitialLoad}
               />
               <TideLabels
-                data={currentTideData}
+                data={allData}
                 contentWidth={contentWidth}
                 isAnimating={!showLabels || isInitialLoad}
               />

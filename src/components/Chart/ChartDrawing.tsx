@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 interface Point {
   time: Date;
   height: number;
-  type: "High" | "Low" | "Hourly";
+  type: "Hourly";  // Only hourly points are used for drawing
 }
 
 interface ChartDrawingProps {
@@ -42,7 +42,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   const getScaledPath = () => {
     if (data.length === 0) return '';
 
-    // Sort all points by time to ensure correct order
+    // Sort points by time to ensure correct order
     const sortedData = [...data].sort((a, b) => a.time.getTime() - b.time.getTime());
     if (sortedData.length === 0) return '';
 
@@ -178,13 +178,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
             transition={ANIMATION_CONFIG.wave.duration}
             onAnimationStart={() => {
               console.log('Wave points:', { 
-                initial: {
-                  total: data.length,
-                  byType: data.reduce((acc, p) => {
-                    acc[p.type] = (acc[p.type] || 0) + 1;
-                    return acc;
-                  }, {} as Record<string, number>)
-                },
+                total: data.length,
                 pathCommands: currentPath.split(' ').filter(cmd => ['M', 'L', 'C', 'Z'].includes(cmd[0])).length
               });
               onAnimationStart?.();
