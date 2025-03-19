@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChartDrawing.css';
-import { CHART_CONFIG } from './config';
+import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
 import { motion } from 'framer-motion';
 
 interface Point {
@@ -176,14 +176,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
           className="wave-path"
           initial={false}
           animate={{ d: currentPath }}
-          transition={{ 
-            type: "spring",
-            stiffness: 150,
-            damping: 15,
-            mass: 0.8,
-            restSpeed: 0.001,
-            restDelta: 0.001
-          }}
+          transition={ANIMATION_CONFIG.wave.spring}
           onAnimationStart={onAnimationStart}
           onAnimationComplete={onAnimationComplete}
         />

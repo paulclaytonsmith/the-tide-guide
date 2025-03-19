@@ -8,22 +8,25 @@ export const TIME_AXIS_CONFIG = {
 } as const;
 
 // Animation settings
+export const SPRING_CONFIG = { // for wave and labels
+  stiffness: 150,
+  damping: 15,
+  mass: 0.8,
+  restSpeed: 0.001,
+  restDelta: 0.001
+} as const;
+
 export const ANIMATION_CONFIG = {
+  wave: {
+    spring: SPRING_CONFIG
+  },
   labels: {
-    motion: {
-      duration: 0.5,
-      ease: [0.34, 1.56, 0.64, 1], // Bouncy easing with overshoot
-      delay: 0.1,
-      initialY: -20,
-    },
+    spring: SPRING_CONFIG,
+    offset: 100, // Distance labels move from their initial position
     opacity: {
       duration: 0.1,
       ease: "easeOut",
       delay: 0.1,
-    },
-    container: {
-      duration: 0.2,
-      ease: "easeInOut",
     }
   }
 } as const;

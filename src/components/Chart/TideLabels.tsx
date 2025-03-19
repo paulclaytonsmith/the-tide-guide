@@ -93,7 +93,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
             
             // Find corresponding point in previous data to determine animation direction
             const previousPoint = findPreviousPoint(point);
-            const offset = 50; // Animation distance
+            const offset = ANIMATION_CONFIG.labels.offset;
             
             // If we have a previous point, animate from its position
             // Otherwise, animate from below for high tide and above for low tide
@@ -110,14 +110,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                 initial={{ y: initialY }}
                 animate={{ 
                   y,
-                  transition: {
-                    type: "spring",
-                    stiffness: 150,
-                    damping: 15,
-                    mass: 0.8,
-                    restSpeed: 0.001,
-                    restDelta: 0.001
-                  }
+                  transition: ANIMATION_CONFIG.labels.spring
                 }}
                 style={{
                   position: 'absolute',
