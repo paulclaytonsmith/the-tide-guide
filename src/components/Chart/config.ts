@@ -15,29 +15,22 @@ export const TIME_AXIS_CONFIG = {
 } as const;
 
 // Animation settings
-export const SPRING_CONFIG = { // for wave and labels
-  stiffness: 15,    // Reduced from 50
-  damping: 15,
-  mass: 6,         // Increased from 2
-  restSpeed: 0.001,
-  restDelta: 0.001
-} as const;
-
 export const ANIMATION_CONFIG = {
   wave: {
-    spring: SPRING_CONFIG,
-    duration: {
-      duration: 0.5,  
-      ease: [0.4, 0, 0.2, 1]  // Custom easing for smooth animation
+    spring: {
+      stiffness: 25,    // Increased for more "springiness"
+      damping: 5,      // Reduced significantly for more bounce
+      mass: 3,         // Adjusted for better bounce characteristics
+      restSpeed: 0.001,
+      restDelta: 0.001
     }
   },
   labels: {
-    spring: SPRING_CONFIG,
     offset: 100, // Distance labels move from their initial position
     opacity: {
       duration: 0.1,
       ease: "easeOut",
-      delay: 0.1,
+      delay: 0.5,
     }
   },
   fadeIn: {

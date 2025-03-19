@@ -107,10 +107,22 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
               <motion.div
                 key={`${point.time.getTime()}-${point.type}`}
                 className="tide-point-label"
-                initial={{ y: initialY }}
+                initial={{ y, opacity: 0 }}
                 animate={{ 
                   y,
-                  transition: ANIMATION_CONFIG.labels.spring
+                  opacity: 1,
+                  transition: {
+                    y: { duration: 0 },
+                    opacity: ANIMATION_CONFIG.labels.opacity
+                  }
+                }}
+                exit={{ 
+                  y,
+                  opacity: 0,
+                  transition: {
+                    y: { duration: 0 },
+                    opacity: { duration: 0 }
+                  }
                 }}
                 style={{
                   position: 'absolute',
@@ -118,8 +130,22 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   transform: `translateX(-50%)`,
                 }}
               >
-                <p className="tide-point-height">{`${point.height.toFixed(1)}'`}</p>
-                <div className="tide-point-marker" />
+                <motion.p 
+                  className="tide-point-height"
+                  variants={ANIMATION_CONFIG.labels.heightText}
+                  initial="exit"
+                  animate="enter"
+                  exit="exit"
+                >
+                  {`${point.height.toFixed(1)}'`}
+                </motion.p>
+                <motion.div 
+                  className="tide-point-marker"
+                  variants={ANIMATION_CONFIG.labels.marker}
+                  initial="exit"
+                  animate="enter"
+                  exit="exit"
+                />
               </motion.div>
             );
           })}
