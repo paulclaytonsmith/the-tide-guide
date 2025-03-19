@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChartDrawing.css';
-import { CHART_CONFIG, ANIMATION_CONFIG, INITIAL_WAVE_CONFIG } from './config';
+import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
 import { motion } from 'framer-motion';
 
 interface Point {
@@ -17,12 +17,6 @@ interface ChartDrawingProps {
   onAnimationStart?: () => void;
   onAnimationComplete?: () => void;
   isInitialLoad: boolean;
-}
-
-interface AnimatedPathProps {
-  d: string;
-  fill: string;
-  className: string;
 }
 
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ 
@@ -146,56 +140,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     return pathPoints.join(' ');
   };
 
-  const getInitialWavePath = () => {
-    if (dimensions.width === 0) return '';
-    
-    const amplitude = dimensions.height * INITIAL_WAVE_CONFIG.amplitude;
-    const frequency = INITIAL_WAVE_CONFIG.frequency;
-    const points = [];
-    
-    points.push(`M 0 ${dimensions.height}`); // Start bottom left
-    
-    // Create smooth sine wave with cubic curves
-    const numPoints = 50; // We need fewer points when using cubic curves
-    const dx = dimensions.width / numPoints;
-    
-    // Start at the first point
-    const startY = (dimensions.height / 2) + 
-      amplitude * Math.sin(0);
-    points.push(`L 0 ${startY}`);
-    
-    // Create cubic curves between points
-    for (let i = 0; i < numPoints; i++) {
-      const x1 = i * dx;
-      const x2 = (i + 1) * dx;
-      
-      // Calculate points
-      const y1 = (dimensions.height / 2) + 
-        amplitude * Math.sin((x1 / dimensions.width) * frequency);
-      const y2 = (dimensions.height / 2) + 
-        amplitude * Math.sin((x2 / dimensions.width) * frequency);
-      
-      // Calculate control points using the derivative of the sine function
-      const derivative = frequency * amplitude / dimensions.width;
-      const controlLen = dx / 3;
-      
-      const c1x = x1 + controlLen;
-      const c1y = y1 + Math.cos((x1 / dimensions.width) * frequency) * derivative * controlLen;
-      
-      const c2x = x2 - controlLen;
-      const c2y = y2 - Math.cos((x2 / dimensions.width) * frequency) * derivative * controlLen;
-      
-      points.push(`C ${c1x} ${c1y} ${c2x} ${c2y} ${x2} ${y2}`);
-    }
-    
-    // Close the path
-    points.push(`L ${dimensions.width} ${dimensions.height}`);
-    points.push(`L 0 ${dimensions.height}`);
-    points.push('Z');
-    
-    return points.join(' ');
-  };
-
   // Calculate the current path
   const currentPath = useMemo(() => {
     console.log('Calculating path:', { isInitialLoad });
@@ -231,7 +175,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
           d={currentPath}
           fill="var(--color-blue)"
           className="wave-path"
-          initial={false}
+          initial={isInitialLoad ? { d: currentPath } : false}
           animate={{ d: currentPath }}
           transition={ANIMATION_CONFIG.wave.spring}
           onAnimationStart={() => {

@@ -23,18 +23,6 @@ export const SPRING_CONFIG = { // for wave and labels
   restDelta: 0.001
 } as const;
 
-export const INITIAL_WAVE_CONFIG = {
-  spring: {
-    stiffness: 80,  // Slower, gentler animation
-    damping: 12,
-    mass: 1.2,
-    restSpeed: 0.001,
-    restDelta: 0.001
-  },
-  amplitude: 0.1,  // 10% of height
-  frequency: Math.PI * 16  // Increased from 1.5π to 8π for many more waves
-} as const;
-
 export const ANIMATION_CONFIG = {
   wave: {
     spring: SPRING_CONFIG
