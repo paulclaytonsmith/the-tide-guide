@@ -27,7 +27,7 @@ export const ANIMATION_CONFIG = {
   wave: {
     spring: SPRING_CONFIG,
     duration: {
-      duration: 5,  // 5 seconds
+      duration: 0.5,  
       ease: [0.4, 0, 0.2, 1]  // Custom easing for smooth animation
     }
   },
