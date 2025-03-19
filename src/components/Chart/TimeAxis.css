@@ -3,7 +3,7 @@
   flex-direction: column;
   width: 100%;
   position: relative;
-  padding-bottom: 12px;
+  padding-bottom: var(--time-axis-padding);
   flex: 0 0 auto;
 }
 

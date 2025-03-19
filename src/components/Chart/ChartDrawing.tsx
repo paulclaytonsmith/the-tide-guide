@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import './ChartDrawing.css';
+import { CHART_CONFIG } from './config';
 
 interface Point {
   time: Date;
@@ -14,31 +15,24 @@ interface ChartDrawingProps {
   contentWidth: number;
 }
 
-const RANGE_MULTIPLIER = 2;           // Extends range in both directions
-const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing in pixels
-const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing in percentage of chart height
-
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
-    width: (window.innerWidth * contentWidth) / 100, // Convert vw to pixels
-    height: 0 // Will be set after measuring container
+    width: (window.innerWidth * contentWidth) / 100,
+    height: 0
   });
 
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         setDimensions({
-          width: (window.innerWidth * contentWidth) / 100, // Convert vw to pixels
+          width: (window.innerWidth * contentWidth) / 100,
           height: containerRef.current.clientHeight
         });
       }
     };
 
-    // Initial update
     updateDimensions();
-
-    // Update on viewport changes
     window.addEventListener('resize', updateDimensions);
 
     return () => {
@@ -48,10 +42,8 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
 
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
-    // First scale the height to the available drawing space
     const scaledHeight = (height - displayMin) * heightScale;
-    // Then position it with the top offset
-    return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
+    return CHART_CONFIG.topOffset + (availableHeight - scaledHeight);
   };
 
   // Scale points to SVG dimensions
@@ -72,14 +64,14 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
     const actualRange = maxHeight - minHeight;
     
     // Calculate the extended range
-    const rangeExtension = (actualRange * (RANGE_MULTIPLIER - 1)) / 2;
+    const rangeExtension = (actualRange * (CHART_CONFIG.rangeMultiplier - 1)) / 2;
     const displayMin = minHeight - rangeExtension;
     const displayMax = maxHeight + rangeExtension;
     const heightRange = displayMax - displayMin;
     
     // Calculate available drawing height after offsets
-    const bottomOffset = dimensions.height * BOTTOM_OFFSET_PERCENTAGE;
-    const availableHeight = dimensions.height - TOP_OFFSET_HEIGHT - bottomOffset;
+    const bottomOffset = dimensions.height * CHART_CONFIG.bottomOffset;
+    const availableHeight = dimensions.height - CHART_CONFIG.topOffset - bottomOffset;
     
     // Scale heights to fit available drawing height
     const heightScale = availableHeight / heightRange;
@@ -166,46 +158,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
           fill="var(--color-blue)"
           className="wave-path"
         />
-        {data.length > 0 && data
-          .filter(point => point.type === "High" || point.type === "Low")
-          .map((point, index) => {
-            const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
-            const timeScale = dimensions.width / timeRange;
-
-            const maxHeight = Math.max(...data.map(p => p.height));
-            const minHeight = Math.min(...data.map(p => p.height));
-            const actualRange = maxHeight - minHeight;
-            const rangeExtension = (actualRange * (RANGE_MULTIPLIER - 1)) / 2;
-            const displayMin = minHeight - rangeExtension;
-            const displayMax = maxHeight + rangeExtension;
-            const heightRange = displayMax - displayMin;
-            const bottomOffset = dimensions.height * BOTTOM_OFFSET_PERCENTAGE;
-            const availableHeight = dimensions.height - TOP_OFFSET_HEIGHT - bottomOffset;
-            const heightScale = availableHeight / heightRange;
-
-            const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
-            const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
-
-            const time = point.time.toLocaleTimeString([], { 
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true 
-            });
-
-            return (
-              <g key={index}>
-                <circle 
-                  cx={x} 
-                  cy={y} 
-                  r="4" 
-                  fill="white" 
-                  stroke="var(--color-blue)" 
-                  strokeWidth="2"
-                />
-              </g>
-            );
-          })}
-       
       </svg>
     </div>
   );

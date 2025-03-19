@@ -13,5 +13,5 @@
 }
 
 .wave-path {
-  opacity: 0.9;
+  opacity: var(--wave-opacity);
 } 

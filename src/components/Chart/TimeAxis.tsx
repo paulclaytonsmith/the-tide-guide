@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
+import { TIME_AXIS_CONFIG } from './config';
 import './TimeAxis.css';
-
-const LABEL_FREQUENCY = 6; // Hours between each label
 
 interface Point {
   time: Date;
@@ -15,7 +14,7 @@ interface TimeAxisProps {
   data: Point[];
   startTime: Date;
   endTime: Date;
-  contentWidth: number;  // Add this prop to receive the total width
+  contentWidth: number;
 }
 
 export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, contentWidth }) => {
@@ -28,11 +27,11 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
   const generateTimeLabels = () => {
     const labels = [];
     
-    // Start at the first LABEL_FREQUENCY-hour mark after startTime
+    // Start at the first labelFrequency-hour mark after startTime
     const firstLabel = new Date(startTime);
-    // Round up to next LABEL_FREQUENCY-hour mark
+    // Round up to next labelFrequency-hour mark
     const currentHour = firstLabel.getHours();
-    const hoursToNext = (LABEL_FREQUENCY - (currentHour % LABEL_FREQUENCY)) % LABEL_FREQUENCY;
+    const hoursToNext = (TIME_AXIS_CONFIG.labelFrequency - (currentHour % TIME_AXIS_CONFIG.labelFrequency)) % TIME_AXIS_CONFIG.labelFrequency;
     firstLabel.setMinutes(0, 0, 0); // Reset minutes and seconds
     firstLabel.setHours(currentHour + hoursToNext);
     
@@ -40,10 +39,10 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
     const lastDayMidnight = new Date(endTime);
     lastDayMidnight.setHours(0, 0, 0, 0);
     
-    // Generate labels every LABEL_FREQUENCY hours until we reach the last day's midnight (exclusive)
+    // Generate labels every labelFrequency hours until we reach the last day's midnight (exclusive)
     for (let time = new Date(firstLabel); 
-         time < lastDayMidnight;  // Changed to < instead of <= to exclude the last midnight
-         time = new Date(time.getTime() + (LABEL_FREQUENCY * 60 * 60 * 1000))) {
+         time < lastDayMidnight;
+         time = new Date(time.getTime() + (TIME_AXIS_CONFIG.labelFrequency * 60 * 60 * 1000))) {
       const isMidnight = time.getHours() === 0;
       labels.push({
         time: new Date(time),

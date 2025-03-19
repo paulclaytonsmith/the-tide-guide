@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { CHART_CONFIG } from './config';
 import './TideLabels.css';
 
 interface Point {
@@ -11,10 +12,6 @@ interface TideLabelsProps {
   data: Point[];
   contentWidth: number;
 }
-
-const RANGE_MULTIPLIER = 2;           // Extends range in both directions
-const TOP_OFFSET_HEIGHT = 24;         // Offset from top of chart to start drawing in pixels
-const BOTTOM_OFFSET_PERCENTAGE = 0.3; // Offset from bottom of chart to end drawing in percentage of chart height
 
 export const TideLabels: React.FC<TideLabelsProps> = ({ data, contentWidth }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +41,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({ data, contentWidth }) =>
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
     const scaledHeight = (height - displayMin) * heightScale;
-    return TOP_OFFSET_HEIGHT + (availableHeight - scaledHeight);
+    return CHART_CONFIG.topOffset + (availableHeight - scaledHeight);
   };
 
   return (
@@ -58,12 +55,12 @@ export const TideLabels: React.FC<TideLabelsProps> = ({ data, contentWidth }) =>
           const maxHeight = Math.max(...data.map(p => p.height));
           const minHeight = Math.min(...data.map(p => p.height));
           const actualRange = maxHeight - minHeight;
-          const rangeExtension = (actualRange * (RANGE_MULTIPLIER - 1)) / 2;
+          const rangeExtension = (actualRange * (CHART_CONFIG.rangeMultiplier - 1)) / 2;
           const displayMin = minHeight - rangeExtension;
           const displayMax = maxHeight + rangeExtension;
           const heightRange = displayMax - displayMin;
-          const bottomOffset = dimensions.height * BOTTOM_OFFSET_PERCENTAGE;
-          const availableHeight = dimensions.height - TOP_OFFSET_HEIGHT - bottomOffset;
+          const bottomOffset = dimensions.height * CHART_CONFIG.bottomOffset;
+          const availableHeight = dimensions.height - CHART_CONFIG.topOffset - bottomOffset;
           const heightScale = availableHeight / heightRange;
 
           const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
@@ -76,11 +73,12 @@ export const TideLabels: React.FC<TideLabelsProps> = ({ data, contentWidth }) =>
               style={{
                 position: 'absolute',
                 left: `${x}px`,
-                top: `${y - 20}px`,
+                top: `${y}px`,
                 transform: 'translateX(-50%)'
               }}
             >
               <p className="tide-point-height">{`${point.height.toFixed(1)}'`}</p>
+              <div className="tide-point-marker" />
             </div>
           );
         })}

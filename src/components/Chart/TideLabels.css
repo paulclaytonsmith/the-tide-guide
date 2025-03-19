@@ -8,13 +8,28 @@
 }
 
 .tide-point-label {
+  position: absolute;
   pointer-events: auto;
 }
 
 .tide-point-height {
+  position: absolute;
+  bottom: var(--label-offset);
+  left: 50%;
+  transform: translateX(calc(-50% + 0.25ch));
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--color-text);
   text-align: center;
+}
+
+.tide-point-marker {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--marker-size);
+  height: var(--marker-size);
+  border-radius: 50%;
+  background: white;
+  border: var(--marker-border) solid var(--color-blue);
+  box-sizing: content-box;
 } 

@@ -5,6 +5,7 @@ import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
 import { TideLabels } from './TideLabels';
+import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG } from './config';
 import './Chart.css';
 
 interface Point {
@@ -16,8 +17,6 @@ interface Point {
 interface ChartProps {
   tideData: Point[];
 }
-
-const VIEWPORT_WIDTHS = 3; // How many viewport widths wide the chart should be
 
 export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   // Get start and end times from the full dataset
@@ -58,7 +57,16 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   }, [startTime, endTime]);
 
   return (
-    <div className="chart-container">
+    <div 
+      className="chart-container"
+      style={{
+        '--marker-size': `${CHART_CONFIG.markerSize}px`,
+        '--marker-border': `${CHART_CONFIG.markerBorder}px`,
+        '--label-offset': `${CHART_CONFIG.labelOffset}px`,
+        '--wave-opacity': CHART_CONFIG.waveOpacity,
+        '--time-axis-padding': `${TIME_AXIS_CONFIG.bottomPadding}px`,
+      } as React.CSSProperties}
+    >
       <Grid />
       
       <div className="chart-scroll-container">
