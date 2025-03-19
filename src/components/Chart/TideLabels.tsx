@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CHART_CONFIG } from './config';
+import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
 import { motion, AnimatePresence } from 'framer-motion';
 import './TideLabels.css';
 
@@ -55,7 +55,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
       className="tide-labels"
       ref={containerRef}
       animate={{ opacity: isAnimating ? 0 : 1 }}
-      transition={{ duration: 0.2, ease: "easeInOut" }}
+      transition={ANIMATION_CONFIG.labels.container}
     >
       <AnimatePresence>
         {data.length > 0 && data
@@ -82,13 +82,13 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
               <motion.div
                 key={`${point.time.getTime()}-${point.height}`}
                 className="tide-point-label"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: ANIMATION_CONFIG.labels.motion.initialY }}
                 animate={{ 
                   opacity: 1,
+                  y: 0,
                   transition: {
-                    duration: 0.1,
-                    ease: "easeOut",
-                    delay: 0.3
+                    y: ANIMATION_CONFIG.labels.motion,
+                    opacity: ANIMATION_CONFIG.labels.opacity
                   }
                 }}
                 exit={{ opacity: 0 }}

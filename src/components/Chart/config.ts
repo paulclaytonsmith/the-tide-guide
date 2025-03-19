@@ -7,6 +7,27 @@ export const TIME_AXIS_CONFIG = {
   bottomPadding: 12,  // Padding below time axis in pixels
 } as const;
 
+// Animation settings
+export const ANIMATION_CONFIG = {
+  labels: {
+    motion: {
+      duration: 0.5,
+      ease: [0.34, 1.56, 0.64, 1], // Bouncy easing with overshoot
+      delay: 0.1,
+      initialY: -20,
+    },
+    opacity: {
+      duration: 0.1,
+      ease: "easeOut",
+      delay: 0.1,
+    },
+    container: {
+      duration: 0.2,
+      ease: "easeInOut",
+    }
+  }
+} as const;
+
 // Chart drawing settings
 export const CHART_CONFIG = {
   // Range settings
