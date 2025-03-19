@@ -5,6 +5,7 @@ import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
 import { TideLabels } from './TideLabels';
+import { Tooltip } from './Tooltip';
 import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG } from './config';
 import './Chart.css';
 
@@ -22,10 +23,29 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   // Get start and end times from the full dataset
   const startTime = tideData[0].time;
   const endTime = tideData[tideData.length - 1].time;
-  console.log('Chart - Data time range:', {
-    start: startTime.toLocaleString(),
-    end: endTime.toLocaleString()
-  });
+
+  // Find the midnight point and calculate its rate
+  const midnightPoint = useMemo(() => {
+    const midnight = tideData.find(point => {
+      const hours = point.time.getHours();
+      const minutes = point.time.getMinutes();
+      return hours === 0 && minutes === 0;
+    });
+
+    if (!midnight) return null;
+
+    const pointIndex = tideData.indexOf(midnight);
+    const nextPoint = tideData[pointIndex + 1];
+    const rate = nextPoint 
+      ? (nextPoint.height - midnight.height) / 
+        ((nextPoint.time.getTime() - midnight.time.getTime()) / (1000 * 60 * 60))
+      : 0;
+
+    return {
+      point: midnight,
+      rate
+    };
+  }, [tideData]);
 
   // Calculate offset to align midnight with the edge
   const { offsetPercentage, contentWidth } = useMemo(() => {
@@ -35,19 +55,13 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     const totalTimeRange = endTime.getTime() - startTime.getTime();
     const timeToMidnight = today.getTime() - startTime.getTime();
     
-    // Calculate what percentage of the total time range is before midnight
     const beforeMidnightPercentage = (timeToMidnight / totalTimeRange);
-    
-    // Calculate the total width needed in viewport widths
     const totalWidth = VIEWPORT_WIDTHS * 100;
-    
-    // Calculate the offset in viewport width units
     const offsetPercentage = beforeMidnightPercentage * totalWidth;
 
     const pagePaddingPx = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--page-padding'));
     const pagePaddingVw = (pagePaddingPx / window.innerWidth) * 100;
     
-    // Calculate the total offset including padding
     const totalOffset = Math.max(0, offsetPercentage - pagePaddingVw);
     
     return { 
@@ -96,6 +110,15 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 data={tideData}
                 contentWidth={contentWidth}
               />
+              {midnightPoint && (
+                <Tooltip
+                  height={midnightPoint.point.height}
+                  time={midnightPoint.point.time}
+                  rate={midnightPoint.rate}
+                  position={{ x: 0, y: 0 }}
+                  visible={true}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChartDrawing.css';
 import { CHART_CONFIG } from './config';
+import { motion } from 'framer-motion';
 
 interface Point {
   time: Date;
@@ -15,30 +16,18 @@ interface ChartDrawingProps {
   contentWidth: number;
 }
 
+interface AnimatedPathProps {
+  d: string;
+  fill: string;
+  className: string;
+}
+
 export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: (window.innerWidth * contentWidth) / 100,
     height: 0
   });
-
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: (window.innerWidth * contentWidth) / 100,
-          height: containerRef.current.clientHeight
-        });
-      }
-    };
-
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-    };
-  }, [contentWidth]);
 
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
@@ -146,6 +135,27 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
     return pathPoints.join(' ');
   };
 
+  // Calculate the current path
+  const currentPath = useMemo(() => getScaledPath(), [data, dimensions]);
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: (window.innerWidth * contentWidth) / 100,
+          height: containerRef.current.clientHeight
+        });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, [contentWidth]);
+
   return (
     <div className="chart-drawing" ref={containerRef}>
       <svg 
@@ -153,10 +163,20 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
         height={dimensions.height} 
         preserveAspectRatio="none"
       >
-        <path
-          d={getScaledPath()}
+        <motion.path
+          d={currentPath}
           fill="var(--color-blue)"
           className="wave-path"
+          initial={false}
+          animate={{ d: currentPath }}
+          transition={{ 
+            type: "spring",
+            stiffness: 85,
+            damping: 12,
+            mass: 1.2,
+            restSpeed: 0.001,
+            restDelta: 0.001
+          }}
         />
       </svg>
     </div>
