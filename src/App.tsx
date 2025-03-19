@@ -43,11 +43,9 @@ function App() {
         tideError={tideError}
         stationId={tideData?.stationId}
       />
-      {tideData && (
-        <Chart 
-          tideData={tideData.predictions}
-        />
-      )}
+      <Chart 
+        tideData={tideData?.predictions || []}
+      />
     </div>
   )
 }

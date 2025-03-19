@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { TIME_AXIS_CONFIG } from './config';
+import { motion } from 'framer-motion';
+import { TIME_AXIS_CONFIG, ANIMATION_CONFIG } from './config';
 import './TimeAxis.css';
 
 interface Point {
@@ -15,9 +16,17 @@ interface TimeAxisProps {
   startTime: Date;
   endTime: Date;
   contentWidth: number;
+  isInitialLoad: boolean;
 }
 
-export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, contentWidth }) => {
+export const TimeAxis: React.FC<TimeAxisProps> = ({ 
+  data, 
+  startTime, 
+  endTime, 
+  contentWidth,
+  isInitialLoad 
+}) => {
+  console.log('TimeAxis render:', { isInitialLoad, dataLength: data.length });
 
   const generateTimeLabels = () => {
     const labels = [];
@@ -54,7 +63,14 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
   const timeRange = endTime.getTime() - startTime.getTime();
 
   return (
-    <div className="time-axis">
+    <motion.div 
+      className="time-axis"
+      initial={{ opacity: 0 }}
+      animate={{ 
+        opacity: isInitialLoad ? 0 : 1,
+        transition: ANIMATION_CONFIG.fadeIn
+      }}
+    >
       <div className="time-axis__dates">
         {timeLabels.filter(label => label.isMidnight).map((label, index) => (
           <p 
@@ -83,6 +99,6 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, co
           </p>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }; 

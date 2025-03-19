@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
@@ -22,10 +22,45 @@ interface ChartProps {
 export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [hasStartedTransition, setHasStartedTransition] = useState(false);
+
+  console.log('Chart render:', { isInitialLoad, tideDataLength: tideData.length, hasStartedTransition });
+
+  // When tideData changes and it's not empty, we're no longer in initial load
+  useEffect(() => {
+    console.log('tideData changed:', { tideDataLength: tideData.length, isInitialLoad, hasStartedTransition });
+    if (tideData.length > 0 && isInitialLoad && !hasStartedTransition) {
+      console.log('Starting transition sequence');
+      setHasStartedTransition(true);
+      // Add a small delay before starting the transition
+      setTimeout(() => {
+        console.log('Setting isInitialLoad to false');
+        setIsInitialLoad(false);
+      }, 100);
+    }
+  }, [tideData, isInitialLoad, hasStartedTransition]);
 
   // Get start and end times from the full dataset
-  const startTime = tideData[0].time;
-  const endTime = tideData[tideData.length - 1].time;
+  const startTime = useMemo(() => {
+    if (tideData.length === 0) {
+      // If no data, use current time and 24 hours ahead
+      const now = new Date();
+      return now;
+    }
+    return tideData[0].time;
+  }, [tideData]);
+
+  const endTime = useMemo(() => {
+    if (tideData.length === 0) {
+      // If no data, use current time and 24 hours ahead
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setHours(now.getHours() + 24);
+      return tomorrow;
+    }
+    return tideData[tideData.length - 1].time;
+  }, [tideData]);
 
   // Find the midnight point and calculate its rate
   const midnightPoint = useMemo(() => {
@@ -74,14 +109,17 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   }, [startTime, endTime]);
 
   const handleAnimationStart = () => {
+    console.log('Animation started');
     setIsAnimating(true);
     // Start fading in labels after a longer delay
     setTimeout(() => {
+      console.log('Setting showLabels to true');
       setShowLabels(true);
     }, 5000);
   };
 
   const handleAnimationComplete = () => {
+    console.log('Animation completed');
     setIsAnimating(false);
   };
 
@@ -96,7 +134,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
         '--time-axis-padding': `${TIME_AXIS_CONFIG.bottomPadding}px`,
       } as React.CSSProperties}
     >
-      <Grid />
+      <Grid isInitialLoad={isInitialLoad} />
       
       <div className="chart-scroll-container">
         <div 
@@ -115,6 +153,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
               startTime={startTime}
               endTime={endTime}
               contentWidth={contentWidth}
+              isInitialLoad={isInitialLoad}
             />
             <div className="chart-overlay-container">
               <ChartDrawing 
@@ -122,11 +161,12 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 contentWidth={contentWidth}
                 onAnimationStart={handleAnimationStart}
                 onAnimationComplete={handleAnimationComplete}
+                isInitialLoad={isInitialLoad}
               />
               <TideLabels
                 data={tideData}
                 contentWidth={contentWidth}
-                isAnimating={!showLabels}
+                isAnimating={!showLabels || isInitialLoad}
               />
               {midnightPoint && (
                 <Tooltip

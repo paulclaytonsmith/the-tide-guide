@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChartDrawing.css';
-import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
+import { CHART_CONFIG, ANIMATION_CONFIG, INITIAL_WAVE_CONFIG } from './config';
 import { motion } from 'framer-motion';
 
 interface Point {
@@ -16,6 +16,7 @@ interface ChartDrawingProps {
   contentWidth: number;
   onAnimationStart?: () => void;
   onAnimationComplete?: () => void;
+  isInitialLoad: boolean;
 }
 
 interface AnimatedPathProps {
@@ -28,13 +29,16 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   data, 
   contentWidth,
   onAnimationStart,
-  onAnimationComplete 
+  onAnimationComplete,
+  isInitialLoad 
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: (window.innerWidth * contentWidth) / 100,
     height: 0
   });
+
+  console.log('ChartDrawing render:', { isInitialLoad, dataLength: data.length });
 
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
@@ -142,8 +146,38 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     return pathPoints.join(' ');
   };
 
+  const getInitialWavePath = () => {
+    if (dimensions.width === 0) return '';
+    
+    const amplitude = dimensions.height * INITIAL_WAVE_CONFIG.amplitude;
+    const frequency = INITIAL_WAVE_CONFIG.frequency;
+    const points = [];
+    
+    points.push(`M 0 ${dimensions.height}`); // Start bottom left
+    
+    // Create simple sine wave
+    for (let x = 0; x <= dimensions.width; x += dimensions.width / 100) {
+      const y = (dimensions.height / 2) + 
+        amplitude * Math.sin((x / dimensions.width) * frequency);
+      points.push(x === 0 ? `L ${x} ${y}` : `L ${x} ${y}`);
+    }
+    
+    // Close the path
+    points.push(`L ${dimensions.width} ${dimensions.height}`);
+    points.push(`L 0 ${dimensions.height}`);
+    points.push('Z');
+    
+    return points.join(' ');
+  };
+
   // Calculate the current path
-  const currentPath = useMemo(() => getScaledPath(), [data, dimensions]);
+  const currentPath = useMemo(() => {
+    console.log('Calculating path:', { isInitialLoad });
+    if (isInitialLoad) {
+      return getInitialWavePath();
+    }
+    return getScaledPath();
+  }, [data, dimensions, isInitialLoad]);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -176,9 +210,15 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
           className="wave-path"
           initial={false}
           animate={{ d: currentPath }}
-          transition={ANIMATION_CONFIG.wave.spring}
-          onAnimationStart={onAnimationStart}
-          onAnimationComplete={onAnimationComplete}
+          transition={isInitialLoad ? INITIAL_WAVE_CONFIG.spring : ANIMATION_CONFIG.wave.spring}
+          onAnimationStart={() => {
+            console.log('Wave animation started:', { isInitialLoad });
+            onAnimationStart?.();
+          }}
+          onAnimationComplete={() => {
+            console.log('Wave animation completed:', { isInitialLoad });
+            onAnimationComplete?.();
+          }}
         />
       </svg>
     </div>

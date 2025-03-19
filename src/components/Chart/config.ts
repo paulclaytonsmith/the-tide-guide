@@ -16,6 +16,18 @@ export const SPRING_CONFIG = { // for wave and labels
   restDelta: 0.001
 } as const;
 
+export const INITIAL_WAVE_CONFIG = {
+  spring: {
+    stiffness: 80,  // Slower, gentler animation
+    damping: 12,
+    mass: 1.2,
+    restSpeed: 0.001,
+    restDelta: 0.001
+  },
+  amplitude: 0.1,  // 10% of height
+  frequency: Math.PI * 2  // One complete wave
+} as const;
+
 export const ANIMATION_CONFIG = {
   wave: {
     spring: SPRING_CONFIG
@@ -28,6 +40,11 @@ export const ANIMATION_CONFIG = {
       ease: "easeOut",
       delay: 0.1,
     }
+  },
+  fadeIn: {
+    duration: 0.5,
+    ease: "easeOut",
+    delay: 0.2  // Start after wave begins morphing
   }
 } as const;
 
