@@ -181,15 +181,12 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
             d={currentPath}
             fill="var(--color-blue)"
             className="wave-path"
-            initial={{ d: currentPath, scaleY: 0.8 }}
-            animate={{ d: currentPath, scaleY: 1 }}
+            initial={{ d: currentPath }}
+            animate={{ d: currentPath }}
             transition={{
-              ...ANIMATION_CONFIG.wave.spring,
-              scaleY: {
+              d: {
                 type: "spring",
-                stiffness: 25,
-                damping: 5,
-                mass: 3
+                ...ANIMATION_CONFIG.wave.spring
               }
             }}
             onAnimationStart={() => {
