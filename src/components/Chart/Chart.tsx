@@ -33,6 +33,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
 
   // Filter to only use hourly points for the wave drawing
   const hourlyData = useMemo(() => {
+    if (currentTideData.length === 0) return [];
     return currentTideData.filter(point => point.type === "Hourly");
   }, [currentTideData]);
 

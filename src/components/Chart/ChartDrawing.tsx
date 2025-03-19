@@ -28,9 +28,21 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
-    width: (window.innerWidth * contentWidth) / 100,
-    height: 0
+    ...CHART_CONFIG.defaultDimensions,
+    width: (window.innerWidth * contentWidth) / 100
   });
+
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => a.time.getTime() - b.time.getTime());
+  }, [data]);
+
+  const heightBounds = useMemo(() => {
+    if (data.length === 0) return { min: 0, max: 0 };
+    return data.reduce((acc, point) => ({
+      min: Math.min(acc.min, point.height),
+      max: Math.max(acc.max, point.height)
+    }), { min: Infinity, max: -Infinity });
+  }, [data]);
 
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
@@ -41,10 +53,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   // Scale points to SVG dimensions
   const getScaledPath = () => {
     if (data.length === 0) return '';
-
-    // Sort points by time to ensure correct order
-    const sortedData = [...data].sort((a, b) => a.time.getTime() - b.time.getTime());
-    if (sortedData.length === 0) return '';
 
     // Scale time values to width
     const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
@@ -119,7 +127,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
         const weightedSlope2 = (nextSlope + afterSlope) / 2;
 
         // Calculate control points using weighted slopes
-        const thirdX = dx / 3;
+        const thirdX = dx / CHART_CONFIG.smoothFactor;
         const controlX1 = currentX + thirdX;
         const controlY1 = currentY + (thirdX * weightedSlope1);
         const controlX2 = nextX - thirdX;
@@ -177,10 +185,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
             animate={{ d: currentPath }}
             transition={ANIMATION_CONFIG.wave.duration}
             onAnimationStart={() => {
-              console.log('Wave points:', { 
-                total: data.length,
-                pathCommands: currentPath.split(' ').filter(cmd => ['M', 'L', 'C', 'Z'].includes(cmd[0])).length
-              });
               onAnimationStart?.();
             }}
             onAnimationComplete={onAnimationComplete}

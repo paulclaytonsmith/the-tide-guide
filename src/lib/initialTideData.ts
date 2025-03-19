@@ -14,11 +14,20 @@ function getTideHeight(time: Date, startDate: Date): number {
   return TYPICAL_TIDE.mean + (TYPICAL_TIDE.range * Math.sin(angle));
 }
 
+// Add memoization for initial data to prevent regeneration
+let cachedData: TideData | null = null;
+let cachedTimestamp: number | null = null;
+
 export function generateInitialTideData(): TideData {
-  // Get today at midnight in local time
-  const today = new Date();
+  const now = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   
+  // Return cached data if it's from the same day
+  if (cachedData && cachedTimestamp === today.getTime()) {
+    return cachedData;
+  }
+
   // Calculate start time (9 PM yesterday)
   const startDate = new Date(today);
   startDate.setDate(startDate.getDate() - 1);
@@ -32,13 +41,6 @@ export function generateInitialTideData(): TideData {
   // Calculate total duration and points needed
   const totalHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
   const hourlyPoints = Math.floor(totalHours) + 1; // Add 1 to include both start and end points
-  
-  console.log('Point calculation:', {
-    totalHours,
-    hourlyPoints,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString()
-  });
 
   // Calculate time interval between points (should be 1 hour)
   const timeInterval = (endDate.getTime() - startDate.getTime()) / (hourlyPoints - 1); // Subtract 1 since we're including both endpoints
@@ -60,9 +62,29 @@ export function generateInitialTideData(): TideData {
   // Sort points by time (should already be sorted, but just to be safe)
   predictions.sort((a, b) => a.time.getTime() - b.time.getTime());
 
-  return {
+  const result: TideData = {
     stationName: "Initial Wave",
     stationId: "INIT",
     predictions
   };
+
+  // Cache the result
+  cachedData = result;
+  cachedTimestamp = today.getTime();
+  return result;
+}
+
+// Create a shared types file for common interfaces
+// src/types/tide.ts
+export interface BasePoint {
+  time: Date;
+  height: number;
+}
+
+export interface TidePoint extends BasePoint {
+  type: "High" | "Low" | "Hourly";
+}
+
+export interface HourlyPoint extends BasePoint {
+  type: "Hourly";
 } 

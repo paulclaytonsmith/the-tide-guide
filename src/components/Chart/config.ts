@@ -63,4 +63,14 @@ export const CHART_CONFIG = {
   markerSize: 8,      // Size of high/low point markers in pixels
   markerBorder: 3,     // Border width of markers in pixels
   labelOffset: 12,     // Distance between marker and label in pixels
+
+  // Curve smoothing
+  smoothFactor: 3,     // Factor for Bezier curve calculation
+  minHeightBuffer: 0.1, // Minimum buffer for height calculations
+  
+  // Default dimensions
+  defaultDimensions: {
+    width: 0 as number,
+    height: 0 as number
+  }
 } as const; 
