@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
@@ -20,6 +20,9 @@ interface ChartProps {
 }
 
 export const Chart: React.FC<ChartProps> = ({ tideData }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
+
   // Get start and end times from the full dataset
   const startTime = tideData[0].time;
   const endTime = tideData[tideData.length - 1].time;
@@ -70,6 +73,18 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     };
   }, [startTime, endTime]);
 
+  const handleAnimationStart = () => {
+    setIsAnimating(true);
+    // Start fading in labels after a longer delay
+    setTimeout(() => {
+      setShowLabels(true);
+    }, 5000);
+  };
+
+  const handleAnimationComplete = () => {
+    setIsAnimating(false);
+  };
+
   return (
     <div 
       className="chart-container"
@@ -105,10 +120,13 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
               <ChartDrawing 
                 data={tideData}
                 contentWidth={contentWidth}
+                onAnimationStart={handleAnimationStart}
+                onAnimationComplete={handleAnimationComplete}
               />
               <TideLabels
                 data={tideData}
                 contentWidth={contentWidth}
+                isAnimating={!showLabels}
               />
               {midnightPoint && (
                 <Tooltip

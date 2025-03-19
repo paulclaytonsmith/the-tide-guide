@@ -7,6 +7,10 @@
   pointer-events: none;
 }
 
+.tide-labels-hidden {
+  opacity: 0;
+}
+
 .tide-point-label {
   position: absolute;
   pointer-events: auto;

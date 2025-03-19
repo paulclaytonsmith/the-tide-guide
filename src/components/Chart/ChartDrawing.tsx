@@ -14,6 +14,8 @@ interface Point {
 interface ChartDrawingProps {
   data: Point[];
   contentWidth: number;
+  onAnimationStart?: () => void;
+  onAnimationComplete?: () => void;
 }
 
 interface AnimatedPathProps {
@@ -22,7 +24,12 @@ interface AnimatedPathProps {
   className: string;
 }
 
-export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }) => {
+export const ChartDrawing: React.FC<ChartDrawingProps> = ({ 
+  data, 
+  contentWidth,
+  onAnimationStart,
+  onAnimationComplete 
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: (window.innerWidth * contentWidth) / 100,
@@ -171,12 +178,14 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({ data, contentWidth }
           animate={{ d: currentPath }}
           transition={{ 
             type: "spring",
-            stiffness: 85,
-            damping: 12,
-            mass: 1.2,
+            stiffness: 150,
+            damping: 15,
+            mass: 0.8,
             restSpeed: 0.001,
             restDelta: 0.001
           }}
+          onAnimationStart={onAnimationStart}
+          onAnimationComplete={onAnimationComplete}
         />
       </svg>
     </div>
