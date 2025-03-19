@@ -18,11 +18,6 @@ interface TimeAxisProps {
 }
 
 export const TimeAxis: React.FC<TimeAxisProps> = ({ data, startTime, endTime, contentWidth }) => {
-  console.log('TimeAxis - Props:', {
-    start: startTime.toLocaleString(),
-    end: endTime.toLocaleString(),
-    dataPoints: data.length
-  });
 
   const generateTimeLabels = () => {
     const labels = [];

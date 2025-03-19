@@ -96,18 +96,15 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
   // Get today at midnight in local time
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  console.log('NOAA - Today midnight:', today.toLocaleString())
   
   // Calculate yesterday and end date
   const startDate = new Date(today)
   startDate.setDate(startDate.getDate() - 1)  // Go to yesterday
-  console.log('NOAA - Start date:', startDate.toLocaleString())
   
   // Set end date to midnight of day+3 instead of end of day+3
   const endDate = new Date(today)
   endDate.setDate(endDate.getDate() + DAYS_TO_DISPLAY)
   endDate.setHours(0, 0, 0, 0)  // Set to midnight
-  console.log('NOAA - End date for API:', endDate.toLocaleString())
 
   const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0]
@@ -151,10 +148,6 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
     const startTimestamp = new Date(startDate)
     startTimestamp.setHours(21, 0, 0, 0)  // Start at 9 PM yesterday
     const endTimestamp = new Date(endDate)  // ends at midnight of last day
-    console.log('NOAA - Filtering range:', {
-      start: startTimestamp.toLocaleString(),
-      end: endTimestamp.toLocaleString()
-    })
     
     // Combine predictions and filter to our desired time range
     const filtered = [...hiloData, ...hourlyData]
@@ -163,12 +156,6 @@ async function fetchTidePredictions(stationId: string): Promise<TidePrediction[]
         const predTime = new Date(prediction.t)
         return predTime >= startTimestamp && predTime <= endTimestamp
       })
-
-    console.log('NOAA - Filtered data range:', {
-      start: new Date(filtered[0].t).toLocaleString(),
-      end: new Date(filtered[filtered.length - 1].t).toLocaleString(),
-      count: filtered.length
-    })
 
     return filtered
   } catch (error) {

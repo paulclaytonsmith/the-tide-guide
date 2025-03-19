@@ -11,12 +11,14 @@ interface Point {
 
 interface TideLabelsProps {
   data: Point[];
+  previousData?: Point[];
   contentWidth: number;
   isAnimating?: boolean;
 }
 
 export const TideLabels: React.FC<TideLabelsProps> = ({ 
   data, 
+  previousData,
   contentWidth,
   isAnimating = false 
 }) => {
@@ -25,6 +27,9 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
     width: (window.innerWidth * contentWidth) / 100,
     height: 0
   });
+  
+  // Track previous heights for each point
+  const prevHeights = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -44,6 +49,15 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
     };
   }, [contentWidth]);
 
+  // Helper function to find corresponding point in previous data
+  const findPreviousPoint = (currentPoint: Point) => {
+    if (!previousData) return null;
+    return previousData.find(p => 
+      p.type === currentPoint.type && 
+      p.time.getHours() === currentPoint.time.getHours()
+    );
+  };
+
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
     const scaledHeight = (height - displayMin) * heightScale;
@@ -51,16 +65,15 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
   };
 
   return (
-    <motion.div 
+    <div 
       className="tide-labels"
       ref={containerRef}
-      animate={{ opacity: isAnimating ? 0 : 1 }}
-      transition={ANIMATION_CONFIG.labels.container}
+      style={{ opacity: isAnimating ? 0 : 1 }}
     >
       <AnimatePresence>
         {data.length > 0 && data
           .filter(point => point.type === "High" || point.type === "Low")
-          .map((point, index) => {
+          .map((point) => {
             const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
             const timeScale = dimensions.width / timeRange;
 
@@ -77,26 +90,39 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
 
             const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
             const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
+            
+            // Find corresponding point in previous data to determine animation direction
+            const previousPoint = findPreviousPoint(point);
+            const offset = 50; // Animation distance
+            
+            // If we have a previous point, animate from its position
+            // Otherwise, animate from below for high tide and above for low tide
+            const initialY = previousPoint 
+              ? calculateYPosition(previousPoint.height, displayMin, heightScale, availableHeight)
+              : point.type === "High" 
+                ? y + offset  // High tide points come from below
+                : y - offset; // Low tide points come from above
 
             return (
               <motion.div
-                key={`${point.time.getTime()}-${point.height}`}
+                key={`${point.time.getTime()}-${point.type}`}
                 className="tide-point-label"
-                initial={{ opacity: 0, y: ANIMATION_CONFIG.labels.motion.initialY }}
+                initial={{ y: initialY }}
                 animate={{ 
-                  opacity: 1,
-                  y: 0,
+                  y,
                   transition: {
-                    y: ANIMATION_CONFIG.labels.motion,
-                    opacity: ANIMATION_CONFIG.labels.opacity
+                    type: "spring",
+                    stiffness: 150,
+                    damping: 15,
+                    mass: 0.8,
+                    restSpeed: 0.001,
+                    restDelta: 0.001
                   }
                 }}
-                exit={{ opacity: 0 }}
                 style={{
                   position: 'absolute',
                   left: `${x}px`,
-                  top: `${y}px`,
-                  transform: 'translateX(-50%)'
+                  transform: `translateX(-50%)`,
                 }}
               >
                 <p className="tide-point-height">{`${point.height.toFixed(1)}'`}</p>
@@ -105,6 +131,6 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
             );
           })}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }; 
