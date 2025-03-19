@@ -18,9 +18,9 @@ export const TIME_AXIS_CONFIG = {
 export const ANIMATION_CONFIG = {
   wave: {
     spring: {
-      stiffness: 15,    // Controls how quickly the path moves
-      damping: 5,      // Controls how bouncy the movement is (lower = more bounce)
-      mass: 2,         // Controls the "weight" of the movement
+      stiffness: 75,    // Keep the same for same overall speed
+      damping: 15,     // Reduced from 20 for more sloshing
+      mass: 3.5,         // Keep the same to maintain physics
       restSpeed: 0.001,
       restDelta: 0.001
     }
