@@ -4,14 +4,22 @@ import type { TideData } from './noaa';
 // Typical tide ranges in feet
 const TYPICAL_TIDE = {
   mean: 2,      // Center point
-  range: 1.5,   // Plus/minus from mean
+  range: 0.9,   // Plus/minus from mean - creates ~10px wave with 50px/foot scale
 };
 
 // Helper function to calculate tide height at any time
 function getTideHeight(time: Date, startDate: Date): number {
   const hoursSinceStart = (time.getTime() - startDate.getTime()) / (1000 * 60 * 60);
   const angle = (hoursSinceStart % 12) / 12 * Math.PI * 2; // Complete cycle every 12 hours
-  return TYPICAL_TIDE.mean + (TYPICAL_TIDE.range * Math.sin(angle));
+  const height = TYPICAL_TIDE.mean + (TYPICAL_TIDE.range * Math.sin(angle));
+  console.log('Generated tide height:', {
+    hoursSinceStart,
+    angle,
+    mean: TYPICAL_TIDE.mean,
+    range: TYPICAL_TIDE.range,
+    height
+  });
+  return height;
 }
 
 // Add memoization for initial data to prevent regeneration

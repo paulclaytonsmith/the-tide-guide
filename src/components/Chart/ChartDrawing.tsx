@@ -72,14 +72,44 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     const minHeight = Math.min(...data.map(p => p.height));
     const actualRange = maxHeight - minHeight;
     
-    const rangeExtension = (actualRange * (CHART_CONFIG.rangeMultiplier - 1)) / 2;
+    // Use a much smaller range multiplier for initial data
+    const effectiveRangeMultiplier = isInitialLoad ? 1.05 : CHART_CONFIG.rangeMultiplier;
+    const rangeExtension = (actualRange * (effectiveRangeMultiplier - 1)) / 2;
     const displayMin = minHeight - rangeExtension;
     const displayMax = maxHeight + rangeExtension;
     const heightRange = displayMax - displayMin;
     
     const bottomOffset = dimensions.height * CHART_CONFIG.bottomOffset;
     const availableHeight = dimensions.height - CHART_CONFIG.topOffset - bottomOffset;
-    const heightScale = availableHeight / heightRange;
+    
+    // For initial data, use a fixed scale in pixels per foot
+    // For live data, scale to fill available height
+    const heightScale = isInitialLoad
+      ? 50  // 50 pixels per foot for initial data
+      : availableHeight / heightRange;
+
+    console.log('Height Calculations:', {
+      isInitialLoad,
+      dimensions: {
+        width: dimensions.width,
+        height: dimensions.height
+      },
+      heights: {
+        min: minHeight,
+        max: maxHeight,
+        actualRange,
+        displayMin,
+        displayMax,
+        heightRange
+      },
+      scaling: {
+        effectiveRangeMultiplier,
+        bottomOffset,
+        availableHeight,
+        heightScale,
+        pixelsPerFoot: heightScale
+      }
+    });
 
     const segments: PathSegment[] = [];
 
