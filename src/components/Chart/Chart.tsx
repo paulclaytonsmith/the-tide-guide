@@ -125,7 +125,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     >
       <Grid isInitialLoad={isInitialLoad} />
       
-      <div className="chart-scroll-container">
+      <div className={`chart-scroll-container ${isInitialLoad ? 'chart-scroll-container--no-scroll' : ''}`}>
         <div 
           className="chart-scroll-content"
           style={{

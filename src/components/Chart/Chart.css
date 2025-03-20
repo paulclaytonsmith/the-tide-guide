@@ -21,6 +21,12 @@
   -webkit-overflow-scrolling: touch;
   -webkit-overscroll-behavior-x: none;
   touch-action: pan-x;
+  transition: overflow-x 0.3s ease;
+}
+
+.chart-scroll-container--no-scroll {
+  overflow-x: hidden;
+  touch-action: none;
 }
 
 .chart-scroll-content {
