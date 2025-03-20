@@ -26,11 +26,28 @@ export const ANIMATION_CONFIG = {
     }
   },
   labels: {
-    offset: 100, // Distance labels move from their initial position
-    opacity: {
-      duration: 0.1,
-      ease: "easeOut",
-      delay: 0.5,
+    heightText: {
+      initial: { opacity: 0 },
+      enter: { 
+        opacity: 1,
+        transition: {
+          duration: 0.3,
+          delay: 2
+        }
+      },
+      exit: { opacity: 0 }
+    },
+    marker: {
+      initial: { opacity: 0, scale: 0 },
+      enter: { 
+        opacity: 1,
+        scale: 1,
+        transition: {
+          duration: 0.3,
+          delay: 1.5
+        }
+      },
+      exit: { opacity: 0, scale: 0 }
     }
   },
   fadeIn: {
@@ -55,7 +72,7 @@ export const CHART_CONFIG = {
   // Point markers
   markerSize: 8,      // Size of high/low point markers in pixels
   markerBorder: 3,     // Border width of markers in pixels
-  labelOffset: 12,     // Distance between marker and label in pixels
+  labelOffset: 6,     // Distance between marker and label in pixels
 
   // Curve smoothing
   smoothFactor: 3,     // Factor for Bezier curve calculation
