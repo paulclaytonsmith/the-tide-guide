@@ -4,6 +4,9 @@
   bottom: var(--page-padding);
   left: var(--page-padding);
   z-index: 9999;
+  background-color: #FFFFFF;
+  border-radius: 6px;
+  padding: 12px;
 }
 
 /* Content */
@@ -11,11 +14,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-/* Measurement text */
-.tide-tooltip-measurement {
-  color: #ffffff;
 }
 
 /* Rate container */
@@ -27,7 +25,7 @@
 
 /* Arrow */
 .tide-tooltip-arrow {
-  color: #14264C;
+  /* color property removed to allow SVG's fill color to show */
 }
 
 .tide-tooltip-arrow img {
@@ -41,5 +39,6 @@
 
 /* Rate value */
 .tide-tooltip-rate-value {
-  color: #14264C;
+  color: var(--color-dark50);
+  font-weight: var(--font-regular);
 } 
