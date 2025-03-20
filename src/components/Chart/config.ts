@@ -55,9 +55,18 @@ export const ANIMATION_CONFIG = {
     }
   },
   fadeIn: { // controls grid and time axis on first render of chart
-    duration: 0.5,
-    ease: "easeOut",
-    delay: 0.2  // Start after wave begins morphing
+    initial: {
+      opacity: 1,
+      y: 400 // start 200px below final position
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 1.5,
+        ease: [0.4, 0.5, 0.2, 1] // smooth easeOut
+      }
+    }
   }
 } as const;
 

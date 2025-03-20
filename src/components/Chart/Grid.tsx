@@ -13,11 +13,8 @@ export const Grid: React.FC<GridProps> = ({ isInitialLoad }) => {
   return (
     <motion.div 
       className="grid-container"
-      initial={{ opacity: 0 }}
-      animate={{ 
-        opacity: isInitialLoad ? 0 : 1,
-        transition: ANIMATION_CONFIG.fadeIn
-      }}
+      initial={ANIMATION_CONFIG.fadeIn.initial}
+      animate={isInitialLoad ? { opacity: 0 } : ANIMATION_CONFIG.fadeIn.animate}
     >
       <div className="grid">
         {Array.from({ length: 100 }).map((_, index) => (
