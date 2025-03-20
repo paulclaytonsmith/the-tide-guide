@@ -166,6 +166,13 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                     return hoursDiff <= CHART_CONFIG.hourlyMarkerThreshold;
                   });
 
+                  // Calculate rate for tooltip
+                  const nextPoint = data[data.indexOf(point) + 1];
+                  const rate = nextPoint 
+                    ? (nextPoint.height - point.height) / 
+                      ((nextPoint.time.getTime() - point.time.getTime()) / (1000 * 60 * 60))
+                    : 0;
+
                   return (
                     <div
                       key={`hourly-${point.time.getTime()}`}
@@ -174,8 +181,19 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                         left: `${x}px`,
                         top: `${y}px`
                       }}
+                      onMouseEnter={() => setHoveredPoint(point)}
+                      onMouseLeave={() => setHoveredPoint(null)}
                     >
                       <div className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`} />
+                      {hoveredPoint === point && (
+                        <Tooltip
+                          height={point.height}
+                          time={point.time}
+                          rate={rate}
+                          visible={true}
+                          alignRight={x > dimensions.width / 2}
+                        />
+                      )}
                     </div>
                   );
                 });
