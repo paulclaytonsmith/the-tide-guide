@@ -7,9 +7,10 @@ interface TooltipProps {
   time: Date;
   rate: number;
   visible: boolean;
+  alignRight?: boolean;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, alignRight = false }) => {
   if (!visible) return null;
 
   const formattedTime = time.toLocaleString('en-US', {
@@ -23,7 +24,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible })
   const isRising = rate > 0;
 
   return (
-    <div className="tide-tooltip">
+    <div className={`tide-tooltip ${alignRight ? 'tide-tooltip--right' : ''}`}>
       <div className="tide-tooltip-content">
         <h1 className="tide-tooltip-measurement">
           {formattedHeight}

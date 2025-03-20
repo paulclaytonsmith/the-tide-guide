@@ -132,6 +132,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                     time={point.time}
                     rate={rate}
                     visible={true}
+                    alignRight={x > dimensions.width / 2}
                   />
                 )}
               </motion.div>
