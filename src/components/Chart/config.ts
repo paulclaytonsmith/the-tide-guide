@@ -88,6 +88,7 @@ export const CHART_CONFIG = {
   markerHoverScale: 1.25, // Scale factor for marker hover state
   markerHoverOffset: -0.125, // Offset factor to keep marker centered during hover
   labelOffset: 6,     // Distance between marker and label in pixels
+  hourlyMarkerThreshold: 0.3, // Hide hourly markers within this many hours of high/low points
 
   // Curve smoothing
   smoothFactor: 3,     // Factor for Bezier curve calculation

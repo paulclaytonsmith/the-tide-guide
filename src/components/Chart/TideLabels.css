@@ -25,7 +25,8 @@
   text-align: center;
 }
 
-.tide-point-marker {
+.tide-point-marker,
+.tide-point-marker--hourly {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -36,4 +37,8 @@
   background: white;
   border: var(--marker-border) solid var(--color-blue);
   box-sizing: content-box;
-} 
+}
+
+.tide-point-marker--near-extreme {
+  display: none;
+}
