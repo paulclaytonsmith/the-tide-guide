@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TIME_AXIS_CONFIG, ANIMATION_CONFIG } from './config';
 import './TimeAxis.css';
@@ -26,8 +26,20 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
   contentWidth,
   isInitialLoad 
 }) => {
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const generateTimeLabels = () => {
     const labels = [];
+    const isMobile = windowWidth < 768;
     
     // Start at the first labelFrequency-hour mark after startTime
     const firstLabel = new Date(startTime);
@@ -46,12 +58,26 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
          time < lastDayMidnight;
          time = new Date(time.getTime() + (TIME_AXIS_CONFIG.labelFrequency * 60 * 60 * 1000))) {
       const isMidnight = time.getHours() === 0;
-      labels.push({
-        time: new Date(time),
-        dateLabel: isMidnight ? `${time.toLocaleDateString('en-US', { weekday: 'long' })} ${time.getMonth() + 1}/${time.getDate()}` : '',
-        timeLabel: time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true}).replace(/\s/g, ''),
-        isMidnight
-      });
+      
+      if (isMobile) {
+        labels.push({
+          time: new Date(time),
+          dateLabel: isMidnight ? `${time.toLocaleDateString('en-US', { weekday: 'long' })} ${time.getMonth() + 1}/${time.getDate()}` : '',
+          timeLabel: time.toLocaleTimeString([], { hour: 'numeric', hour12: true })
+            .replace(/\s/g, '')
+            .replace(':00', '')
+            .replace('AM', 'A')
+            .replace('PM', 'P'),
+          isMidnight
+        });
+      } else {
+        labels.push({
+          time: new Date(time),
+          dateLabel: isMidnight ? `${time.toLocaleDateString('en-US', { weekday: 'long' })} ${time.getMonth() + 1}/${time.getDate()}` : '',
+          timeLabel: time.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }),
+          isMidnight
+        });
+      }
     }
     
     return labels;
