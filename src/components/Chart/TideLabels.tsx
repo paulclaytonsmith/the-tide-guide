@@ -118,7 +118,9 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   animate="enter"
                   exit="exit"
                   custom={x}
-                />
+                  whileHover={{ scale: 1.25 }}
+                  transition={{ duration: 0 }}
+                />  
                 {hoveredPoint === point && (
                   <Tooltip
                     height={point.height}
