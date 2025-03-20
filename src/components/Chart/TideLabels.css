@@ -19,8 +19,8 @@
 .tide-point-height {
   position: absolute;
   bottom: var(--label-offset);
-  left: 50%;
-  transform: translateX(-20%);
+  /* left: 50%;
+  transform: translateX(-20%); */
   margin: 0;
   text-align: center;
 }

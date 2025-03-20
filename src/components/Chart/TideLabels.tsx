@@ -63,7 +63,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
           .map((point) => {
             const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
             const timeScale = dimensions.width / timeRange;
-
+            const markerOffset = (CHART_CONFIG.markerSize + CHART_CONFIG.markerBorder * 2) / 2;
             const maxHeight = Math.max(...data.map(p => p.height));
             const minHeight = Math.min(...data.map(p => p.height));
             const actualRange = maxHeight - minHeight;
@@ -75,7 +75,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
             const availableHeight = dimensions.height - CHART_CONFIG.topOffset - bottomOffset;
             const heightScale = availableHeight / heightRange;
 
-            const x = (point.time.getTime() - data[0].time.getTime()) * timeScale;
+            const x = ((point.time.getTime() - data[0].time.getTime()) * timeScale) - markerOffset;
             const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
 
             return (
