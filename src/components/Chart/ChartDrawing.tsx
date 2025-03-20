@@ -58,6 +58,11 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
     const scaledHeight = (height - displayMin) * heightScale;
+    if (isInitialLoad) {
+      // Center the wave vertically in the available space
+      const centerY = CHART_CONFIG.topOffset + (availableHeight / 2);
+      return centerY + ((2 - height) * heightScale); // 2 is the mean height
+    }
     return CHART_CONFIG.topOffset + (availableHeight - scaledHeight);
   };
 

@@ -96,4 +96,20 @@ export const CHART_CONFIG = {
     width: 0 as number,
     height: 0 as number
   }
+} as const;
+
+// Breakpoints
+export const BREAKPOINTS = {
+  mobile: 768,  // Matches index.css media query
+} as const;
+
+// Initial tide settings
+export const TIDE_CONFIG = {
+  mean: 2.5,    // Center point - aligned with typical live data
+  range: () => {
+    if (typeof window === 'undefined') return 0.9;  // SSR fallback
+    return window.innerWidth < BREAKPOINTS.mobile
+      ? 0.5   // Smaller range for mobile
+      : 0.9;  // Larger range for desktop
+  }
 } as const; 
