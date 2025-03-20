@@ -97,6 +97,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   initial="initial"
                   animate="enter"
                   exit="exit"
+                  custom={x}
                 >
                   {`${point.height.toFixed(1)}'`}
                 </motion.p>
@@ -106,6 +107,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   initial="initial"
                   animate="enter"
                   exit="exit"
+                  custom={x}
                 />
               </motion.div>
             );

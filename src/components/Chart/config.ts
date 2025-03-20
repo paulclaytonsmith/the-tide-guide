@@ -26,28 +26,31 @@ export const ANIMATION_CONFIG = {
     }
   },
   labels: {
+    stagger: { // controls the delay between the labels appearing
+      staggerScale: 3000, // Higher = faster sequence
+    },
     heightText: {
       initial: { opacity: 0 },
-      enter: { 
+      enter: (x: number) => ({ 
         opacity: 1,
         transition: {
           duration: 0.3,
-          delay: 2.5
+          delay: 2.25 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale)
         }
-      },
+      }),
       exit: { opacity: 0 }
     },
     marker: {
       initial: { opacity: 0, scale: 0 },
-      enter: { 
+      enter: (x: number) => ({ 
         opacity: 1,
         scale: 1,
         transition: {
           duration: 0.3,
-          delay: 1.75,
-          ease: [0.34, 1.56, 0.64, 1]  // Custom spring-like ease
+          delay: 1.75 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale),
+          ease: [0.34, 1.56, 0.64, 1]
         }
-      },
+      }),
       exit: { opacity: 0, scale: 0 }
     }
   },
