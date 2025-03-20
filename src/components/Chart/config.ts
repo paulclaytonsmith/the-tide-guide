@@ -32,7 +32,7 @@ export const ANIMATION_CONFIG = {
         opacity: 1,
         transition: {
           duration: 0.3,
-          delay: 2
+          delay: 2.5
         }
       },
       exit: { opacity: 0 }
@@ -44,13 +44,14 @@ export const ANIMATION_CONFIG = {
         scale: 1,
         transition: {
           duration: 0.3,
-          delay: 1.5
+          delay: 1.75,
+          ease: [0.34, 1.56, 0.64, 1]  // Custom spring-like ease
         }
       },
       exit: { opacity: 0, scale: 0 }
     }
   },
-  fadeIn: {
+  fadeIn: { // controls grid and time axis on first render of chart
     duration: 0.5,
     ease: "easeOut",
     delay: 0.2  // Start after wave begins morphing
