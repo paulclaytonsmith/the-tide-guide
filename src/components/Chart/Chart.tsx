@@ -157,19 +157,19 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 contentWidth={contentWidth}
                 isAnimating={!showLabels || isInitialLoad}
               />
-              {midnightPoint && (
-                <Tooltip
-                  height={midnightPoint.point.height}
-                  time={midnightPoint.point.time}
-                  rate={midnightPoint.rate}
-                  position={{ x: 0, y: 0 }}
-                  visible={true}
-                />
-              )}
             </div>
           </div>
         </div>
       </div>
+      {/* Move Tooltip outside of scroll container */}
+      {midnightPoint && !isInitialLoad && (
+        <Tooltip
+          height={midnightPoint.point.height}
+          time={midnightPoint.point.time}
+          rate={midnightPoint.rate}
+          visible={true}
+        />
+      )}
     </div>
   );
 }; 

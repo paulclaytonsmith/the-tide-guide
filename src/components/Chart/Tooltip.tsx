@@ -1,15 +1,15 @@
 import React from 'react';
 import './Tooltip.css';
+import ArrowIcon from './icons/arrow.svg';
 
 interface TooltipProps {
   height: number;
   time: Date;
   rate: number;
-  position: { x: number; y: number };
   visible: boolean;
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, position, visible }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible }) => {
   if (!visible) return null;
 
   const formattedTime = time.toLocaleString('en-US', {
@@ -23,27 +23,22 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, position, 
   const isRising = rate > 0;
 
   return (
-    <div 
-      className="tide-tooltip"
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`
-      }}
-    >
-      <div className="tide-tooltip-line">
-        <div className="tide-tooltip-point" />
-        <div className="tide-tooltip-vr" />
-      </div>
+    <div className="tide-tooltip">
       <div className="tide-tooltip-content">
-        <div className="tide-tooltip-measurement">
+        <h1 className="tide-tooltip-measurement">
           {formattedHeight}
           <br />
           {formattedTime}
-        </div>
+        </h1>
         <div className="tide-tooltip-rate">
-          <span className={`tide-tooltip-arrow ${isRising ? 'rising' : 'falling'}`}>
-            {isRising ? '↑' : '↓'}
+          <span className="tide-tooltip-arrow">
+            <img 
+              src={ArrowIcon} 
+              alt="" 
+              className={isRising ? '' : 'falling'}
+            />
           </span>
-          <span className="tide-tooltip-rate-value">{formattedRate}</span>
+          <p className="tide-tooltip-rate-value">{formattedRate}</p>
         </div>
       </div>
     </div>
