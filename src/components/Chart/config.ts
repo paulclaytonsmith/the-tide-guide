@@ -27,15 +27,15 @@ export const ANIMATION_CONFIG = {
   },
   labels: {
     stagger: { // controls the delay between the labels appearing
-      staggerScale: 3000, // Higher = faster sequence
+      staggerScale: 2500, // Higher = faster sequence
     },
     heightText: {
       initial: { opacity: 0 },
       enter: (x: number) => ({ 
         opacity: 1,
         transition: {
-          duration: 0.3,
-          delay: 2.25 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale)
+          duration: 0.5,
+          delay: 1.75 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale)
         }
       }),
       exit: { opacity: 0 }
@@ -46,9 +46,9 @@ export const ANIMATION_CONFIG = {
         opacity: 1,
         scale: 1,
         transition: {
-          duration: 0.3,
-          delay: 1.75 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale),
-          ease: [0.34, 1.56, 0.64, 1]
+          duration: 0.25,
+          delay: 1.5 + (x / ANIMATION_CONFIG.labels.stagger.staggerScale),
+          ease: [.75, 0, .75, 1.25]
         }
       }),
       exit: { opacity: 0, scale: 0 }
