@@ -118,7 +118,12 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   animate="enter"
                   exit="exit"
                   custom={x}
-                  whileHover={{ scale: 1.25 }}
+                  whileHover={{ 
+                    width: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                    height: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                    x: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset,
+                    y: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset
+                  }}
                   transition={{ duration: 0 }}
                 />  
                 {hoveredPoint === point && (

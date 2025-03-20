@@ -85,6 +85,8 @@ export const CHART_CONFIG = {
   // Point markers
   markerSize: 8,      // Size of high/low point markers in pixels
   markerBorder: 3,     // Border width of markers in pixels
+  markerHoverScale: 1.25, // Scale factor for marker hover state
+  markerHoverOffset: -0.125, // Offset factor to keep marker centered during hover
   labelOffset: 6,     // Distance between marker and label in pixels
 
   // Curve smoothing
