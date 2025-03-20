@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Tooltip } from './Tooltip';
 import './TideLabels.css';
 
 interface Point {
@@ -21,6 +22,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
   isAnimating = false 
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
   const [dimensions, setDimensions] = useState({
     width: (window.innerWidth * contentWidth) / 100,
     height: 0
@@ -78,6 +80,12 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
             const x = ((point.time.getTime() - data[0].time.getTime()) * timeScale) - markerOffset;
             const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
 
+            const nextPoint = data[data.indexOf(point) + 1];
+            const rate = nextPoint 
+              ? (nextPoint.height - point.height) / 
+                ((nextPoint.time.getTime() - point.time.getTime()) / (1000 * 60 * 60))
+              : 0;
+
             return (
               <motion.div
                 key={`${point.time.getTime()}-${point.type}`}
@@ -90,6 +98,8 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   left: `${x}px`,
                   transform: `translateX(-50%)`,
                 }}
+                onMouseEnter={() => setHoveredPoint(point)}
+                onMouseLeave={() => setHoveredPoint(null)}
               >
                 <motion.p 
                   className="tide-point-height"
@@ -109,6 +119,14 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                   exit="exit"
                   custom={x}
                 />
+                {hoveredPoint === point && (
+                  <Tooltip
+                    height={point.height}
+                    time={point.time}
+                    rate={rate}
+                    visible={true}
+                  />
+                )}
               </motion.div>
             );
           })}
