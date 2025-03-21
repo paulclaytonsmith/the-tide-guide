@@ -17,8 +17,9 @@
   bottom: 0;
   z-index: 1;
   overflow-x: scroll;
-  overflow-y: visible;
+  overflow-y: hidden;
   overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   -webkit-overscroll-behavior-x: none;
   touch-action: pan-x;

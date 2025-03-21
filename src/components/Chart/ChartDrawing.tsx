@@ -222,7 +222,7 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
             transition={{
               d: {
                 type: "spring",
-                ...ANIMATION_CONFIG.wave.spring
+                ...(isInitialLoad ? ANIMATION_CONFIG.wave.spring.initial : ANIMATION_CONFIG.wave.spring.location)
               }
             }}
             onMouseEnter={(e) => {

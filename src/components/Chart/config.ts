@@ -18,11 +18,20 @@ export const TIME_AXIS_CONFIG = {
 export const ANIMATION_CONFIG = {
   wave: {
     spring: {
-      stiffness: 75,    // Keep the same for same overall speed
-      damping: 15,     // Reduced from 20 for more sloshing
-      mass: 3.5,         // Keep the same to maintain physics
-      restSpeed: 0.001,
-      restDelta: 0.001
+      initial: {
+        stiffness: 65,    // Slightly lower stiffness for a bit more give
+        damping: 12,      // Slightly lower damping for longer movement
+        mass: 4,          // Slightly more mass for a bit more momentum
+        restSpeed: 0.001,
+        restDelta: 0.001
+      },
+      location: {
+        stiffness: 75,    // Keep original settings for location changes
+        damping: 15,     
+        mass: 3.5,
+        restSpeed: 0.001,
+        restDelta: 0.001
+      }
     }
   },
   chartDrawing: { // controls the initial scale animation of the chart drawing
@@ -35,7 +44,7 @@ export const ANIMATION_CONFIG = {
       transition: {
         duration: 1,
         ease: [0.4, 0.5, 0.2, 1], // smooth easeOut
-        delay: 1 // slight delay to let wave animation start first
+        delay: 0.25 // slight delay to let wave animation start first
       }
     }
   },
