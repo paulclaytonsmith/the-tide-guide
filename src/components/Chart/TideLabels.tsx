@@ -15,7 +15,8 @@ interface TideLabelsProps {
   contentWidth: number;
   isAnimating?: boolean;
   hoveredPoint?: Point | null;
-  onPointHover?: (point: Point | null) => void;
+  onPointHover?: (point: Point | null, x?: number) => void;
+  tooltipAlignRight?: boolean;
 }
 
 export const TideLabels: React.FC<TideLabelsProps> = ({ 
@@ -23,7 +24,8 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
   contentWidth,
   isAnimating = false,
   hoveredPoint: externalHoveredPoint,
-  onPointHover
+  onPointHover,
+  tooltipAlignRight
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [internalHoveredPoint, setInternalHoveredPoint] = useState<Point | null>(null);
@@ -35,9 +37,9 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
   // Use external hover point if provided, otherwise use internal state
   const hoveredPoint = externalHoveredPoint ?? internalHoveredPoint;
 
-  const handleMouseEnter = (point: Point) => {
+  const handleMouseEnter = (point: Point, x: number) => {
     setInternalHoveredPoint(point);
-    onPointHover?.(point);
+    onPointHover?.(point, x);
   };
 
   const handleMouseLeave = () => {
@@ -122,7 +124,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                         left: `${x}px`,
                         transform: `translateX(-50%)`,
                       }}
-                      onMouseEnter={() => handleMouseEnter(point)}
+                      onMouseEnter={() => handleMouseEnter(point, x)}
                       onMouseLeave={handleMouseLeave}
                     >
                       <motion.p 
@@ -156,7 +158,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                           time={point.time}
                           rate={rate}
                           visible={true}
-                          alignRight={x > dimensions.width / 2}
+                          alignRight={tooltipAlignRight !== undefined ? tooltipAlignRight : x > dimensions.width / 2}
                         />
                       )}
                     </motion.div>
@@ -198,7 +200,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                         left: `${x}px`,
                         top: `${y}px`
                       }}
-                      onMouseEnter={() => handleMouseEnter(point)}
+                      onMouseEnter={() => handleMouseEnter(point, x)}
                       onMouseLeave={handleMouseLeave}
                     >
                       <div className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`} />
@@ -208,7 +210,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                           time={point.time}
                           rate={rate}
                           visible={true}
-                          alignRight={x > dimensions.width / 2}
+                          alignRight={tooltipAlignRight !== undefined ? tooltipAlignRight : x > dimensions.width / 2}
                         />
                       )}
                     </div>

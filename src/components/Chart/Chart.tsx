@@ -27,6 +27,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const [hasStartedTransition, setHasStartedTransition] = useState(false);
   const [mouseX, setMouseX] = useState<number | null>(null);
   const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
+  const [tooltipAlignRight, setTooltipAlignRight] = useState(false);
 
   // Use initial tide data when no real data is provided
   const currentTideData = useMemo(() => {
@@ -140,6 +141,12 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     setMouseX(x);
     const closest = findClosestPoint(x);
     setHoveredPoint(closest);
+    
+    // Calculate tooltip alignment based on mouse position relative to viewport
+    const viewportWidth = window.innerWidth;
+    const scrollOffset = viewportWidth * (offsetPercentage / 100);
+    const adjustedX = x - scrollOffset;
+    setTooltipAlignRight(adjustedX > viewportWidth / 2);
   };
 
   const handleMouseLeave = () => {
@@ -147,8 +154,15 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     setHoveredPoint(null);
   };
 
-  const handlePointHover = (point: Point | null) => {
+  const handlePointHover = (point: Point | null, x?: number) => {
     setHoveredPoint(point);
+    if (x !== undefined) {
+      // For direct marker hovers, use the same viewport-relative calculation
+      const viewportWidth = window.innerWidth;
+      const scrollOffset = viewportWidth * (offsetPercentage / 100);
+      const adjustedX = x - scrollOffset;
+      setTooltipAlignRight(adjustedX > viewportWidth / 2);
+    }
   };
 
   return (
@@ -199,6 +213,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 isAnimating={!showLabels || isInitialLoad}
                 hoveredPoint={hoveredPoint}
                 onPointHover={handlePointHover}
+                tooltipAlignRight={tooltipAlignRight}
               />
             </div>
           </div>

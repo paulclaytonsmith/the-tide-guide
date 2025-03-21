@@ -214,11 +214,9 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
             }}
             onMouseEnter={(e) => {
               e.stopPropagation();
-              console.log('Mouse entered wave path');
             }}
             onMouseLeave={(e) => {
               e.stopPropagation();
-              console.log('Mouse left wave path');
               onMouseLeave?.();
             }}
             onMouseMove={(e: React.MouseEvent<SVGPathElement>) => {
