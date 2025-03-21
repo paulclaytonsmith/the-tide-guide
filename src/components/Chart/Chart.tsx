@@ -8,13 +8,8 @@ import { TideLabels } from './TideLabels';
 import { Tooltip } from './Tooltip';
 import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG } from './config';
 import { generateInitialTideData } from '../../lib/initialTideData';
+import { Point, HourlyPoint } from './types';
 import './Chart.css';
-
-interface Point {
-  time: Date;
-  height: number;
-  type: "High" | "Low" | "Hourly";
-}
 
 interface ChartProps {
   tideData: Point[];
@@ -37,7 +32,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   // Filter to only use hourly points for the wave drawing
   const hourlyData = useMemo(() => {
     if (currentTideData.length === 0) return [];
-    return currentTideData.filter(point => point.type === "Hourly");
+    return currentTideData.filter((point): point is HourlyPoint => point.type === "Hourly");
   }, [currentTideData]);
 
   // Keep all points for labels

@@ -139,17 +139,28 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                       </motion.p>
                       <motion.div 
                         className="tide-point-marker"
-                        variants={ANIMATION_CONFIG.labels.marker}
+                        variants={{
+                          ...ANIMATION_CONFIG.labels.marker,
+                          hover: {
+                            width: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                            height: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                            x: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset,
+                            y: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset
+                          },
+                          default: {
+                            width: CHART_CONFIG.markerSize,
+                            height: CHART_CONFIG.markerSize,
+                            x: 0,
+                            y: 0
+                          }
+                        }}
                         initial="initial"
-                        animate="enter"
+                        animate={[
+                          "enter",
+                          hoveredPoint === point ? "hover" : "default"
+                        ]}
                         exit="exit"
                         custom={x}
-                        whileHover={{ 
-                          width: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
-                          height: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
-                          x: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset,
-                          y: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset
-                        }}
                         transition={{ duration: 0 }}
                       />  
                       {hoveredPoint === point && (
@@ -203,7 +214,32 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                       onMouseEnter={() => handleMouseEnter(point, x)}
                       onMouseLeave={handleMouseLeave}
                     >
-                      <div className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`} />
+                      <motion.div 
+                        className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`}
+                        variants={{
+                          ...ANIMATION_CONFIG.labels.marker,
+                          hover: {
+                            width: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                            height: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
+                            x: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset,
+                            y: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset
+                          },
+                          default: {
+                            width: CHART_CONFIG.markerSize,
+                            height: CHART_CONFIG.markerSize,
+                            x: 0,
+                            y: 0
+                          }
+                        }}
+                        initial="initial"
+                        animate={[
+                          "enter",
+                          hoveredPoint === point ? "hover" : "default"
+                        ]}
+                        exit="exit"
+                        custom={x}
+                        transition={{ duration: 0 }}
+                      />
                       {hoveredPoint === point && (
                         <Tooltip
                           height={point.height}

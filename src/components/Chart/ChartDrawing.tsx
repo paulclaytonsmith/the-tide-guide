@@ -4,15 +4,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './ChartDrawing.css';
 import { CHART_CONFIG, ANIMATION_CONFIG } from './config';
 import { motion } from 'framer-motion';
-
-interface Point {
-  time: Date;
-  height: number;
-  type: "Hourly";  // Only hourly points are used for drawing
-}
+import { HourlyPoint } from './types';
 
 interface ChartDrawingProps {
-  data: Point[];
+  data: HourlyPoint[];
   contentWidth: number;
   onAnimationStart?: () => void;
   onAnimationComplete?: () => void;
