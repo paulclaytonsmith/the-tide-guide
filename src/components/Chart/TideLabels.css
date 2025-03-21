@@ -39,6 +39,14 @@
   box-sizing: content-box;
 }
 
+.tide-point-marker--hourly {
+  background: var(--color-blue);
+  border: var(--marker-border) solid #fff;
+}
+
+
+
+
 .tide-point-marker--near-extreme {
   display: none;
 }
