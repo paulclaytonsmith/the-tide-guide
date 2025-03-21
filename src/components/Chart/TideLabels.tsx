@@ -186,15 +186,16 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
 
               return data
                 .filter(point => point.type === "Hourly")
-                .map((point) => {
-                  const x = ((point.time.getTime() - data[0].time.getTime()) / (data[data.length - 1].time.getTime() - data[0].time.getTime())) * dimensions.width;
-                  const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
-
-                  // Check if this hourly point is near any high/low point
-                  const isNearHighLow = highLowPoints.some(hlPoint => {
+                .filter(point => {
+                  // Filter out hourly points that are near high/low points
+                  return !highLowPoints.some(hlPoint => {
                     const hoursDiff = Math.abs(point.time.getTime() - hlPoint.time.getTime()) / (1000 * 60 * 60);
                     return hoursDiff <= CHART_CONFIG.hourlyMarkerThreshold;
                   });
+                })
+                .map((point) => {
+                  const x = ((point.time.getTime() - data[0].time.getTime()) / (data[data.length - 1].time.getTime() - data[0].time.getTime())) * dimensions.width;
+                  const y = calculateYPosition(point.height, displayMin, heightScale, availableHeight);
 
                   // Calculate rate for tooltip
                   const nextPoint = data[data.indexOf(point) + 1];
@@ -217,7 +218,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                       onMouseLeave={handleMouseLeave}
                     >
                       <motion.div 
-                        className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`}
+                        className={`tide-point-marker tide-point-marker--hourly`}
                         variants={{
                           initial: { opacity: 0 },
                           enter: { opacity: 0 },

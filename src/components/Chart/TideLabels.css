@@ -44,9 +44,6 @@
   border: var(--marker-border) solid #fff;
 }
 
-
-
-
 .tide-point-marker--near-extreme {
   display: none;
 }
