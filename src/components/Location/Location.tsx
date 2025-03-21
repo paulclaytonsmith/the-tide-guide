@@ -23,7 +23,7 @@ const TYPEOUT_CONFIG = {
   placeholder: {
     numChars: 1,
     delay: 20,
-    initialDelay: 400,
+    initialDelay: 1500,
     scramble: true,
     scrambleAhead: 3
   },

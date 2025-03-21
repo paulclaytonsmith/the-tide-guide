@@ -46,6 +46,14 @@
   position: relative;
   min-width: 100px;
   max-width: calc(100vw - (var(--page-padding) * 2));  /* Use viewport width instead */
+  visibility: hidden;
+  animation: showInput 0s 0.25s forwards;
+}
+
+@keyframes showInput {
+  to {
+    visibility: visible;
+  }
 }
 
 .input-underline {
