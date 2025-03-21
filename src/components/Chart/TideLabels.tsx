@@ -208,7 +208,9 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                       key={`hourly-${point.time.getTime()}`}
                       className="tide-point-label"
                       style={{
+                        position: 'absolute',
                         left: `${x}px`,
+                        transform: `translateX(-50%)`,
                         top: `${y}px`
                       }}
                       onMouseEnter={() => handleMouseEnter(point, x)}
@@ -217,19 +219,10 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                       <motion.div 
                         className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`}
                         variants={{
-                          ...ANIMATION_CONFIG.labels.marker,
-                          hover: {
-                            width: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
-                            height: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverScale,
-                            x: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset,
-                            y: CHART_CONFIG.markerSize * CHART_CONFIG.markerHoverOffset
-                          },
-                          default: {
-                            width: CHART_CONFIG.markerSize,
-                            height: CHART_CONFIG.markerSize,
-                            x: 0,
-                            y: 0
-                          }
+                          initial: { opacity: 0 },
+                          enter: { opacity: 0 },
+                          hover: { opacity: 1 },
+                          default: { opacity: 0 }
                         }}
                         initial="initial"
                         animate={[
