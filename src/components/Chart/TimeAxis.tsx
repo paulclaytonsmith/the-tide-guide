@@ -85,8 +85,11 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
   return (
     <motion.div 
       className="time-axis"
-      initial={ANIMATION_CONFIG.fadeIn.initial}
+      initial={{ opacity: 0 }}
       animate={isInitialLoad ? { opacity: 0 } : ANIMATION_CONFIG.fadeIn.animate}
+      style={{
+        visibility: isInitialLoad ? 'hidden' : 'visible'
+      }}
     >
       <div className="time-axis__dates">
         {timeLabels.filter(label => label.isMidnight).map((label, index) => (
