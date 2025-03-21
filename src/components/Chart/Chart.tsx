@@ -25,6 +25,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const [showLabels, setShowLabels] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [hasStartedTransition, setHasStartedTransition] = useState(false);
+  const [mouseX, setMouseX] = useState<number | null>(null);
 
   // Use initial tide data when no real data is provided
   const currentTideData = useMemo(() => {
@@ -112,6 +113,14 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     setIsAnimating(false);
   };
 
+  const handleMouseMove = (x: number) => {
+    setMouseX(x);
+  };
+
+  const handleMouseLeave = () => {
+    setMouseX(null);
+  };
+
   return (
     <div 
       className="chart-container"
@@ -151,6 +160,8 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 onAnimationStart={handleAnimationStart}
                 onAnimationComplete={handleAnimationComplete}
                 isInitialLoad={isInitialLoad}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
               />
               <TideLabels
                 data={allData}

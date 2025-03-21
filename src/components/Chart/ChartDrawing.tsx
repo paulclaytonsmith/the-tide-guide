@@ -17,6 +17,8 @@ interface ChartDrawingProps {
   onAnimationStart?: () => void;
   onAnimationComplete?: () => void;
   isInitialLoad: boolean;
+  onMouseMove?: (x: number) => void;
+  onMouseLeave?: () => void;
 }
 
 interface ControlPoint {
@@ -35,7 +37,9 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   contentWidth,
   onAnimationStart,
   onAnimationComplete,
-  isInitialLoad 
+  isInitialLoad,
+  onMouseMove,
+  onMouseLeave
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
@@ -92,29 +96,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     const heightScale = isInitialLoad
       ? 50  // 50 pixels per foot for initial data
       : availableHeight / heightRange;
-
-    console.log('Height Calculations:', {
-      isInitialLoad,
-      dimensions: {
-        width: dimensions.width,
-        height: dimensions.height
-      },
-      heights: {
-        min: minHeight,
-        max: maxHeight,
-        actualRange,
-        displayMin,
-        displayMax,
-        heightRange
-      },
-      scaling: {
-        effectiveRangeMultiplier,
-        bottomOffset,
-        availableHeight,
-        heightScale,
-        pixelsPerFoot: heightScale
-      }
-    });
 
     const segments: PathSegment[] = [];
 
@@ -209,7 +190,10 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   }, [contentWidth]);
 
   return (
-    <div className="chart-drawing" ref={containerRef}>
+    <div 
+      className="chart-drawing" 
+      ref={containerRef}
+    >
       <svg 
         width={dimensions.width} 
         height={dimensions.height} 
@@ -227,6 +211,14 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
                 type: "spring",
                 ...ANIMATION_CONFIG.wave.spring
               }
+            }}
+            onMouseEnter={() => {
+              console.log('Mouse entered wave path');
+              onMouseMove?.(0); // We'll update this value later
+            }}
+            onMouseLeave={() => {
+              console.log('Mouse left wave path');
+              onMouseLeave?.();
             }}
             onAnimationStart={() => {
               onAnimationStart?.();

@@ -7,13 +7,7 @@ function getTideHeight(time: Date, startDate: Date): number {
   const hoursSinceStart = (time.getTime() - startDate.getTime()) / (1000 * 60 * 60);
   const angle = (hoursSinceStart % 12) / 12 * Math.PI * 2; // Complete cycle every 12 hours
   const height = TIDE_CONFIG.mean + (TIDE_CONFIG.range() * Math.sin(angle));
-  console.log('Generated tide height:', {
-    hoursSinceStart,
-    angle,
-    mean: TIDE_CONFIG.mean,
-    range: TIDE_CONFIG.range(),
-    height
-  });
+  
   return height;
 }
 
