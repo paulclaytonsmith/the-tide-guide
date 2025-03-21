@@ -6,7 +6,7 @@ import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
 import { TideLabels } from './TideLabels';
 import { Tooltip } from './Tooltip';
-import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG } from './config';
+import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG, ANIMATION_CONFIG } from './config';
 import { generateInitialTideData } from '../../lib/initialTideData';
 import { Point, HourlyPoint } from './types';
 import './Chart.css';
@@ -169,6 +169,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
         '--label-offset': `${CHART_CONFIG.labelOffset}px`,
         '--wave-opacity': CHART_CONFIG.waveOpacity,
         '--time-axis-padding': `${TIME_AXIS_CONFIG.bottomPadding}px`,
+        '--tooltip-fade-duration': `${ANIMATION_CONFIG.tooltip.fadeDuration}ms`,
       } as React.CSSProperties}
     >
       <Grid isInitialLoad={isInitialLoad} />

@@ -25,6 +25,10 @@ export const ANIMATION_CONFIG = {
       restDelta: 0.001
     }
   },
+  tooltip: {
+    showDelay: 200,    // Delay before showing tooltip (ms)
+    fadeDuration: 150  // Duration of fade animation (ms)
+  },
   labels: {
     stagger: { // controls the delay between the labels appearing
       staggerScale: 2500, // Higher = faster sequence
