@@ -35,7 +35,7 @@ export const ANIMATION_CONFIG = {
       transition: {
         duration: 1,
         ease: [0.4, 0.5, 0.2, 1], // smooth easeOut
-        delay: .5 // slight delay to let wave animation start first
+        delay: 1 // slight delay to let wave animation start first
       }
     }
   },

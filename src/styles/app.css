@@ -7,3 +7,23 @@
   gap: 48px;
   overflow: hidden;
 } 
+
+.app-title {
+  position: fixed;
+  top: var(--page-padding);
+  left: var(--page-padding);
+  margin: 0;
+  z-index: 10;
+  color: var(--color-off-white);
+  transition: opacity 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
