@@ -178,9 +178,11 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
   }, [contentWidth]);
 
   return (
-    <div 
+    <motion.div 
       className="chart-drawing" 
       ref={containerRef}
+      initial={ANIMATION_CONFIG.chartDrawing.initial}
+      animate={ANIMATION_CONFIG.chartDrawing.animate}
     >
       <svg 
         width={dimensions.width} 
@@ -222,6 +224,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
           />
         )}
       </svg>
-    </div>
+    </motion.div>
   );
 }; 

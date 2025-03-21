@@ -25,6 +25,19 @@ export const ANIMATION_CONFIG = {
       restDelta: 0.001
     }
   },
+  chartDrawing: { // controls the initial slide up of the chart drawing
+    initial: {
+      y: 600
+    },
+    animate: {
+      y: 0,
+      transition: {
+        duration: 1,
+        ease: [0.4, 0.5, 0.2, 1], // smooth easeOut
+        delay: 0.2 // slight delay to let wave animation start first
+      }
+    }
+  },
   tooltip: {
     showDelay: 200,    // Delay before showing tooltip (ms)
     fadeDuration: 150,  // Duration of fade animation (ms)
