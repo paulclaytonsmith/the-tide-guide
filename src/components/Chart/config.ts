@@ -27,7 +27,14 @@ export const ANIMATION_CONFIG = {
   },
   tooltip: {
     showDelay: 200,    // Delay before showing tooltip (ms)
-    fadeDuration: 150  // Duration of fade animation (ms)
+    fadeDuration: 150,  // Duration of fade animation (ms)
+    rateDelay: 333,    // Delay before showing flow rate (ms)
+    arrow: {
+      duration: 0.3,    // Duration of arrow animation (s)
+      delay: 0.25,      // Delay before arrow animation starts (s)
+      offset: 8,        // Initial offset for arrow movement (px)
+      ease: "easeOut"   // Easing function for arrow animation
+    }
   },
   labels: {
     stagger: { // controls the delay between the labels appearing

@@ -58,3 +58,10 @@
   color: var(--color-dark50);
   font-weight: var(--font-regular);
 } 
+
+.tide-tooltip-rate-value::after {
+  content: '0';
+  display: inline-block;
+  width: 0;
+  visibility: hidden;
+} 

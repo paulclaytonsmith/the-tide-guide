@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './Tooltip.css';
 import ArrowIcon from './icons/arrow.svg';
 import { ANIMATION_CONFIG } from './config';
+import { useTypeout } from '../../hooks/useTypeout';
+import { motion } from 'framer-motion';
 
 interface TooltipProps {
   height: number;
@@ -44,6 +46,14 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, a
   const formattedRate = `${Math.abs(rate).toFixed(1)}' / hr`;
   const isRising = rate > 0;
 
+  // Use typeout effect for rate only
+  const { displayText: displayRate } = useTypeout(formattedRate, {
+    delay: 50,
+    initialDelay: ANIMATION_CONFIG.tooltip.showDelay + ANIMATION_CONFIG.tooltip.rateDelay,
+    scramble: true,
+    scrambleAhead: 2
+  }, `rate-${rate}`);
+
   return (
     <div className={`tide-tooltip ${alignRight ? 'tide-tooltip--right' : ''} ${isShown ? 'visible' : ''}`}>
       <div className="tide-tooltip-content">
@@ -53,14 +63,23 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, a
           {formattedTime}
         </h1>
         <div className="tide-tooltip-rate">
-          <span className="tide-tooltip-arrow">
+          <motion.span 
+            className="tide-tooltip-arrow"
+            initial={{ opacity: 0, y: isRising ? ANIMATION_CONFIG.tooltip.arrow.offset : -ANIMATION_CONFIG.tooltip.arrow.offset }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: ANIMATION_CONFIG.tooltip.arrow.duration,
+              delay: ANIMATION_CONFIG.tooltip.arrow.delay,
+              ease: ANIMATION_CONFIG.tooltip.arrow.ease
+            }}
+          >
             <img 
               src={ArrowIcon} 
               alt="" 
               className={isRising ? '' : 'falling'}
             />
-          </span>
-          <p className="tide-tooltip-rate-value">{formattedRate}</p>
+          </motion.span>
+          <p className="tide-tooltip-rate-value">{displayRate}</p>
         </div>
       </div>
     </div>
