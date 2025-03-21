@@ -169,6 +169,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                           time={point.time}
                           rate={rate}
                           visible={true}
+                          type={point.type}
                           alignRight={tooltipAlignRight !== undefined ? tooltipAlignRight : x > dimensions.width / 2}
                         />
                       )}
@@ -240,6 +241,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                           time={point.time}
                           rate={rate}
                           visible={true}
+                          type={point.type}
                           alignRight={tooltipAlignRight !== undefined ? tooltipAlignRight : x > dimensions.width / 2}
                         />
                       )}

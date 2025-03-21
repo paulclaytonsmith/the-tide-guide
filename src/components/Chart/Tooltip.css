@@ -64,4 +64,9 @@
   display: inline-block;
   width: 0;
   visibility: hidden;
+}
+
+/* High/Low tide rate value */
+.tide-tooltip-rate-value--extreme {
+  color: var(--color-dark);
 } 

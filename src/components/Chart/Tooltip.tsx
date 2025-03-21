@@ -11,9 +11,17 @@ interface TooltipProps {
   rate: number;
   visible: boolean;
   alignRight?: boolean;
+  type?: "High" | "Low" | "Hourly";
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, alignRight = false }) => {
+export const Tooltip: React.FC<TooltipProps> = ({ 
+  height, 
+  time, 
+  rate, 
+  visible, 
+  alignRight = false,
+  type = "Hourly"
+}) => {
   const [isShown, setIsShown] = useState(false);
 
   useEffect(() => {
@@ -43,16 +51,22 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, a
   });
 
   const formattedHeight = `${height.toFixed(1)}'`;
-  const formattedRate = `${Math.abs(rate).toFixed(1)}' / hr`;
+  const formattedRate = type === "Hourly" 
+    ? `${Math.abs(rate).toFixed(1)}' / hr`
+    : `${type} Tide`;
   const isRising = rate > 0;
 
-  // Use typeout effect for rate only
-  const { displayText: displayRate } = useTypeout(formattedRate, {
-    delay: 50,
-    initialDelay: ANIMATION_CONFIG.tooltip.showDelay + ANIMATION_CONFIG.tooltip.rateDelay,
-    scramble: true,
-    scrambleAhead: 2
-  }, `rate-${rate}`);
+  // Use typeout effect for hourly points only
+  const { displayText: displayRate } = useTypeout(
+    type === "Hourly" ? formattedRate : "", // Only use typeout for hourly points
+    {
+      delay: 50,
+      initialDelay: ANIMATION_CONFIG.tooltip.showDelay,
+      scramble: false,
+      scrambleAhead: 0
+    }, 
+    `rate-${rate}-${type}`
+  );
 
   return (
     <div className={`tide-tooltip ${alignRight ? 'tide-tooltip--right' : ''} ${isShown ? 'visible' : ''}`}>
@@ -63,23 +77,27 @@ export const Tooltip: React.FC<TooltipProps> = ({ height, time, rate, visible, a
           {formattedTime}
         </h1>
         <div className="tide-tooltip-rate">
-          <motion.span 
-            className="tide-tooltip-arrow"
-            initial={{ opacity: 0, y: isRising ? ANIMATION_CONFIG.tooltip.arrow.offset : -ANIMATION_CONFIG.tooltip.arrow.offset }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: ANIMATION_CONFIG.tooltip.arrow.duration,
-              delay: ANIMATION_CONFIG.tooltip.arrow.delay,
-              ease: ANIMATION_CONFIG.tooltip.arrow.ease
-            }}
-          >
-            <img 
-              src={ArrowIcon} 
-              alt="" 
-              className={isRising ? '' : 'falling'}
-            />
-          </motion.span>
-          <p className="tide-tooltip-rate-value">{displayRate}</p>
+          {type === "Hourly" && (
+            <motion.span 
+              className="tide-tooltip-arrow"
+              initial={{ opacity: 0, y: isRising ? ANIMATION_CONFIG.tooltip.arrow.offset : -ANIMATION_CONFIG.tooltip.arrow.offset }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: ANIMATION_CONFIG.tooltip.arrow.duration,
+                delay: ANIMATION_CONFIG.tooltip.arrow.delay,
+                ease: ANIMATION_CONFIG.tooltip.arrow.ease
+              }}
+            >
+              <img 
+                src={ArrowIcon} 
+                alt="" 
+                className={isRising ? '' : 'falling'}
+              />
+            </motion.span>
+          )}
+          <p className={`tide-tooltip-rate-value ${type !== "Hourly" ? 'tide-tooltip-rate-value--extreme' : ''}`}>
+            {type === "Hourly" ? displayRate : formattedRate}
+          </p>
         </div>
       </div>
     </div>
