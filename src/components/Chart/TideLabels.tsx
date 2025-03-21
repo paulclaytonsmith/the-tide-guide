@@ -99,6 +99,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
             <AnimatePresence>
               {data
                 .filter(point => point.type === "High" || point.type === "Low")
+                .filter(point => point.time.getTime() < data[data.length - 1].time.getTime())
                 .map((point) => {
                   const timeRange = data[data.length - 1].time.getTime() - data[0].time.getTime();
                   const timeScale = dimensions.width / timeRange;
@@ -187,6 +188,7 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
 
               return data
                 .filter(point => point.type === "Hourly")
+                .filter(point => point.time.getTime() < data[data.length - 1].time.getTime())
                 .filter(point => {
                   // Filter out hourly points that are near high/low points
                   return !highLowPoints.some(hlPoint => {

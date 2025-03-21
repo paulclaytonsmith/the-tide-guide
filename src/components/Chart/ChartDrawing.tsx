@@ -159,7 +159,8 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
       });
     }
 
-    pathPoints.push(`L ${dimensions.width} ${dimensions.height}`);
+    // Extend the path slightly beyond the container width to prevent gaps
+    pathPoints.push(`L ${dimensions.width + 1} ${dimensions.height}`);
     pathPoints.push(`L 0 ${dimensions.height}`);
     pathPoints.push('Z');
 
