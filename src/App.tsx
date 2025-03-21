@@ -11,13 +11,11 @@ interface LocationData {
 }
 
 function App() {
-  const [selectedLocation, setSelectedLocation] = React.useState<LocationData | null>(null)
   const [tideData, setTideData] = React.useState<TideData | null>(null)
   const [isLoadingTides, setIsLoadingTides] = React.useState(false)
   const [tideError, setTideError] = React.useState<string | null>(null)
 
   const handleLocationSelect = async (location: LocationData) => {
-    setSelectedLocation(location)
     setIsLoadingTides(true)
     setTideError(null)
     

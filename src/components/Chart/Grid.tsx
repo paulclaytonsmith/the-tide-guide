@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ANIMATION_CONFIG } from './config';
 import './Grid.css';
 
 interface GridProps {

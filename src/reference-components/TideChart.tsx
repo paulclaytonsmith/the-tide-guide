@@ -1,4 +1,4 @@
-import { TideData } from "@/lib/noaa"
+import { type TideData } from '@/lib/noaa'
 import { Area, AreaChart, ResponsiveContainer, YAxis, XAxis, Tooltip } from "recharts"
 import { useEffect, useRef, useState } from "react"
 
@@ -6,11 +6,10 @@ interface TideChartProps {
   data: TideData
 }
 
-export function TideChart({ data }: TideChartProps) {
+export const TideChart = ({ data }: TideChartProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [windowWidth, setWindowWidth] = useState(window.innerWidth)
-  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null)
 
   // Add resize listener
   useEffect(() => {
@@ -28,21 +27,6 @@ export function TideChart({ data }: TideChartProps) {
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (contentRef.current) {
-      const rect = contentRef.current.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-      setMousePosition({ x, y })
-      console.log('Mouse position:', { x, y })
-    }
-  }
-
-  const handleMouseLeave = () => {
-    setMousePosition(null)
-    console.log('Mouse left chart area')
-  }
 
   // Sort predictions by time
   const chartData = [...data.predictions]
@@ -183,8 +167,6 @@ export function TideChart({ data }: TideChartProps) {
           style={{ 
             transform: `translateX(-${windowWidth * (window.innerWidth < 640 ? 1.13 : 0.65)}px)`
           }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
         >
           <div 
             className="absolute bottom-0 left-0 right-0 h-28 -mt-1" 

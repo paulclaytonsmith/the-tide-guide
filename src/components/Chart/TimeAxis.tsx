@@ -2,14 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TIME_AXIS_CONFIG, ANIMATION_CONFIG } from './config';
+import { TIME_AXIS_CONFIG } from './config';
 import './TimeAxis.css';
-
-interface Point {
-  time: Date;
-  height: number;
-  type: "High" | "Low" | "Hourly";
-}
 
 interface TimeAxisProps {
   startTime: Date;

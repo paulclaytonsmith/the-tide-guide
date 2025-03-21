@@ -5,7 +5,6 @@ import { TimeAxis } from './TimeAxis';
 import { Grid } from './Grid';
 import { ChartDrawing } from './ChartDrawing';
 import { TideLabels } from './TideLabels';
-import { Tooltip } from './Tooltip';
 import { VIEWPORT_WIDTHS, CHART_CONFIG, TIME_AXIS_CONFIG, ANIMATION_CONFIG } from './config';
 import { generateInitialTideData } from '../../lib/initialTideData';
 import { Point, HourlyPoint } from './types';
@@ -16,11 +15,9 @@ interface ChartProps {
 }
 
 export const Chart: React.FC<ChartProps> = ({ tideData }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [hasStartedTransition, setHasStartedTransition] = useState(false);
-  const [mouseX, setMouseX] = useState<number | null>(null);
   const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
   const [tooltipAlignRight, setTooltipAlignRight] = useState(false);
 
@@ -52,29 +49,6 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const startTime = currentTideData[0].time;
   const endTime = currentTideData[currentTideData.length - 1].time;
 
-  // Find the midnight point and calculate its rate
-  const midnightPoint = useMemo(() => {
-    const midnight = currentTideData.find(point => {
-      const hours = point.time.getHours();
-      const minutes = point.time.getMinutes();
-      return hours === 0 && minutes === 0;
-    });
-
-    if (!midnight) return null;
-
-    const pointIndex = currentTideData.indexOf(midnight);
-    const nextPoint = currentTideData[pointIndex + 1];
-    const rate = nextPoint 
-      ? (nextPoint.height - midnight.height) / 
-        ((nextPoint.time.getTime() - midnight.time.getTime()) / (1000 * 60 * 60))
-      : 0;
-
-    return {
-      point: midnight,
-      rate
-    };
-  }, [currentTideData]);
-
   // Calculate offset to align midnight with the edge
   const { offsetPercentage, contentWidth } = useMemo(() => {
     const today = new Date();
@@ -99,7 +73,6 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   }, [startTime, endTime]);
 
   const handleAnimationStart = () => {
-    setIsAnimating(true);
     // Start fading in labels after a longer delay
     setTimeout(() => {
       setShowLabels(true);
@@ -107,7 +80,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   };
 
   const handleAnimationComplete = () => {
-    setIsAnimating(false);
+    // Implementation needed
   };
 
   // Find the closest point to the mouse position
@@ -133,7 +106,6 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   };
 
   const handleMouseMove = (x: number) => {
-    setMouseX(x);
     const closest = findClosestPoint(x);
     setHoveredPoint(closest);
     
@@ -145,7 +117,6 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   };
 
   const handleMouseLeave = () => {
-    setMouseX(null);
     setHoveredPoint(null);
   };
 
@@ -187,7 +158,6 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
             }}
           >
             <TimeAxis 
-              data={currentTideData}
               startTime={startTime}
               endTime={endTime}
               contentWidth={contentWidth}
