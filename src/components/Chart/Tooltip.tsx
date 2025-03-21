@@ -60,8 +60,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const { displayText: displayRate } = useTypeout(
     type === "Hourly" ? formattedRate : "", // Only use typeout for hourly points
     {
-      delay: 50,
-      initialDelay: ANIMATION_CONFIG.tooltip.showDelay,
+      delay: 30,
+      initialDelay: ANIMATION_CONFIG.tooltip.showDelay + ANIMATION_CONFIG.tooltip.rateDelay,
       scramble: false,
       scrambleAhead: 0
     }, 
