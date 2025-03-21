@@ -25,16 +25,17 @@ export const ANIMATION_CONFIG = {
       restDelta: 0.001
     }
   },
-  chartDrawing: { // controls the initial slide up of the chart drawing
+  chartDrawing: { // controls the initial scale animation of the chart drawing
     initial: {
-      y: 600
+      scaleY: 3, // Start with height of 100vh (approximately 3x normal height)
+      transformOrigin: "50% 100%" // Scale from bottom center
     },
     animate: {
-      y: 0,
+      scaleY: 1, // Scale to normal height
       transition: {
         duration: 1,
         ease: [0.4, 0.5, 0.2, 1], // smooth easeOut
-        delay: 0.2 // slight delay to let wave animation start first
+        delay: .5 // slight delay to let wave animation start first
       }
     }
   },
