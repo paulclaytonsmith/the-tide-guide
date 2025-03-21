@@ -63,9 +63,7 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
           dateLabel: isMidnight ? `${time.toLocaleDateString('en-US', { weekday: 'long' })} ${time.getMonth() + 1}/${time.getDate()}` : '',
           timeLabel: time.toLocaleTimeString([], { hour: 'numeric', hour12: true })
             .replace(/\s/g, '')
-            .replace(':00', '')
-            .replace('AM', 'A')
-            .replace('PM', 'P'),
+            .replace(':00', ''),
           isMidnight
         });
       } else {
