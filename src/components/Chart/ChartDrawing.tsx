@@ -212,13 +212,22 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
                 ...ANIMATION_CONFIG.wave.spring
               }
             }}
-            onMouseEnter={() => {
+            onMouseEnter={(e) => {
+              e.stopPropagation();
               console.log('Mouse entered wave path');
-              onMouseMove?.(0); // We'll update this value later
             }}
-            onMouseLeave={() => {
+            onMouseLeave={(e) => {
+              e.stopPropagation();
               console.log('Mouse left wave path');
               onMouseLeave?.();
+            }}
+            onMouseMove={(e: React.MouseEvent<SVGPathElement>) => {
+              e.stopPropagation();
+              const rect = containerRef.current?.getBoundingClientRect();
+              if (rect) {
+                const x = e.clientX - rect.left;
+                onMouseMove?.(x);
+              }
             }}
             onAnimationStart={() => {
               onAnimationStart?.();

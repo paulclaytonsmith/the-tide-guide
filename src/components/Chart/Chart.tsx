@@ -26,6 +26,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [hasStartedTransition, setHasStartedTransition] = useState(false);
   const [mouseX, setMouseX] = useState<number | null>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
 
   // Use initial tide data when no real data is provided
   const currentTideData = useMemo(() => {
@@ -113,12 +114,41 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
     setIsAnimating(false);
   };
 
+  // Find the closest point to the mouse position
+  const findClosestPoint = (x: number) => {
+    if (!x || currentTideData.length === 0) return null;
+
+    const timeRange = endTime.getTime() - startTime.getTime();
+    const timeScale = (contentWidth * window.innerWidth / 100) / timeRange;
+    
+    let closestPoint = currentTideData[0];
+    let minDistance = Infinity;
+
+    currentTideData.forEach(point => {
+      const pointX = (point.time.getTime() - startTime.getTime()) * timeScale;
+      const distance = Math.abs(pointX - x);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestPoint = point;
+      }
+    });
+
+    return closestPoint;
+  };
+
   const handleMouseMove = (x: number) => {
     setMouseX(x);
+    const closest = findClosestPoint(x);
+    setHoveredPoint(closest);
   };
 
   const handleMouseLeave = () => {
     setMouseX(null);
+    setHoveredPoint(null);
+  };
+
+  const handlePointHover = (point: Point | null) => {
+    setHoveredPoint(point);
   };
 
   return (
@@ -167,20 +197,13 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
                 data={allData}
                 contentWidth={contentWidth}
                 isAnimating={!showLabels || isInitialLoad}
+                hoveredPoint={hoveredPoint}
+                onPointHover={handlePointHover}
               />
             </div>
           </div>
         </div>
       </div>
-      {/* Move Tooltip outside of scroll container */}
-      {midnightPoint && !isInitialLoad && (
-        <Tooltip
-          height={midnightPoint.point.height}
-          time={midnightPoint.point.time}
-          rate={midnightPoint.rate}
-          visible={true}
-        />
-      )}
     </div>
   );
 }; 

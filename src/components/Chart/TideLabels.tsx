@@ -14,19 +14,36 @@ interface TideLabelsProps {
   data: Point[];
   contentWidth: number;
   isAnimating?: boolean;
+  hoveredPoint?: Point | null;
+  onPointHover?: (point: Point | null) => void;
 }
 
 export const TideLabels: React.FC<TideLabelsProps> = ({ 
   data, 
   contentWidth,
-  isAnimating = false 
+  isAnimating = false,
+  hoveredPoint: externalHoveredPoint,
+  onPointHover
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [hoveredPoint, setHoveredPoint] = useState<Point | null>(null);
+  const [internalHoveredPoint, setInternalHoveredPoint] = useState<Point | null>(null);
   const [dimensions, setDimensions] = useState({
     width: (window.innerWidth * contentWidth) / 100,
     height: 0
   });
+
+  // Use external hover point if provided, otherwise use internal state
+  const hoveredPoint = externalHoveredPoint ?? internalHoveredPoint;
+
+  const handleMouseEnter = (point: Point) => {
+    setInternalHoveredPoint(point);
+    onPointHover?.(point);
+  };
+
+  const handleMouseLeave = () => {
+    setInternalHoveredPoint(null);
+    onPointHover?.(null);
+  };
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -105,8 +122,8 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                         left: `${x}px`,
                         transform: `translateX(-50%)`,
                       }}
-                      onMouseEnter={() => setHoveredPoint(point)}
-                      onMouseLeave={() => setHoveredPoint(null)}
+                      onMouseEnter={() => handleMouseEnter(point)}
+                      onMouseLeave={handleMouseLeave}
                     >
                       <motion.p 
                         className="tide-point-height"
@@ -181,8 +198,8 @@ export const TideLabels: React.FC<TideLabelsProps> = ({
                         left: `${x}px`,
                         top: `${y}px`
                       }}
-                      onMouseEnter={() => setHoveredPoint(point)}
-                      onMouseLeave={() => setHoveredPoint(null)}
+                      onMouseEnter={() => handleMouseEnter(point)}
+                      onMouseLeave={handleMouseLeave}
                     >
                       <div className={`tide-point-marker tide-point-marker--hourly ${isNearHighLow ? 'tide-point-marker--near-extreme' : ''}`} />
                       {hoveredPoint === point && (
