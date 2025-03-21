@@ -46,7 +46,7 @@ export const Chart: React.FC<ChartProps> = ({ tideData }) => {
       setHasStartedTransition(true);
       setIsInitialLoad(false);
     }
-  }, [tideData, isInitialLoad, hasStartedTransition, currentTideData]);
+  }, [tideData, isInitialLoad, hasStartedTransition]);
 
   // Get start and end times from the current dataset
   const startTime = currentTideData[0].time;

@@ -12,7 +12,6 @@ interface Point {
 }
 
 interface TimeAxisProps {
-  data: Point[];
   startTime: Date;
   endTime: Date;
   contentWidth: number;
@@ -20,7 +19,6 @@ interface TimeAxisProps {
 }
 
 export const TimeAxis: React.FC<TimeAxisProps> = ({ 
-  data, 
   startTime, 
   endTime, 
   contentWidth,

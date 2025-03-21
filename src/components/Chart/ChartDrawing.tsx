@@ -46,14 +46,6 @@ export const ChartDrawing: React.FC<ChartDrawingProps> = ({
     return [...data].sort((a, b) => a.time.getTime() - b.time.getTime());
   }, [data]);
 
-  const heightBounds = useMemo(() => {
-    if (data.length === 0) return { min: 0, max: 0 };
-    return data.reduce((acc, point) => ({
-      min: Math.min(acc.min, point.height),
-      max: Math.max(acc.max, point.height)
-    }), { min: Infinity, max: -Infinity });
-  }, [data]);
-
   // Helper function to calculate y position with offsets
   const calculateYPosition = (height: number, displayMin: number, heightScale: number, availableHeight: number) => {
     const scaledHeight = (height - displayMin) * heightScale;
