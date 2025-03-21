@@ -85,8 +85,11 @@ export const TimeAxis: React.FC<TimeAxisProps> = ({
   return (
     <motion.div 
       className="time-axis"
-      initial={{ opacity: 0 }}
-      animate={isInitialLoad ? { opacity: 0 } : ANIMATION_CONFIG.fadeIn.animate}
+      initial={{ opacity: 0, y: 400 }}
+      animate={isInitialLoad ? 
+        { opacity: 0, y: 400 } : 
+        { opacity: 1, y: 0, transition: { duration: 1.5, ease: [0.4, 0.5, 0.2, 1] } }
+      }
       style={{
         visibility: isInitialLoad ? 'hidden' : 'visible'
       }}
