@@ -23,6 +23,17 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment and sensitive files
 .env
 .env.local
 .env.*.local
+FigmaKey.txt
+*.pem
+.env.development
+.env.test
+.env.production
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firebase-debug.*.log*
