@@ -1,96 +1,178 @@
-# Tide Prediction App
+# 🌊 The Tide Guide
 
-A modern web application for checking tide predictions at any coastal location. Built with React, TypeScript, and Vite.
+A web application for checking tide predictions at any location near a NOAA tide station. Built with React, TypeScript, and Vite, this app provides real-time tide data with an interactive visualization.
 
-## Features
+## ✨ Features
 
-- 🌊 Real-time tide predictions from NOAA
-- 📍 Location-based search with Google Maps integration
-- 📊 Interactive tide chart visualization
-- 🎨 Modern, responsive design with custom animations
-- ⚡ Fast performance with Vite build system
+- 🌊 **Real-time Tide Predictions**
+  - Accurate data from NOAA's tide prediction service
+  - Support for locations worldwide
+  - 24-hour tide forecasts
 
-## Tech Stack
+- 📍 **Smart Location Search**
+  - Google Maps integration for precise location selection
+  - Automatic nearest station detection
 
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS
-- Google Maps API
-- NOAA Tides API
-- Firebase Hosting
+- 📊 **Interactive Visualization**
+  - Beautiful, responsive tide charts
+  - Animated tide level indicators
+  - Time-based navigation
+  - Custom tooltips with detailed information
 
-## Getting Started
+- 🎨 **Modern Design**
+  - Clean, minimalist interface
+  - Custom animations and transitions
+  - Responsive layout for all devices
+  - Dark/light mode support
+
+## 🛠 Tech Stack
+
+- **Frontend Framework**: React 19
+- **Language**: TypeScript
+- **Build Tool**: Vite
+- **Styling**: 
+  - Tailwind CSS
+  - Custom animations with Framer Motion
+- **APIs**: 
+  - Google Maps JavaScript API
+  - NOAA CO-OPS API
+- **Hosting**: Firebase
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v18 or higher recommended)
+- Node.js (v18 or higher)
 - npm or yarn
 - Google Maps API key
-- NOAA API key (optional)
+- Git
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone [repository-url]
-cd tide
-```
+   ```bash
+   git clone https://github.com/paulclaytonsmith/the-tide-guide
+   cd tide
+   ```
 
 2. Install dependencies:
-```bash
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-3. Create a `.env` file in the root directory with your API keys:
-```
-VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-```
+3. Set up environment variables:
+   ```bash
+   # Create .env file
+   cp .env.example .env
+   
+   # Add your API keys
+   VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+   ```
 
 4. Start the development server:
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
-The app will be available at `http://localhost:5173`
+   Visit `http://localhost:5173` to see the app.
 
-### Building for Production
+## 📦 Building for Production
 
-```bash
-npm run build
-```
+1. Create a production build:
+   ```bash
+   npm run build
+   ```
 
-## Deployment
+2. Preview the production build:
+   ```bash
+   npm run preview
+   ```
 
-The app is configured for Firebase Hosting. To deploy:
+## 🚢 Deployment
 
-1. Install Firebase CLI (if not already installed):
-```bash
-npm install -g firebase-tools
-```
+The app is configured for Firebase Hosting deployment:
+
+1. Install Firebase CLI globally:
+   ```bash
+   npm install -g firebase-tools
+   ```
 
 2. Login to Firebase:
-```bash
-firebase login
-```
+   ```bash
+   firebase login
+   ```
 
-3. Deploy:
-```bash
-firebase deploy
-```
+3. Initialize Firebase (first time only):
+   ```bash
+   firebase init hosting
+   ```
 
-## Contributing
+4. Deploy:
+   ```bash
+   firebase deploy
+   ```
 
-1. Create a feature branch from `main`
-2. Make your changes
-3. Submit a pull request to `main`
-4. After review and merge to `main`, changes will be merged to `deploy` for deployment
+## 🤝 Contributing
 
-## License
+We welcome contributions! Please follow these steps:
 
-[Add your chosen license here]
+1. Fork the repository
+2. Create your feature branch:
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes:
+   ```bash
+   git commit -m 'Add some AmazingFeature'
+   ```
+4. Push to the branch:
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open a Pull Request
 
-## Acknowledgments
+### Branch Structure
 
-- NOAA for tide prediction data
-- Google Maps for location services
+- `main`: Primary development branch
+- `deploy`: Production deployment branch
+- Feature branches: `feature/feature-name`
+- Hotfix branches: `hotfix/fix-name`
+
+## 📝 Development Guidelines
+
+- Use TypeScript strictly - no `any` types
+- Follow ESLint configuration
+- Write unit tests for new features
+- Follow the existing code style
+- Update documentation as needed
+
+## 🔑 API Keys Setup
+
+### Google Maps API
+1. Visit Google Cloud Console
+2. Create a new project
+3. Enable Maps JavaScript API
+4. Create credentials
+5. Add to your `.env` file
+
+### NOAA CO-OPS API
+- No API key required
+- Rate limited to 1 request per 3 seconds
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👏 Acknowledgments
+
+- [NOAA CO-OPS API](https://tidesandcurrents.noaa.gov/api/) for tide prediction data
+- [Google Maps Platform](https://developers.google.com/maps) for location services
+- [Founders Grotesk](https://klim.co.nz/retail-fonts/founders-grotesk/) font family by Klim Type Foundry
+
+## 📞 Support
+
+For support, please open an issue in the GitHub repository or contact the maintainers.
+
+---
+
+Made with ❤️ by [Your Name]
