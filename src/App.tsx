@@ -35,7 +35,8 @@ function App() {
 
   return (
     <div className="app-container">
-      <Location 
+      <h1>Hello World</h1>
+      {/* <Location 
         onLocationSelect={handleLocationSelect}
         isLoadingTides={isLoadingTides}
         tideError={tideError}
@@ -43,7 +44,7 @@ function App() {
       />
       <Chart 
         tideData={tideData?.predictions || []}
-      />
+      /> */}
     </div>
   )
 }
