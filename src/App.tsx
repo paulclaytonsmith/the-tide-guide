@@ -1,8 +1,11 @@
 import React from 'react'
+import { CardContainer } from './components/CardContainer'
 import { Location } from './components/Location'
 import { getTidePredictions, type TideData } from '@/lib/noaa'
 import { Chart } from './components/Chart'
-import './styles/app.css'
+import '@mantine/core/styles.css'
+import { MantineProvider, Button, AppShell } from '@mantine/core'
+import { theme } from './theme'
 
 interface LocationData {
   name: string
@@ -10,10 +13,25 @@ interface LocationData {
   lng: number
 }
 
+function useViewportHeightFix() {
+  React.useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVh();
+    window.addEventListener('resize', setVh);
+    return () => window.removeEventListener('resize', setVh);
+  }, []);
+}
+
+
 function App() {
   const [tideData, setTideData] = React.useState<TideData | null>(null)
   const [isLoadingTides, setIsLoadingTides] = React.useState(false)
   const [tideError, setTideError] = React.useState<string | null>(null)
+  useViewportHeightFix();
 
   const handleLocationSelect = async (location: LocationData) => {
     setIsLoadingTides(true)
@@ -34,18 +52,16 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      <h1>Hello World</h1>
-      {/* <Location 
-        onLocationSelect={handleLocationSelect}
-        isLoadingTides={isLoadingTides}
-        tideError={tideError}
-        stationId={tideData?.stationId}
-      />
-      <Chart 
-        tideData={tideData?.predictions || []}
-      /> */}
-    </div>
+    <MantineProvider theme={theme}>
+      <AppShell
+        style={{
+          height: 'calc(var(--vh, 1vh) * 100)',
+        }}
+>
+        {/* Your main content here */}
+        <CardContainer />
+      </AppShell>
+    </MantineProvider>
   )
 }
 
