@@ -46,6 +46,7 @@ const colors = {
   chartTick: '#a7a7a7',  // Chart ticks
   hiLo: '#07232f',       // Hi/Lo marker text
   white: '#ffffff',
+  blue: '#016AE9',
   // Figma variables
   lightInk: '#000000',
   lightPrimary: '#ffffff',
