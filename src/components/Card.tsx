@@ -7,9 +7,10 @@ interface CardProps {
   title?: string;
   onClose?: () => void;
   children?: React.ReactNode;
+  height?: number | string; // Add height prop
 }
 
-export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose, children }) => {
+export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose, children, height }) => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: 48em)`); // 768px
 
@@ -26,7 +27,7 @@ export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose,
       radius={radius}
       p={0}
       w="100%"
-      h="100%"
+      h={height || '100%'} // Use the height prop or fallback to 100%
       style={{
         background: cardBg,
         display: 'flex',
@@ -34,6 +35,7 @@ export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose,
         alignItems: 'stretch',
         justifyContent: 'flex-start',
         overflow: 'hidden',
+        height: height || '100%', // Ensure inline style as well
       }}
     >
       <div
@@ -43,6 +45,7 @@ export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose,
           justifyContent: 'space-between',
           padding: `${paddingY} ${paddingX} 0 ${paddingX}`,
           gap: theme.spacing.md,
+          height: 'auto',
         }}
       >
         <Text
@@ -90,6 +93,7 @@ export const Card: React.FC<CardProps> = ({ title = 'Bolinas, CA, USA', onClose,
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.md,
+          height: '100%', // Ensure this fills the Paper
         }}
       >
         {children}
