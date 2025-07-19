@@ -3,25 +3,13 @@ import { Paper, useMantineTheme, Text } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { IconX } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
-
-// Compound state types
-export type CardRole = 'thumbnail' | 'active';
-export type CardPhase = 'entering' | 'entered' | 'exiting' | 'exited';
-export type CardCompoundState = `${CardRole}-${CardPhase}`;
-
-interface CardProps {
-  title?: string;
-  onClose?: () => void;
-  children?: React.ReactNode;
-  height?: number | string;
-  compoundState: CardCompoundState;
-  onCardClick?: () => void;
-  onAnimationComplete?: () => void;
-}
+import { CardProps } from '../../state/types';
+import { useCardAnimations } from '../../hooks/useCardAnimations';
+import { ANIMATION_TIMING } from '../../utils/animationTiming';
 
 const MotionDiv = motion.div;
 
-export const Card: React.FC<CardProps & { index?: number }> = ({
+export const Card: React.FC<CardProps> = ({
   title = 'Bolinas, CA, USA',
   onClose,
   children,
@@ -33,63 +21,14 @@ export const Card: React.FC<CardProps & { index?: number }> = ({
 }) => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: 48em)`); // 768px
+  const animationConfig = useCardAnimations(compoundState);
 
   // Figma-based values from theme
   const radius = isMobile ? theme.radius.md : theme.radius.lg;
   const paddingY = isMobile ? theme.spacing.lg : theme.spacing.xl;
   const paddingX = isMobile ? theme.spacing.md : theme.spacing.xl;
   const headerFontSize = theme.fontSizes.lg;
-  let cardBg = theme.colors.card?.[0] || '#fff';
-  if (compoundState === 'active-entering') {
-    cardBg = '#ffe066'; // yellow
-  } else if (compoundState === 'active-entered') {
-    cardBg = '#00e884'; // green/accent
-  }
   const textColor = theme.colors.ink?.[0] || '#232732';
-
-  // Animation logic based on compoundState
-  let initialProps: any = undefined;
-  let animateProps: any = undefined;
-  let exitProps: any = undefined;
-  let pointerEvents: React.CSSProperties['pointerEvents'] = undefined;
-  // Determine if close button should be rendered (for animation)
-  const showCloseButton = compoundState === 'active-entered' || compoundState === 'active-exiting';
-  // Animate close button opacity
-  let closeButtonOpacity = 0;
-  if (compoundState === 'active-entered') closeButtonOpacity = 1;
-  if (compoundState === 'active-exiting') closeButtonOpacity = 0;
-
-  switch (compoundState) {
-    case 'thumbnail-entered':
-      initialProps = { opacity: 0, scale: 0.95 };
-      animateProps = { opacity: 1, scale: 1, transition: { duration: 0.3 } };
-      exitProps = { opacity: 0, scale: 0.95, transition: { duration: 0.2 } };
-      break;
-    case 'thumbnail-exiting':
-      animateProps = { opacity: 0, scale: 0.95, transition: { duration: 0.3 } };
-      pointerEvents = 'none';
-      break;
-    case 'thumbnail-entering':
-      initialProps = { opacity: 0, scale: 0.95 };
-      animateProps = { opacity: 1, scale: 1, transition: { duration: 0.3 } };
-      break;
-    case 'thumbnail-exited':
-      animateProps = { opacity: 0, scale: 0.95, transition: { duration: 0.01 } };
-      pointerEvents = 'none';
-      break;
-    case 'active-entering':
-      initialProps = { opacity: 1, scale: 1 };
-      animateProps = { opacity: 1, scale: 1, transition: { duration: 0.3 } };
-      break;
-    case 'active-entered':
-      animateProps = { opacity: 1, scale: 1 };
-      break;
-    case 'active-exiting':
-      animateProps = { opacity: 1, scale: 1, transition: { duration: 0.3 } };
-      break;
-    default:
-      animateProps = { opacity: 1, scale: 1 };
-  }
 
   // Handler for card click (excluding close button)
   const handleCardClick = (e: React.MouseEvent) => {
@@ -105,22 +44,25 @@ export const Card: React.FC<CardProps & { index?: number }> = ({
   };
 
   React.useEffect(() => {
-    console.log(`[Card] render index=${index}, compoundState=${compoundState}, pointerEvents=${pointerEvents}`);
+    console.log(`[Card] render index=${index}, compoundState=${compoundState}, pointerEvents=${animationConfig.pointerEvents}`);
   });
 
   return (
     <MotionDiv
-      initial={initialProps}
-      animate={animateProps}
-      exit={exitProps}
+      initial={animationConfig.initialProps}
+      animate={animationConfig.animateProps}
+      exit={animationConfig.exitProps}
       style={{
         height: height || '100%',
-        ...(pointerEvents ? { pointerEvents } : {}),
+        ...(animationConfig.pointerEvents ? { pointerEvents: animationConfig.pointerEvents } : {}),
       } as React.CSSProperties}
       onClick={handleCardClick}
       onAnimationComplete={() => {
-        console.log(`[Card] onAnimationComplete index=${index}, compoundState=${compoundState}`);
-        if (onAnimationComplete) onAnimationComplete();
+        console.log(`[Card ${index}] Animation complete callback triggered for state: ${compoundState}`);
+        if (onAnimationComplete) {
+          console.log(`[Card ${index}] Calling onAnimationComplete with index=${index}, state=${compoundState}`);
+          onAnimationComplete();
+        }
       }}
     >
       <Paper
@@ -129,14 +71,14 @@ export const Card: React.FC<CardProps & { index?: number }> = ({
         w="100%"
         h={height || '100%'}
         style={{
-          background: cardBg,
+          background: animationConfig.cardBg,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'stretch',
           justifyContent: 'flex-start',
           overflow: 'hidden',
           height: height || '100%',
-          transition: 'background 0.2s',
+          transition: `background ${ANIMATION_TIMING.BACKGROUND_TRANSITION}s`,
         }}
       >
         <div
@@ -164,27 +106,34 @@ export const Card: React.FC<CardProps & { index?: number }> = ({
           >
             {title}
           </Text>
-          {showCloseButton && (
+          {animationConfig.showCloseButton && (
             <motion.button
               onClick={handleClose}
               aria-label="Close"
-              initial={{ opacity: closeButtonOpacity }}
-              animate={{ opacity: closeButtonOpacity }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: animationConfig.closeButtonOpacity }}
+              animate={{ opacity: animationConfig.closeButtonOpacity }}
+              transition={{ duration: ANIMATION_TIMING.CLOSE_BUTTON_FADE }}
+              onAnimationComplete={() => {
+                // If this is active-exiting and close button is fading out, trigger card completion
+                if (compoundState === 'active-exiting' && animationConfig.closeButtonOpacity === 0) {
+                  console.log(`[Card ${index}] Close button fade complete, triggering card completion`);
+                  if (onAnimationComplete) onAnimationComplete();
+                }
+              }}
               style={{
                 background: 'none',
                 border: 'none',
                 padding: 0,
                 marginLeft: '16px',
                 borderRadius: '50%',
-                cursor: closeButtonOpacity === 1 ? 'pointer' : 'default',
+                cursor: animationConfig.closeButtonOpacity === 1 ? 'pointer' : 'default',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'background 0.2s',
                 width: 36,
                 height: 36,
-                pointerEvents: closeButtonOpacity === 1 ? 'auto' : 'none',
+                pointerEvents: animationConfig.closeButtonOpacity === 1 ? 'auto' : 'none',
               }}
               onMouseOver={e => (e.currentTarget.style.opacity = '0.5')}
               onMouseOut={e => (e.currentTarget.style.opacity = '1')}
