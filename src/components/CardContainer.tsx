@@ -1,9 +1,12 @@
 import React from 'react';
+import { Box } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
-import { CardGrid } from './CardGrid';
+import { motion } from 'framer-motion';
+import { Card } from './Card';
 import { useCardStateMachine } from '../hooks/useCardStateMachine';
 
 const CARD_COUNT = 6;
+const MotionDiv = motion.div;
 
 export const CardContainer: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 48em)');
@@ -22,18 +25,80 @@ export const CardContainer: React.FC = () => {
   const gridPadding = isMobile ? 16 : 32;
   const cardHeight = isMobile ? 359 : undefined;
 
-  return (
-    <CardGrid
-      cardCount={CARD_COUNT}
-      isMobile={isMobile}
-      gridGap={gridGap}
-      gridPadding={gridPadding}
-      cardHeight={cardHeight}
-      cardStates={cardStates}
-      cardKeys={cardKeys}
-      onCardClick={handleCardClick}
-      onCardClose={handleCardClose}
-      onAnimationComplete={handleAnimationComplete}
+  const renderCard = (i: number) => (
+    <Card
+      key={cardKeys[i]}
+      height={cardHeight}
+      compoundState={cardStates[i]}
+      onCardClick={() => handleCardClick(i)}
+      onClose={handleCardClose}
+      index={i}
+      onAnimationComplete={() => {
+        console.log(`[CardContainer] Card ${i} animation complete callback, current state: ${cardStates[i]}`);
+        if (cardStates[i] === 'thumbnail-exiting') {
+          console.log(`[CardContainer] Triggering thumbnail-exiting completion for card ${i}`);
+          handleAnimationComplete(i, cardStates[i]);
+        } else if (cardStates[i] === 'active-exiting') {
+          console.log(`[CardContainer] Triggering active-exiting completion for card ${i}`);
+          handleAnimationComplete(i, cardStates[i]);
+        } else if (cardStates[i] === 'thumbnail-entering') {
+          console.log(`[CardContainer] Triggering thumbnail-entering completion for card ${i}`);
+          handleAnimationComplete(i, cardStates[i]);
+        }
+      }}
     />
+  );
+
+  return (
+    <MotionDiv style={{ height: '100%', width: '100%' }}>
+      <Box
+        style={{
+          background: '#f5f2e9',
+          height: '100%',
+          width: '100%',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'stretch',
+          alignItems: 'stretch',
+        }}
+      >
+        {isMobile ? (
+          <Box
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: gridGap,
+              padding: gridPadding,
+              width: '100%',
+              height: '100%',
+              boxSizing: 'border-box',
+              position: 'relative',
+            }}
+          >
+            {Array.from({ length: CARD_COUNT }).map((_, i) => (
+              <Box key={i} style={{ width: '100%', height: cardHeight }}>
+                {renderCard(i)}
+              </Box>
+            ))}
+          </Box>
+        ) : (
+          <Box
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateRows: 'repeat(2, 1fr)',
+              gap: gridGap,
+              padding: gridPadding,
+              width: '100%',
+              height: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            {Array.from({ length: CARD_COUNT }).map((_, i) => renderCard(i))}
+          </Box>
+        )}
+      </Box>
+    </MotionDiv>
   );
 }; 

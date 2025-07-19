@@ -47,18 +47,4 @@ export interface CardProps {
   onCardClick?: () => void;
   onAnimationComplete?: () => void;
   index?: number;
-}
-
-// Card grid props
-export interface CardGridProps {
-  cardCount: number;
-  isMobile: boolean;
-  gridGap: number;
-  gridPadding: number;
-  cardHeight?: number;
-  cardStates: CardCompoundState[];
-  cardKeys: number[];
-  onCardClick: (index: number) => void;
-  onCardClose: () => void;
-  onAnimationComplete: (index: number, state: CardCompoundState) => void;
 } 
