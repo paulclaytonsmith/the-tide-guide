@@ -59,9 +59,12 @@ export const Card: React.FC<CardProps> = ({
       onClick={handleCardClick}
       onAnimationComplete={() => {
         console.log(`[Card ${index}] Animation complete callback triggered for state: ${compoundState}`);
-        if (onAnimationComplete) {
-          console.log(`[Card ${index}] Calling onAnimationComplete with index=${index}, state=${compoundState}`);
-          onAnimationComplete();
+        // Only trigger completion for states that matter to the state machine
+        if (['thumbnail-exiting', 'active-exiting', 'thumbnail-entering'].includes(compoundState)) {
+          console.log(`[Card ${index}] Calling onAnimationComplete for relevant state: ${compoundState}`);
+          if (onAnimationComplete) onAnimationComplete();
+        } else {
+          console.log(`[Card ${index}] Ignoring animation complete for irrelevant state: ${compoundState}`);
         }
       }}
     >

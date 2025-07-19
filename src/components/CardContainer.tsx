@@ -33,19 +33,7 @@ export const CardContainer: React.FC = () => {
       onCardClick={() => handleCardClick(i)}
       onClose={handleCardClose}
       index={i}
-      onAnimationComplete={() => {
-        console.log(`[CardContainer] Card ${i} animation complete callback, current state: ${cardStates[i]}`);
-        if (cardStates[i] === 'thumbnail-exiting') {
-          console.log(`[CardContainer] Triggering thumbnail-exiting completion for card ${i}`);
-          handleAnimationComplete(i, cardStates[i]);
-        } else if (cardStates[i] === 'active-exiting') {
-          console.log(`[CardContainer] Triggering active-exiting completion for card ${i}`);
-          handleAnimationComplete(i, cardStates[i]);
-        } else if (cardStates[i] === 'thumbnail-entering') {
-          console.log(`[CardContainer] Triggering thumbnail-entering completion for card ${i}`);
-          handleAnimationComplete(i, cardStates[i]);
-        }
-      }}
+      onAnimationComplete={() => handleAnimationComplete(i, cardStates[i])}
     />
   );
 
