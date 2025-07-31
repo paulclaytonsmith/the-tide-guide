@@ -75,23 +75,26 @@ export const Card: React.FC<CardProps> = ({
         h={height || '100%'}
         style={{
           background: animationConfig.cardBg,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'stretch',
-          justifyContent: 'flex-start',
+          position: 'relative',
           overflow: 'hidden',
           height: height || '100%',
           transition: `background ${ANIMATION_TIMING.BACKGROUND_TRANSITION}s`,
         }}
       >
+        {/* Header section with absolute positioning */}
         <div
           style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
             display: 'flex',
             alignItems: 'flex-start',
             justifyContent: 'space-between',
             padding: `${paddingY} ${paddingX} 0 ${paddingX}`,
             gap: theme.spacing.md,
             height: 'auto',
+            zIndex: 1,
           }}
         >
           <Text
@@ -145,14 +148,19 @@ export const Card: React.FC<CardProps> = ({
             </motion.button>
           )}
         </div>
+        
+        {/* Content section with absolute positioning */}
         <div
           style={{
-            padding: `0 ${paddingX} ${isMobile ? theme.spacing.lg : theme.spacing.lg} ${paddingX}`,
-            flex: 1,
+            position: 'absolute',
+            top: paddingY + 24, // Account for header height
+            left: 0,
+            right: 0,
+            bottom: isMobile ? theme.spacing.lg : theme.spacing.lg,
+            padding: `0 ${paddingX}`,
             display: 'flex',
             flexDirection: 'column',
             gap: theme.spacing.md,
-            height: '100%',
           }}
         >
           {children}
