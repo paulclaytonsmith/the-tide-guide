@@ -3,13 +3,7 @@ export type CardRole = 'thumbnail' | 'active';
 export type CardPhase = 'entering' | 'entered' | 'exiting' | 'exited';
 export type CardCompoundState = `${CardRole}-${CardPhase}`;
 
-// Card grid configuration
-export interface CardGridConfig {
-  cardCount: number;
-  gridGap: number;
-  gridPadding: number;
-  cardHeight?: number;
-}
+
 
 // Card state machine context
 export interface CardStateContext {
@@ -35,6 +29,7 @@ export interface AnimationConfig {
   showCloseButton: boolean;
   closeButtonOpacity: number;
   cardBg: string;
+  cardRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 // Card component props
@@ -47,4 +42,6 @@ export interface CardProps {
   onCardClick?: () => void;
   onAnimationComplete?: () => void;
   index?: number;
+  pendingActiveIndex?: number | null;
+  style?: React.CSSProperties;
 } 

@@ -18,10 +18,12 @@ export const Card: React.FC<CardProps> = ({
   onCardClick,
   onAnimationComplete,
   index,
+  pendingActiveIndex,
+  style,
 }) => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: 48em)`); // 768px
-  const animationConfig = useCardAnimations(compoundState);
+  const animationConfig = useCardAnimations(compoundState, index, pendingActiveIndex);
 
   // Figma-based values from theme
   const radius = isMobile ? theme.radius.md : theme.radius.lg;
@@ -49,18 +51,21 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <MotionDiv
+      ref={animationConfig.cardRef}
       initial={animationConfig.initialProps}
       animate={animationConfig.animateProps}
       exit={animationConfig.exitProps}
       style={{
         height: height || '100%',
+        position: 'absolute',
         ...(animationConfig.pointerEvents ? { pointerEvents: animationConfig.pointerEvents } : {}),
+        ...style,
       } as React.CSSProperties}
       onClick={handleCardClick}
       onAnimationComplete={() => {
         console.log(`[Card ${index}] Animation complete callback triggered for state: ${compoundState}`);
         // Only trigger completion for states that matter to the state machine
-        if (['thumbnail-exiting', 'active-exiting', 'thumbnail-entering'].includes(compoundState)) {
+        if (['thumbnail-exiting', 'active-exiting', 'thumbnail-entering', 'active-entering'].includes(compoundState)) {
           console.log(`[Card ${index}] Calling onAnimationComplete for relevant state: ${compoundState}`);
           if (onAnimationComplete) onAnimationComplete();
         } else {

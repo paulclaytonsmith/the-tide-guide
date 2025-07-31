@@ -23,7 +23,7 @@ export const cardStateReducer = (
       return {
         ...state,
         cardStates: state.cardStates.map((_, i) =>
-          i === index ? 'active-entering' : 'thumbnail-exiting'
+          i === index ? 'thumbnail-entered' : 'thumbnail-exiting'
         ),
         pendingActiveIndex: index,
         animatingOutCount: CARD_COUNT - 1,
@@ -52,16 +52,14 @@ export const cardStateReducer = (
         console.log('[StateMachine] thumbnail-exiting complete', { index, newAnimatingOutCount });
         
         if (newAnimatingOutCount === 0 && state.pendingActiveIndex !== null) {
-          // All animatingOut cards are done, set clicked card to active-entered, others to thumbnail-exited
+          // All animatingOut cards are done, now start the active card animation
           const newStates = state.cardStates.map((_, i) =>
-            i === state.pendingActiveIndex ? 'active-entered' : 'thumbnail-exited'
+            i === state.pendingActiveIndex ? 'active-entering' : 'thumbnail-exited'
           );
-          console.log('[StateMachine] All thumbnail-exiting complete, setting active', { newStates });
+          console.log('[StateMachine] All thumbnail-exiting complete, starting active card animation', { newStates });
           return {
             ...state,
             cardStates: newStates,
-            activeIndex: state.pendingActiveIndex,
-            pendingActiveIndex: null,
             animatingOutCount: 0,
           };
         }
@@ -77,11 +75,11 @@ export const cardStateReducer = (
         console.log('[StateMachine] active-exiting complete', { index, currentStates: state.cardStates });
         
         // Find which card was actually the active card (the one in active-exiting state)
-        const activeCardIndex = state.cardStates.findIndex(state => state === 'active-exiting');
+        const activeCardIndex = state.cardStates.findIndex(_ => _ === 'active-exiting');
         console.log('[StateMachine] Found active card at index:', activeCardIndex);
         
         // Now that active card has completed its exit, start thumbnail-entering animations
-        const newCardStates: CardCompoundState[] = state.cardStates.map((cardState, i) =>
+        const newCardStates: CardCompoundState[] = state.cardStates.map((_, i) =>
           i === activeCardIndex ? 'thumbnail-entered' : 'thumbnail-entering'
         );
         console.log('[StateMachine] Setting active card to thumbnail-entered, others to thumbnail-entering', { newCardStates });
@@ -90,6 +88,20 @@ export const cardStateReducer = (
           ...state,
           cardStates: newCardStates,
           activeIndex: null,
+        };
+      }
+      
+      // Handle active-entering animation completion
+      if (cardState === 'active-entering') {
+        console.log('[StateMachine] active-entering complete', { index });
+        const newCardStates = [...state.cardStates];
+        newCardStates[index] = 'active-entered';
+        
+        return {
+          ...state,
+          cardStates: newCardStates,
+          activeIndex: state.pendingActiveIndex,
+          pendingActiveIndex: null,
         };
       }
       
