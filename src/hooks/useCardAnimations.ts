@@ -81,6 +81,15 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
 
     // Calculate the full container size (respecting padding)
     const getFullContainerStyle = () => {
+      if (isMobile) {
+        // On mobile, use viewport height instead of container height
+        return {
+          top: gridPadding,
+          left: gridPadding,
+          width: `calc(100% - ${gridPadding * 2}px)`,
+          height: `calc(100vh - ${gridPadding * 2}px)`,
+        };
+      }
       return {
         top: gridPadding,
         left: gridPadding,
@@ -91,7 +100,27 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
 
     // Get measured thumbnail dimensions or fallback to calculated ones
     const getThumbnailStyle = () => {
-      if (measurements) {
+      // For mobile, prioritize calculated dimensions over measured ones
+      // since the measured dimensions appear to be incorrect for mobile layout
+      if (isMobile) {
+        if (index !== undefined) {
+          const cardHeight = 359;
+          const cardWidth = `calc(100% - ${gridPadding * 2}px)`;
+          const cardTop = `calc(${gridPadding}px + ${index} * (${cardHeight}px + ${gridGap}px))`;
+          
+          const mobileThumbnailStyle = {
+            top: cardTop,
+            left: gridPadding,
+            width: cardWidth,
+            height: cardHeight,
+          };
+          
+          return mobileThumbnailStyle;
+        }
+      }
+      
+      // For desktop or when measurements are available and we're not on mobile
+      if (measurements && !isMobile) {
         return {
           top: measurements.top,
           left: measurements.left,
@@ -107,12 +136,14 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
           const cardWidth = `calc(100% - ${gridPadding * 2}px)`;
           const cardTop = `calc(${gridPadding}px + ${index} * (${cardHeight}px + ${gridGap}px))`;
           
-          return {
+          const mobileThumbnailStyle = {
             top: cardTop,
             left: gridPadding,
             width: cardWidth,
             height: cardHeight,
           };
+          
+          return mobileThumbnailStyle;
         } else {
           const row = Math.floor(index / 3);
           const col = index % 3;
@@ -123,12 +154,14 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
           const cardTop = `calc(${gridPadding}px + ${row} * (${cardHeightValue} + ${gridGap}px))`;
           const cardLeft = `calc(${gridPadding}px + ${col} * (${cardWidth} + ${gridGap}px))`;
           
-          return {
+          const desktopThumbnailStyle = {
             top: cardTop,
             left: cardLeft,
             width: cardWidth,
             height: cardHeightValue,
           };
+          
+          return desktopThumbnailStyle;
         }
       }
       
@@ -310,7 +343,7 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
         animateProps = { opacity: 1, scale: 1 };
     }
 
-    return {
+    const result = {
       initialProps,
       animateProps,
       exitProps,
@@ -320,5 +353,7 @@ export const useCardAnimations = (compoundState: CardCompoundState, index?: numb
       cardBg,
       cardRef, // Expose the ref for measurement
     };
+
+    return result;
   }, [compoundState, theme.colors.card, index, isMobile, pendingActiveIndex, measurements]);
 }; 

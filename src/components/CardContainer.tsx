@@ -25,6 +25,16 @@ export const CardContainer: React.FC = () => {
   const gridGap = isMobile ? 16 : 16;
   const gridPadding = isMobile ? 16 : 32;
   
+  // Calculate the total height needed for mobile layout
+  const getContainerHeight = () => {
+    if (isMobile) {
+      const cardHeight = 359;
+      const totalHeight = gridPadding + (CARD_COUNT * cardHeight) + ((CARD_COUNT - 1) * gridGap) + gridPadding;
+      return `${totalHeight}px`;
+    }
+    return '100%';
+  };
+  
   const getCardStyle = (index: number): React.CSSProperties => {
     if (isMobile) {
       // Mobile: Single column layout
@@ -32,13 +42,15 @@ export const CardContainer: React.FC = () => {
       const cardWidth = `calc(100% - ${gridPadding * 2}px)`;
       const cardTop = `calc(${gridPadding}px + ${index} * (${cardHeight}px + ${gridGap}px))`;
       
-      return {
+      const mobileStyle: React.CSSProperties = {
         position: 'absolute',
         top: cardTop,
         left: gridPadding,
         width: cardWidth,
         height: cardHeight,
       };
+      
+      return mobileStyle;
     } else {
       // Desktop: 3x2 grid layout
       const row = Math.floor(index / 3);
@@ -50,13 +62,15 @@ export const CardContainer: React.FC = () => {
       const cardTop = `calc(${gridPadding}px + ${row} * (${cardHeight} + ${gridGap}px))`;
       const cardLeft = `calc(${gridPadding}px + ${col} * (${cardWidth} + ${gridGap}px))`;
       
-      return {
+      const desktopStyle: React.CSSProperties = {
         position: 'absolute',
         top: cardTop,
         left: cardLeft,
         width: cardWidth,
         height: cardHeight,
       };
+      
+      return desktopStyle;
     }
   };
 
@@ -79,11 +93,11 @@ export const CardContainer: React.FC = () => {
       <Box
         data-card-container
         style={{
-          background: '#f5f2e9',
-          height: '100%',
+          height: getContainerHeight(),
           width: '100%',
           boxSizing: 'border-box',
           position: 'relative',
+          background: '#f5f2e9',
         }}
       >
         {Array.from({ length: CARD_COUNT }).map((_, i) => renderCard(i))}
