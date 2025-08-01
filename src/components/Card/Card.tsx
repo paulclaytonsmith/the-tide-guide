@@ -19,11 +19,12 @@ export const Card: React.FC<CardProps> = ({
   onAnimationComplete,
   index,
   pendingActiveIndex,
+  activeIndex,
   style,
 }) => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: 48em)`); // 768px
-  const animationConfig = useCardAnimations(compoundState, index, pendingActiveIndex);
+  const animationConfig = useCardAnimations(compoundState, index, pendingActiveIndex, activeIndex);
 
   // Figma-based values from theme
   const radius = isMobile ? theme.radius.md : theme.radius.lg;

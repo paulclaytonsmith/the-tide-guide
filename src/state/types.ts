@@ -43,5 +43,6 @@ export interface CardProps {
   onAnimationComplete?: () => void;
   index?: number;
   pendingActiveIndex?: number | null;
+  activeIndex?: number | null;
   style?: React.CSSProperties;
 } 

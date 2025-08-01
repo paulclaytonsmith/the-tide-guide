@@ -13,7 +13,7 @@ interface CardDimensions {
 }
 
 // Hook to measure card dimensions
-const useCardMeasurements = (index: number | undefined, isMobile: boolean, compoundState: CardCompoundState) => {
+const useCardMeasurements = (index: number | undefined, isMobile: boolean, compoundState: CardCompoundState, activeIndex: number | null) => {
   const [measurements, setMeasurements] = useState<CardDimensions | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -49,22 +49,26 @@ const useCardMeasurements = (index: number | undefined, isMobile: boolean, compo
     // Measure after a short delay to ensure layout is complete
     const timeoutId = setTimeout(measureCard, 100);
     
-    // Also measure on window resize
-    window.addEventListener('resize', measureCard);
+    // Also measure on window resize, but only if no card is active
+    if (activeIndex === null) {
+      window.addEventListener('resize', measureCard);
+    }
     
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('resize', measureCard);
+      if (activeIndex === null) {
+        window.removeEventListener('resize', measureCard);
+      }
     };
-  }, [index, isMobile, compoundState]);
+  }, [index, isMobile, compoundState, activeIndex]);
 
   return { measurements, cardRef };
 };
 
-export const useCardAnimations = (compoundState: CardCompoundState, index?: number, pendingActiveIndex?: number | null): AnimationConfig => {
+export const useCardAnimations = (compoundState: CardCompoundState, index?: number, pendingActiveIndex?: number | null, activeIndex: number | null = null): AnimationConfig => {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery('(max-width: 48em)');
-  const { measurements, cardRef } = useCardMeasurements(index, isMobile, compoundState);
+  const { measurements, cardRef } = useCardMeasurements(index, isMobile, compoundState, activeIndex);
 
   return useMemo(() => {
     let initialProps: any = undefined;
